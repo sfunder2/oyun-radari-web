@@ -40,3 +40,9 @@ test('rss parsing: CDATA titles, https links, dates, limit',()=>{
  const xml='<rss><channel><item><title><![CDATA[Big &amp; News]]></title><link>https://ign.com/a</link><pubDate>Thu, 22 Oct 2026 20:00:00 GMT</pubDate></item><item><title>No link</title><link>http://insecure/x</link><pubDate>Thu, 22 Oct 2026 20:00:00 GMT</pubDate></item><item><title>Atom date</title><link>https://x/b</link><dc:date>2026-10-21T10:00:00Z</dc:date></item></channel></rss>';
  const r=parseRss(xml,'IGN');assert.equal(r.length,2);assert.equal(r[0].title,'Big & News');assert.equal(r[0].published_at,'2026-10-22T20:00:00.000Z');assert.equal(r[1].url,'https://x/b');
 });
+import {ageNotes} from '../scripts/steam-meta.mjs';
+test('age notes come from PEGI first, then ESRB, deduplicated',()=>{
+ assert.deepEqual(ageNotes({pegi:{rating:'18',descriptors:'Violence\nBad Language\nViolence'},esrb:{descriptors:'Blood'}}),['Violence','Bad Language']);
+ assert.deepEqual(ageNotes({esrb:{descriptors:'Alcohol Reference\r\nBlood\r\nViolence'}}),['Alcohol Reference','Blood','Violence']);
+ assert.deepEqual(ageNotes(undefined),[]);
+});
