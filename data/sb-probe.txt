@@ -1,0 +1,4 @@
+okuma ps_products (404, '{"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table \'public.ps_products\' in the schema cache"}')
+okuma ps_price_history (404, '{"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table \'public.ps_price_history\' in the schema cache"}')
+okuma ps_state (404, '{"code":"PGRST205","details":null,"hint":null,"message":"Could not find the table \'public.ps_state\' in the schema cache"}')
+secret SUPABASE_SERVICE_KEY var: False | SUPABASE_URL var: False | URL eşleşiyor: False
