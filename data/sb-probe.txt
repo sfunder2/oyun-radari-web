@@ -1,7 +1,0 @@
-okuma ps_products (200, '[]')
-okuma ps_price_history (200, '[]')
-okuma ps_state (200, '[]')
-secret SUPABASE_SERVICE_KEY var: True | SUPABASE_URL var: True | URL eşleşiyor: True
-service anahtarı okuma: (200, '[]')
-service anahtarı yazma: (201, '')
-anon yazma engelli mi: (401, '{"code":"42501","details":null,"hint":null,"message":"new row violates row-level security policy for table \\"ps_state\\""}')
