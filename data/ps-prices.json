@@ -1,15 +1,12 @@
 {
-  "updatedAt": "2026-10-22T17:48:14.356Z",
-  "coverage": "Kamuya açık PS Deals Türkiye katalog kayıtları ve doğrulanmış resmî ürünler; tam PSN kapsamı değildir.",
+  "updatedAt": "2026-10-22T18:06:06.649Z",
+  "coverage": "PS Deals Türkiye ve doğrulanmış resmî ürünler; tüm katalog her turda yenilenmez. Ürünlerin checkedAt alanını kullanın.",
   "cursors": {
     "newest": 1,
-    "popular": 1
+    "popular": 1,
+    "discounts": 1
   },
   "errors": [
-    {
-      "source": "https://psdeals.net/tr-store/all-games/1",
-      "error": "HTTP 403"
-    },
     {
       "source": "https://psdeals.net/tr-store/all-games/1?sort=most-watchlisted",
       "error": "HTTP 403"
@@ -3142,7 +3139,7 @@
       "url": "https://store.playstation.com/tr-tr/product/EP2319-CUSA26625_00-2010147637670638",
       "source": "https://store.playstation.com/tr-tr/product/EP2319-CUSA26625_00-2010147637670638",
       "edition": "Mağazadaki sürüm · içeriği kontrol edin",
-      "checkedAt": "2026-10-22T17:48:12.780Z",
+      "checkedAt": "2026-10-22T18:06:03.938Z",
       "status": "ok",
       "message": "Resmî ürün fiyatı okundu.",
       "purchaseEligible": true,
@@ -3160,7 +3157,7 @@
       "url": "https://store.playstation.com/tr-tr/product/EP4484-PPSA03711_00-3235764131417729",
       "source": "https://store.playstation.com/tr-tr/product/EP4484-PPSA03711_00-3235764131417729",
       "edition": "Mağazadaki sürüm · içeriği kontrol edin",
-      "checkedAt": "2026-10-22T17:48:13.455Z",
+      "checkedAt": "2026-10-22T18:06:04.561Z",
       "status": "ok",
       "message": "Resmî ürün fiyatı okundu.",
       "purchaseEligible": true,
@@ -3178,7 +3175,7 @@
       "url": "https://store.playstation.com/tr-tr/product/EP1805-PPSA34971_00-0755643093148556",
       "source": "https://store.playstation.com/tr-tr/product/EP1805-PPSA34971_00-0755643093148556",
       "edition": "Mağazadaki sürüm · içeriği kontrol edin",
-      "checkedAt": "2026-10-22T17:48:13.600Z",
+      "checkedAt": "2026-10-22T18:06:05.449Z",
       "status": "ok",
       "message": "Resmî ürün fiyatı okundu.",
       "purchaseEligible": true,
@@ -3196,11 +3193,21 @@
       "url": "https://store.playstation.com/tr-tr/product/EP2120-CUSA11235_00-CELESTEXXCELESTE",
       "source": "https://store.playstation.com/tr-tr/product/EP2120-CUSA11235_00-CELESTEXXCELESTE",
       "edition": "Mağazadaki sürüm · içeriği kontrol edin",
-      "checkedAt": "2026-10-22T17:48:14.340Z",
+      "checkedAt": "2026-10-22T18:06:06.629Z",
       "status": "ok",
       "message": "Resmî ürün fiyatı okundu.",
       "purchaseEligible": true,
       "sourceLabel": "PlayStation Store TR"
     }
-  ]
+  ],
+  "batch": {
+    "startedAt": "2026-10-22T18:06:02.105Z",
+    "finishedAt": "2026-10-22T18:06:06.649Z",
+    "status": "partial",
+    "refreshed": 4,
+    "added": 0,
+    "total": 177,
+    "pages": [],
+    "intervalMinutes": 15
+  }
 }
