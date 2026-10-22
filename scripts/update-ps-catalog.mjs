@@ -1,5 +1,4 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
-import {parsePSCatalog} from './ps-catalog-parser.mjs';
 import {mergeBatch} from './batch-state.mjs';
 const startedAt=new Date().toISOString();
 let old={items:[],cursors:{newest:1,popular:1,discounts:1}};try{old=JSON.parse(await readFile('data/ps-index.json','utf8'))}catch{}
@@ -12,10 +11,11 @@ const jobs=[{key:'refresh',page:1,path:'all-games',query:'?sort=most-watchlisted
 for(const job of jobs){
  const source=`https://psdeals.net/tr-store/${job.path}/${job.page}${job.query}`;
  try{
-  const r=await fetch(source,{headers:{'User-Agent':'OyunRadari/1.0 (game price comparison)','Accept-Language':'tr-TR'},signal:AbortSignal.timeout(25000)});
-  if(!r.ok){errors.push({source,error:'HTTP '+r.status});if([403,429].includes(r.status))break;continue;}
-  const feed=parsePSCatalog(await r.text(),job.page-1);records.push(...feed.items);pages.push({kind:job.key,page:job.page,products:feed.items.length});
-  if(job.key!=='refresh')cursors[job.key]=feed.hasMore?job.page+1:1;
+  const endpoint='https://oyun-radari-tr.gokhangozcu.chatgpt.site/api/ps-catalog-batch?'+new URLSearchParams({kind:job.key,page:String(job.page)});
+  const r=await fetch(endpoint,{headers:{'User-Agent':'OyunRadari/1.0 (game price comparison)','Accept-Language':'tr-TR'},signal:AbortSignal.timeout(25000)});
+  if(!r.ok){const detail=await r.json().catch(()=>({}));errors.push({source,error:detail.error||'HTTP '+r.status});if(/403|429/.test(detail.error||'')||[403,429].includes(r.status))break;continue;}
+  const feed=await r.json();if(feed.status!=='ok'||!Array.isArray(feed.items))throw new Error('Invalid catalog response');records.push(...feed.items);pages.push({kind:job.key,page:job.page,products:feed.items.length});
+  if(job.key!=='refresh')cursors[job.key]=feed.hasMore&&job.page<200?job.page+1:1;
   console.log(job.key,'page',job.page,feed.items.length,'products');
  }catch(e){errors.push({source,error:e.message});}
  await new Promise(r=>setTimeout(r,4000));
