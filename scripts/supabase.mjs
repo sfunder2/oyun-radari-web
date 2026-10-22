@@ -14,5 +14,6 @@ export function supabase(url,key,fetchImpl=fetch){
  async function upsert(table,rows,conflict,size=200){
   for(let i=0;i<rows.length;i+=size)await req('POST',`${table}?on_conflict=${conflict}`,{body:rows.slice(i,i+size),prefer:'resolution=merge-duplicates,return=minimal'});
  }
- return{select:p=>req('GET',p),selectAll,upsert};
+ const patch=(path,body)=>req('PATCH',path,{body,prefer:'return=minimal'});
+ return{select:p=>req('GET',p),selectAll,upsert,patch};
 }
