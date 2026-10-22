@@ -23,16 +23,17 @@ jobs:
                   print('ERR',e); continue
               m=re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>',s,re.S)
               if not m: print('no __NEXT_DATA__', s[:200].replace(chr(10),' ')); continue
-              d=json.loads(m.group(1)); found=[]
-              def walk(o):
-                  if isinstance(o,dict):
-                      if 'basePrice' in o and 'discountedPrice' in o: found.append({k:o[k] for k in ('basePrice','discountedPrice','discountText','currencyCode','isFree') if k in o})
-                      for v in o.values(): walk(v)
-                  elif isinstance(o,list):
-                      for v in o: walk(v)
-              walk(d)
+              d=json.loads(m.group(1))
               ap=d.get('props',{}).get('apolloState',{})
-              print('price objects',len(found),found[:3]); print('products',len([k for k in ap if k.startswith('Product:')]))
+              print('top',list(d.keys()),'props',list(d.get('props',{}).keys()),'apollo',len(ap))
+              from collections import Counter
+              print(Counter(k.split(':')[0] for k in ap))
+              for k,v in ap.items():
+                  t=json.dumps(v,ensure_ascii=False)
+                  if re.search(r'"(price|basePrice|discountedPrice|discountText|upsellText|currencyCode)"',t) and len(t)<1500: print('PRICEKEY',k,t[:700])
+              pk=[k for k in ap if k.startswith('Product:')][:2]
+              for k in pk: print('PRODUCT',k,json.dumps(ap[k],ensure_ascii=False)[:900])
+              print('ROOT_QUERY keys',[k[:120] for k in ap.get('ROOT_QUERY',{})][:15])
           PY
           git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
           git add data/ps-probe.txt; git commit -qm 'PS probe result [skip ci]'; git push
