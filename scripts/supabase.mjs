@@ -15,5 +15,6 @@ export function supabase(url,key,fetchImpl=fetch){
   for(let i=0;i<rows.length;i+=size)await req('POST',`${table}?on_conflict=${conflict}`,{body:rows.slice(i,i+size),prefer:'resolution=merge-duplicates,return=minimal'});
  }
  const patch=(path,body)=>req('PATCH',path,{body,prefer:'return=minimal'});
- return{select:p=>req('GET',p),selectAll,upsert,patch};
+ const del=path=>req('DELETE',path,{prefer:'return=minimal'});
+ return{select:p=>req('GET',p),selectAll,upsert,patch,del};
 }
