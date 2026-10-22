@@ -43,6 +43,11 @@ export function parseRequirements(html){
  }
  return rows;
 }
+// PEGI/ESRB içerik uyarıları (İngilizce, satır sonuyla ayrılmış) -> ['Violence','Bad Language']
+export function ageNotes(r){
+ const raw=r?.pegi?.descriptors||r?.esrb?.descriptors||'';
+ return [...new Set(String(raw).split(/[\r\n,]+/).map(x=>x.trim()).filter(x=>x&&x.length<40))].slice(0,8);
+}
 export function parseDetails(d,titleKey,now=new Date().toISOString()){
  if(!d||d.type!=='game')return null;
  const langs=String(d.supported_languages||''),rel=d.release_date||{};
@@ -53,6 +58,7 @@ export function parseDetails(d,titleKey,now=new Date().toISOString()){
   release_date:rel.coming_soon?null:parseReleaseDate(rel.date),release_text:rel.date||null,
   developers:d.developers||[],publishers:d.publishers||[],
   turkish:/Turkish/.test(langs),turkish_audio:/Turkish<strong>\*<\/strong>/.test(langs),age,
+  age_notes:ageNotes(d.ratings),
   requirements:(()=>{const r=d.pc_requirements;if(!r||Array.isArray(r))return null;const min=parseRequirements(r.minimum),rec=parseRequirements(r.recommended);return min.length||rec.length?{min,rec}:null;})(),
   dlc_count:Array.isArray(d.dlc)?d.dlc.length:0,checked_at:now};
 }
