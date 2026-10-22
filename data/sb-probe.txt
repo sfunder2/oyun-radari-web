@@ -1,4 +1,0 @@
-okuma ps_products (200, '[]')
-okuma ps_price_history (200, '[]')
-okuma ps_state (200, '[]')
-secret SUPABASE_SERVICE_KEY var: False | SUPABASE_URL var: False | URL eşleşiyor: False
