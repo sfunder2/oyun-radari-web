@@ -2,6 +2,7 @@ import {appendFile} from 'node:fs/promises';
 import {supabase} from './supabase.mjs';
 import {fetchGrid,norm} from './ps-store.mjs';
 import {recordHistory,computeStats} from './ps-history.mjs';
+import {titleKey} from './titles.mjs';
 // Tek gerçek: Supabase. Her turda kategori sayfalarından bir kısmı okunur; fiyatlar ve geçmiş Supabase'e yazılır.
 const PAGES_PER_KIND=4,KINDS=['discounts','newest'];
 const {SUPABASE_URL,SUPABASE_SERVICE_KEY}=process.env;
@@ -34,13 +35,14 @@ if(found.size){
  const products=[],historyRows=[];
  for(const it of found.values()){
   const h=hist.items[it.id],stats=computeStats(h,it,today)||{};
-  products.push({id:it.id,name:it.name,name_search:norm(it.name),image:it.image,edition:it.edition,price:it.price,original_price:it.originalPrice,discount_percent:it.discountPercent,discount_ends_at:it.discountEndsAt,currency:'TRY',url:it.url,checked_at:it.checkedAt,
+  products.push({id:it.id,name:it.name,name_search:norm(it.name),title_key:titleKey(it.name),image:it.image,edition:it.edition,price:it.price,original_price:it.originalPrice,discount_percent:it.discountPercent,discount_ends_at:it.discountEndsAt,currency:'TRY',url:it.url,checked_at:it.checkedAt,
    lowest_ever:stats.lowestEver??null,lowest_30d:stats.lowest30d??null,history_days:stats.historyDays??0,historical_low:!!stats.historicalLow,low_30d:!!stats.low30d,price_rise:stats.priceRise??null});
   const last=h.p.at(-1);
   if(last[0]===today&&JSON.stringify(last)!==before[it.id])historyRows.push({product_id:it.id,day:last[0],price:last[1],base_price:last[2]});
  }
  try{
-  await sb.upsert('ps_products',products,'id');
+  try{await sb.upsert('ps_products',products,'id');}
+  catch(e){if(!/title_key/.test(e.message))throw e;console.log('title_key sütunu yok; SQL v2 çalıştırılana kadar sütunsuz yazılıyor');await sb.upsert('ps_products',products.map(({title_key,...r})=>r),'id');}
   await sb.upsert('ps_price_history',historyRows,'product_id,day');
  }catch(e){errors.push({source:'supabase yazma',error:e.message});status='failed';}
 }else status='failed';
