@@ -1,10 +1,19 @@
 {
-  "updatedAt": "2026-10-22T17:44:06.508Z",
-  "source": "https://psdeals.net/tr-store/all-games",
-  "coverage": "Kamuya açık iki katalog sırası; tam PSN kapsamı garantisi yok.",
-  "failedPages": [
-    "https://psdeals.net/tr-store/all-games/3",
-    "https://psdeals.net/tr-store/all-games/4?sort=most-watchlisted"
+  "updatedAt": "2026-10-22T17:48:14.356Z",
+  "coverage": "Kamuya açık PS Deals Türkiye katalog kayıtları ve doğrulanmış resmî ürünler; tam PSN kapsamı değildir.",
+  "cursors": {
+    "newest": 1,
+    "popular": 1
+  },
+  "errors": [
+    {
+      "source": "https://psdeals.net/tr-store/all-games/1",
+      "error": "HTTP 403"
+    },
+    {
+      "source": "https://psdeals.net/tr-store/all-games/1?sort=most-watchlisted",
+      "error": "HTTP 403"
+    }
   ],
   "items": [
     {
@@ -3120,6 +3129,78 @@
       "sourceLabel": "PS Deals · TR",
       "checkedAt": "2026-10-22T17:44:05.406Z",
       "purchaseEligible": true
+    },
+    {
+      "id": "playstation:EP2319-CUSA26625_00-2010147637670638",
+      "storeId": "EP2319-CUSA26625_00-2010147637670638",
+      "platform": "playstation",
+      "name": "Stardew Valley",
+      "image": "https://image.api.playstation.com/gs2-sec/appkgo/prod/CUSA06840_00/1/i_afb1d73df2515936410908f99940dcbe1050a2732eb1b6a5a400f4bdf0980d36/i/icon0.png",
+      "price": 489,
+      "currency": "TRY",
+      "region": "TR",
+      "url": "https://store.playstation.com/tr-tr/product/EP2319-CUSA26625_00-2010147637670638",
+      "source": "https://store.playstation.com/tr-tr/product/EP2319-CUSA26625_00-2010147637670638",
+      "edition": "Mağazadaki sürüm · içeriği kontrol edin",
+      "checkedAt": "2026-10-22T17:48:12.780Z",
+      "status": "ok",
+      "message": "Resmî ürün fiyatı okundu.",
+      "purchaseEligible": true,
+      "sourceLabel": "PlayStation Store TR"
+    },
+    {
+      "id": "playstation:EP4484-PPSA03711_00-3235764131417729",
+      "storeId": "EP4484-PPSA03711_00-3235764131417729",
+      "platform": "playstation",
+      "name": "Hades",
+      "image": "https://image.api.playstation.com/vulcan/ap/rnd/202104/0517/9AcM3vy5t77zPiJyKHwRfnNT.png",
+      "price": 879,
+      "currency": "TRY",
+      "region": "TR",
+      "url": "https://store.playstation.com/tr-tr/product/EP4484-PPSA03711_00-3235764131417729",
+      "source": "https://store.playstation.com/tr-tr/product/EP4484-PPSA03711_00-3235764131417729",
+      "edition": "Mağazadaki sürüm · içeriği kontrol edin",
+      "checkedAt": "2026-10-22T17:48:13.455Z",
+      "status": "ok",
+      "message": "Resmî ürün fiyatı okundu.",
+      "purchaseEligible": true,
+      "sourceLabel": "PlayStation Store TR"
+    },
+    {
+      "id": "playstation:EP1805-PPSA34971_00-0755643093148556",
+      "storeId": "EP1805-PPSA34971_00-0755643093148556",
+      "platform": "playstation",
+      "name": "Hollow Knight Voidheart Edition",
+      "image": "https://image.api.playstation.com/vulcan/ap/rnd/202601/1505/1425e65d043da63396a10ccf87d5e4af50175464e64cda30.png",
+      "price": 623,
+      "currency": "TRY",
+      "region": "TR",
+      "url": "https://store.playstation.com/tr-tr/product/EP1805-PPSA34971_00-0755643093148556",
+      "source": "https://store.playstation.com/tr-tr/product/EP1805-PPSA34971_00-0755643093148556",
+      "edition": "Mağazadaki sürüm · içeriği kontrol edin",
+      "checkedAt": "2026-10-22T17:48:13.600Z",
+      "status": "ok",
+      "message": "Resmî ürün fiyatı okundu.",
+      "purchaseEligible": true,
+      "sourceLabel": "PlayStation Store TR"
+    },
+    {
+      "id": "playstation:EP2120-CUSA11235_00-CELESTEXXCELESTE",
+      "storeId": "EP2120-CUSA11235_00-CELESTEXXCELESTE",
+      "platform": "playstation",
+      "name": "Celeste",
+      "image": "https://image.api.playstation.com/cdn/EP2120/CUSA11235_00/c439UdvQsGkHpQ04PGyPh7rwGfXwLtne.png",
+      "price": 849,
+      "currency": "TRY",
+      "region": "TR",
+      "url": "https://store.playstation.com/tr-tr/product/EP2120-CUSA11235_00-CELESTEXXCELESTE",
+      "source": "https://store.playstation.com/tr-tr/product/EP2120-CUSA11235_00-CELESTEXXCELESTE",
+      "edition": "Mağazadaki sürüm · içeriği kontrol edin",
+      "checkedAt": "2026-10-22T17:48:14.340Z",
+      "status": "ok",
+      "message": "Resmî ürün fiyatı okundu.",
+      "purchaseEligible": true,
+      "sourceLabel": "PlayStation Store TR"
     }
   ]
 }
