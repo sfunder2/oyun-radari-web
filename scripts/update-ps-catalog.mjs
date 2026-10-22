@@ -1,5 +1,6 @@
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {mergeBatch} from './batch-state.mjs';
+import {recordHistory,computeStats} from './ps-history.mjs';
 // Doğrudan PlayStation Store TR: ürün sayfaları (ps-links.json) + resmî katalog/indirim kategorileri.
 const startedAt=new Date().toISOString();
 const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
@@ -67,6 +68,13 @@ old.items=(old.items||[]).filter(i=>!(i.sourceKind==='psdeals'&&live.has(String(
 const data=mergeBatch(old,records,{startedAt,errors,cursors,pages});
 data.coverage='Doğrudan PlayStation Store TR (resmî ürün sayfaları ve kategori listeleri); her turda kataloğun bir kısmı yenilenir. Ürünlerin checkedAt alanını kullanın.';
 await mkdir('data',{recursive:true});
+{ // Fiyat geçmişi ve istatistikler (yalnızca bu turda yenilenen kayıtlar)
+ const today=new Date().toISOString().slice(0,10);let hist={};try{hist=JSON.parse(await readFile('data/ps-history.json','utf8'))}catch{}
+ const ids=new Set(records.map(r=>r.id)),fresh=data.items.filter(i=>ids.has(i.id));
+ recordHistory(hist,fresh,today);
+ for(const it of fresh){const st=computeStats(hist.items[it.id],it,today);if(st)Object.assign(it,st);}
+ await writeFile('data/ps-history.json',JSON.stringify(hist));
+}
 await writeFile('data/ps-index.json',JSON.stringify(data,null,2));await writeFile('data/ps-prices.json',JSON.stringify(data,null,2));
 await writeFile('data/ps-batch-status.json',JSON.stringify(data.batch,null,2));
 console.log(JSON.stringify(data.batch));
