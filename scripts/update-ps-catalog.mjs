@@ -7,8 +7,10 @@ const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, l
 const GQL='https://web.np.playstation.com/api/graphql/v1/op';
 const HASH='9845afc0dbaab4965f6563fffc703f588c8e76792000e8610843b8d3ee9c4c09';
 const CATS={discounts:'3f772501-f6f8-49b7-abac-874a88ca4897',newest:'44d8bb20-653e-431e-8ad0-c0a365f68d2f'};
+const MAX_PAGES=8; // JSON dosyası şişmesin; Supabase'e geçince kaldırılır
 const PAGE=100,KEEP=new Set(['FULL_GAME','PREMIUM_EDITION','GAME_BUNDLE']);
 let old={items:[],cursors:{newest:1,popular:1,discounts:1}};try{old=JSON.parse(await readFile('data/ps-index.json','utf8'))}catch{}
+old.items=(old.items||[]).filter(i=>/^https:\/\/store\.playstation\.com\/tr-tr\/product\//.test(i.url||'')); // PS Deals kayıtları tek gerçeği bozmasın
 const cursors={newest:1,popular:1,discounts:1,...old.cursors},records=[],errors=[],pages=[];
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const tr=s=>{if(s==null)return null;if(typeof s==='number')return s;s=String(s).trim();if(/^(ücretsiz|free)$/i.test(s))return 0;const d=s.replace(/[^\d,.]/g,'');if(!d)return null;const v=Number(d.replace(/\./g,'').replace(',','.'));return Number.isFinite(v)?v:null};
@@ -37,7 +39,7 @@ async function grid(kind,page){
  if(!r.ok)throw new Error('PS Store katalog HTTP '+r.status);
  const j=await r.json();if(j.errors?.length)throw new Error('PS Store katalog: '+String(j.errors[0].message).slice(0,160));
  const g=j.data?.categoryGridRetrieve;if(!g||!Array.isArray(g.products))throw new Error('PS Store katalog yanıtı okunamadı');
- return{items:g.products.map(fromGrid).filter(Boolean),raw:g.products.length,hasMore:g.pageInfo?.isLast===false&&page<400};
+ return{items:g.products.map(fromGrid).filter(Boolean),raw:g.products.length,hasMore:g.pageInfo?.isLast===false&&page<MAX_PAGES};
 }
 for(const kind of ['discounts','newest']){
  try{const page=cursors[kind],f=await grid(kind,page);records.push(...f.items);pages.push({kind,page,products:f.items.length});cursors[kind]=f.hasMore?page+1:1;console.log(kind,'page',page,f.raw,'ham',f.items.length,'kayıt');}
@@ -75,8 +77,7 @@ await mkdir('data',{recursive:true});
  for(const it of fresh){const st=computeStats(hist.items[it.id],it,today);if(st)Object.assign(it,st);}
  await writeFile('data/ps-history.json',JSON.stringify(hist));
 }
-await writeFile('data/ps-index.json',JSON.stringify(data,null,2));await writeFile('data/ps-prices.json',JSON.stringify(data,null,2));
-await writeFile('data/ps-batch-status.json',JSON.stringify(data.batch,null,2));
+await writeFile('data/ps-index.json',JSON.stringify(data));
 console.log(JSON.stringify(data.batch));
 await writeFile('data/ps-batch-summary.md',`### PlayStation · 15 dakika batch\n\nDurum: ${data.batch.status}\n\n- Yenilenen: ${data.batch.refreshed}\n- Yeni oyun: ${data.batch.added}\n- Katalog: ${data.batch.total}\n- Kaynak hatası: ${errors.length}\n${errors.slice(0,5).map(e=>'  - '+e.source+': '+e.error).join('\n')}\n\nHer ürünün kontrol zamanı ayrı tutulur.\n`);
 if(!data.batch.refreshed)process.exitCode=1;
