@@ -11,3 +11,4 @@ test('greys and near-black pixels never produce an accent',()=>{
 test('accent is bright enough for a dark background',()=>{
  const px=[];for(let i=0;i<400;i++)px.push(90,0,0,255);const c=dominantColor(new Uint8Array(px));assert.ok(c);const l=rgbToHsl(parseInt(c.slice(1,3),16),parseInt(c.slice(3,5),16),parseInt(c.slice(5,7),16))[2];assert.ok(l>.55&&l<.7);
 });
+

@@ -76,3 +76,4 @@ export async function fetchNews(appid,f=fetch){
  const r=await f(`https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=${appid}&count=3&maxlength=0&feeds=steam_community_announcements`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(20000)});
  if(!r.ok)throw new Error('Steam haber HTTP '+r.status);return parseNews(await r.json());
 }
+

@@ -46,3 +46,4 @@ test('age notes come from PEGI first, then ESRB, deduplicated',()=>{
  assert.deepEqual(ageNotes({esrb:{descriptors:'Alcohol Reference\r\nBlood\r\nViolence'}}),['Alcohol Reference','Blood','Violence']);
  assert.deepEqual(ageNotes(undefined),[]);
 });
+

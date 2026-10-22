@@ -3,6 +3,8 @@ on:
   schedule:
     - cron: '12,27,42,57 * * * *'
   workflow_dispatch:
+  push:
+    paths: ['scripts/enrich*.mjs', 'scripts/stores.mjs', 'scripts/score-merge.mjs', 'scripts/news.mjs']
 concurrency:
   group: enrich
   cancel-in-progress: false
@@ -24,3 +26,4 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
         run: node scripts/enrich-run.mjs
+

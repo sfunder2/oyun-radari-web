@@ -25,3 +25,4 @@ export async function fetchAccent(imageUrl,f=fetch){
  if(!r.ok)throw new Error('Görsel HTTP '+r.status);
  return colorFromJpeg(Buffer.from(await r.arrayBuffer()));
 }
+

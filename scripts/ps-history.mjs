@@ -9,8 +9,8 @@ export function recordHistory(hist,items,today){
   const base=Number.isFinite(it.originalPrice)&&it.originalPrice>it.price?it.originalPrice:it.price;
   const h=hist.items[it.id]??={n:it.name,p:[]};h.n=it.name;
   const last=h.p.at(-1);
-  if(last&&last[0]===today){last[1]=it.price;last[2]=base}
-  else if(!last||last[1]!==it.price||last[2]!==base)h.p.push([today,it.price,base]);
+  if(last&&last[0]===today){last[3]=Math.min(last[3]??last[1],it.price);last[1]=it.price;last[2]=base}
+  else if(!last||last[1]!==it.price||last[2]!==base)h.p.push([today,it.price,base,it.price]);
   if(h.p.length>400)h.p.splice(0,h.p.length-400);
   h.s=today;
  }
@@ -33,9 +33,9 @@ export function detectRise(p,it){
 export function computeStats(h,it,today){
  const p=h?.p||[];if(!p.length||!Number.isFinite(it.price))return null;
  const cur=it.price;
- const lowestEver=Math.min(cur,...p.map(x=>x[1]));
+ const lowestEver=Math.min(cur,...p.map(x=>x[3]??x[1]));
  const cut=dstr(Date.parse(today)-30*DAY);
- const win=p.filter(x=>x[0]>=cut).map(x=>x[1]);const before=[...p].reverse().find(x=>x[0]<cut);if(before)win.push(before[1]);
+ const win=p.filter(x=>x[0]>=cut).map(x=>x[3]??x[1]);const before=[...p].reverse().find(x=>x[0]<cut);if(before)win.push(before[1]);
  const lowest30d=Math.min(cur,...win);
  const historyDays=days(p[0][0],today);
  const highest=Math.max(cur,it.originalPrice||0,...p.map(x=>x[2]));
@@ -44,3 +44,4 @@ export function computeStats(h,it,today){
   low30d:historyDays>=1&&cur<=lowest30d&&Math.max(it.originalPrice||0,...win)>cur,
   priceRise:detectRise(p,it)};
 }
+

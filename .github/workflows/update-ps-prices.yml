@@ -1,7 +1,6 @@
 name: Update PlayStation prices
 on:
-  schedule:
-    - cron: '7,22,37,52 * * * *'
+  # Automatic schedule runs in Supabase Cron. This workflow is the manual fallback.
   workflow_dispatch:
   push:
     paths: ['scripts/**', '.github/workflows/update-ps-prices.yml']

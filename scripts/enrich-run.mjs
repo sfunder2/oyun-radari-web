@@ -1,3 +1,4 @@
+import {mergeScores} from './score-merge.mjs';
 import {supabase} from './supabase.mjs';
 import {enrichProduct} from './enrich.mjs';
 import {parseOcSitemap} from './stores.mjs';
@@ -29,13 +30,15 @@ let hasMeta=true;
 try{await sb.select('game_meta?select=title_key&limit=1');await sb.select('upcoming_games?select=id&limit=1');}catch(e){if(/404|PGRST205/.test(e.message)){hasMeta=false;console.log('supabase/schema-v4.sql henüz çalıştırılmamış; tür/tarih/takvim verisi atlanıyor.');}else throw e;}
 // 2) OpenCritic dizinini belleğe al (title_key -> {id,slug}); aynı anahtarda en küçük id korunur
 const ocIndex=new Map();
-for(const r of await sb.selectAll('oc_index?select=id,slug,title_key&order=id',1000))if(!ocIndex.has(r.title_key))ocIndex.set(r.title_key,r);
+for(const r of await sb.selectAll('oc_index?select=id,slug,title_key&order=id',1000)){const slug=r.slug.split('/')[0],key=titleKey(slug.replace(/-/g,' '));if(!ocIndex.has(key))ocIndex.set(key,{...r,slug,title_key:key});}
 // 3) Sıradaki ürünler: hiç zenginleştirilmemiş olanlar önce (indirimliler en önde), sonra en eskiler
-const products=await sb.select(`ps_products?select=id,name,title_key,image&order=enriched_at.asc.nullsfirst,discount_percent.desc&limit=${BATCH}`);
+const fresh=await sb.select(`ps_products?select=id,name,title_key,image&enriched_at=is.null&order=discount_percent.desc,id&limit=${Math.ceil(BATCH*.75)}`);
+const revisits=await sb.select(`ps_products?select=id,name,title_key,image&enriched_at=not.is.null&order=enriched_at.asc,id&limit=${BATCH-fresh.length}`);
+const products=[...fresh,...revisits];
 let offersN=0,scoresN=0,errN=0;const offers=[],scores=new Map(),metas=new Map(),done=[],accents=new Map(),now=new Date().toISOString();
 for(let i=0;i<products.length;i+=3){
  await Promise.all(products.slice(i,i+3).map(async p=>{
-  const r=await enrichProduct(p,{ocIndex});done.push({id:p.id,key:r.key});
+  const r=await enrichProduct(p,{ocIndex});done.push({id:p.id,key:r.key,store_status:r.storeStatus,enrichment_status:r.errors.some(e=>/^(steam|xbox|switch):/.test(e))?'partial':'ok'});
   offers.push(...r.offers);if(r.scores)scores.set(r.key,r.scores);if(r.meta)metas.set(r.key,r.meta);if(r.accent)accents.set(p.id,r.accent);errN+=r.errors.length;
   if(r.errors.length)console.log(p.name,'->',r.errors.join(' | '));
  }));
@@ -44,11 +47,12 @@ for(let i=0;i<products.length;i+=3){
 // yinelenen anahtarlar tek kayıt olsun
 const uniq=new Map(offers.map(o=>[o.platform+':'+o.store_id,o]));
 await sb.upsert('store_offers',[...uniq.values()],'platform,store_id');
-await sb.upsert('game_scores',[...scores.values()],'title_key');
+const oldScores=new Map();if(scores.size){const keys=[...scores.keys()].map(k=>'"'+k.replaceAll('"','')+'"').join(',');for(const row of await sb.selectAll('game_scores?select=*&title_key=in.('+keys+')'))oldScores.set(row.title_key,row);}
+await sb.upsert('game_scores',[...scores.values()].map(row=>mergeScores(oldScores.get(row.title_key),row)),'title_key');
 if(hasMeta&&metas.size)await sb.upsert('game_meta',[...metas.values()],'title_key');
 const missing=new Map(products.filter(p=>!p.title_key).map(p=>[p.id,true]));
 for(let i=0;i<done.length;i+=50){const chunk=done.slice(i,i+50);
- await sb.patch(`ps_products?id=in.(${chunk.map(c=>`"${c.id}"`).join(',')})`,{enriched_at:now});
+ for(const c of chunk)await sb.patch('ps_products?id=eq.'+encodeURIComponent(c.id),{enriched_at:now,store_status:c.store_status,enrichment_status:c.enrichment_status});
  for(const c of chunk)if(c.key&&missing.has(c.id))await sb.patch(`ps_products?id=eq.${encodeURIComponent(c.id)}`,{title_key:c.key});}
 offersN=uniq.size;scoresN=scores.size;
 // Baskın vurgu rengi (v7 sütunu varsa): bu turdaki ürünler + rengi eksik olan en çok 60 ürün
@@ -97,3 +101,4 @@ if(hasMeta){
 }
 say(`Ürün: ${products.length} · mağaza teklifi: ${offersN} · puan kaydı: ${scoresN} · kaynak hatası: ${errN}`);
 if(process.env.GITHUB_STEP_SUMMARY)await appendFile(process.env.GITHUB_STEP_SUMMARY,'### Zenginleştirme\n\n'+log.map(l=>'- '+l).join('\n')+'\n');
+

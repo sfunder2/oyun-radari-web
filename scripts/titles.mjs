@@ -7,3 +7,4 @@ export function cleanTitle(name){
 export function titleKey(name){
  return norm(cleanTitle(name)).replace(/[^a-z0-9]+/g,' ').replace(/\b(standard|standart|edition|surum|digital|dijital)\b/g,' ').replace(/\s+/g,' ').trim();
 }
+

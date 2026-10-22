@@ -41,7 +41,7 @@ export function pickExact(cands,key){
 export function ocFromHtml(html,expectedName){
  for(const m of html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)){
   let j;try{j=JSON.parse(m[1])}catch{continue}
-  for(const x of [j].flat()){if(![x?.['@type']].flat().includes('VideoGame'))continue;
+  for(const x of [j, ...(j?.['@graph']||[])].flat()){if(![x?.['@type']].flat().includes('VideoGame'))continue;
    if(titleKey(x.name)!==titleKey(expectedName))continue;const r=x.aggregateRating,s=Number(r?.ratingValue);
    if(r&&Number(r.bestRating)===100&&Number.isFinite(s)&&s>0&&s<=100&&(!r.name||/OpenCritic/i.test(r.name)))return{score:Math.round(s),reviews:num(r.reviewCount)};}
  }return null;
@@ -52,5 +52,10 @@ export async function openCritic(entry,f=fetch){
  const s=ocFromHtml(await r.text(),entry.slug.replace(/-/g,' '));return s?{...s,url}:null;
 }
 export function parseOcSitemap(xml){
- return[...xml.matchAll(/<loc>https:\/\/opencritic\.com\/game\/(\d+)\/([^<\s]+)<\/loc>/g)].map(m=>({id:Number(m[1]),slug:m[2],title_key:titleKey(m[2].replace(/-/g,' '))})).filter(x=>x.title_key);
+ const rows=new Map();
+ for(const match of xml.matchAll(/<loc>https:\/\/opencritic\.com\/game\/(\d+)\/([^<\s]+)<\/loc>/g)){
+  const slug=match[2].split('/')[0].split('?')[0],id=Number(match[1]);
+  if(!slug)continue;rows.set(id,{id,slug,title_key:titleKey(slug.replace(/-/g,' '))});
+ }
+ return [...rows.values()].filter(x=>x.title_key);
 }

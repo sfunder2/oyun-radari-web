@@ -22,3 +22,4 @@ assert.equal(s2.historicalLow,false);assert.equal(s2.priceRise,null);
 // değişmeyen fiyat yeni nokta eklememeli
 recordHistory(hist,[it],D(81));assert.equal(hist.items.x.p.length,5);
 console.log('TESTLER GEÇTİ');
+

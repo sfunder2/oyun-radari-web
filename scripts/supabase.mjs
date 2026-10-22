@@ -21,5 +21,6 @@ export function supabase(url,key,fetchImpl=fetch){
  }
  const patch=(path,body)=>req('PATCH',path,{body,prefer:'return=minimal'});
  const del=path=>req('DELETE',path,{prefer:'return=minimal'});
- return{select:p=>req('GET',p),selectAll,upsert,patch,del};
+ return{rpc:(name,body)=>req('POST','rpc/'+name,{body}),select:p=>req('GET',p),selectAll,upsert,patch,del};
 }
+

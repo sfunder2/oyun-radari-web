@@ -28,3 +28,6 @@ test('enrich writes exact matches only and survives a failing source',async()=>{
  assert.deepEqual(r.offers.map(o=>[o.platform,o.store_id,o.price]),[['steam','1145360',8.25],['switch','hades-switch',24.99]]);
  assert.equal(r.scores.metacritic,93);assert.equal(r.scores.metacritic_platform,'PC');assert.equal(r.scores.opencritic,93);assert.match(r.errors[0],/xbox/);
 });
+
+
+test('OpenCritic sitemap review subpages cannot contaminate matching keys',()=>{assert.deepEqual(parseOcSitemap('<loc>https://opencritic.com/game/10181/hades/reviews</loc><loc>https://opencritic.com/game/10181/hades</loc>'),[{id:10181,slug:'hades',title_key:'hades'}]);});

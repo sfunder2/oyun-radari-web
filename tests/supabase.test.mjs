@@ -32,3 +32,4 @@ test('preview video is the first PREVIEW mp4',()=>{
  const g=fg({id:'EP1-A_00-X',name:'Oyun',storeDisplayClassification:'FULL_GAME',price:{basePriceValue:100,discountedValue:100},media:[{type:'VIDEO',role:'PREVIEW',url:'https://v/a.mp4'},{type:'VIDEO',role:'PREVIEW',url:'https://v/b.mp4'},{type:'IMAGE',role:'GAMEHUB_COVER_ART',url:'https://i/x.png'}]});
  assert.equal(g.previewUrl,'https://v/a.mp4');
 });
+
