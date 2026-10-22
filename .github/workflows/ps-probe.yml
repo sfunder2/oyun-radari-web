@@ -1,0 +1,35 @@
+name: PS Store probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe store.playstation.com
+        run: |
+          UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
+          for u in \
+            "https://store.playstation.com/tr-tr/product/EP4484-PPSA03711_00-3235764131417729" \
+            "https://store.playstation.com/tr-tr/pages/deals" \
+            "https://store.playstation.com/tr-tr/category/3f772501-f6f8-49b7-abac-874a88ca4897/1"; do
+            echo "=== $u"
+            curl -sS -L -m 30 -A "$UA" -H 'Accept-Language: tr-TR,tr;q=0.9' -o /tmp/p.html -w 'http=%{http_code} size=%{size_download}\n' "$u" || true
+            grep -c '__NEXT_DATA__' /tmp/p.html || true
+            python3 - <<'PY'
+          import re,json
+          s=open('/tmp/p.html',encoding='utf-8',errors='replace').read()
+          m=re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>',s,re.S)
+          if not m: print('no __NEXT_DATA__'); print(s[:300].replace('\n',' ')); raise SystemExit
+          d=json.loads(m.group(1))
+          found=[]
+          def walk(o):
+              if isinstance(o,dict):
+                  if 'basePrice' in o and 'discountedPrice' in o: found.append({k:o[k] for k in ('basePrice','discountedPrice','discountText','currencyCode','isFree') if k in o})
+                  for v in o.values(): walk(v)
+              elif isinstance(o,list):
+                  for v in o: walk(v)
+          walk(d)
+          print('price objects:',len(found)); print(found[:3])
+          ap=d.get('props',{}).get('apolloState',{})
+          print('apollo keys:',len(ap), [k for k in ap if k.startswith('Product:')][:3])
+          PY
+          done
