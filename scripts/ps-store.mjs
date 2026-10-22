@@ -22,7 +22,8 @@ export function fromGrid(p,now=new Date().toISOString()){
  const cls=p.storeDisplayClassification||'';if(cls&&!KEEP.has(cls))return null;
  const m=money(p.price);if(m.price===null)return null;
  const img=(p.media||[]).find(x=>x.type==='IMAGE'&&x.role==='GAMEHUB_COVER_ART')||(p.media||[]).find(x=>x.type==='IMAGE'&&x.role==='EDITION_KEY_ART')||(p.media||[]).find(x=>x.type==='IMAGE');
- return{id:p.id,name:p.name,image:img?img.url+'?w=480':null,price:m.price,originalPrice:m.originalPrice,discountPercent:m.discountPercent,discountEndsAt:m.endsAt,
+ const vid=(p.media||[]).find(x=>x.type==='VIDEO'&&x.role==='PREVIEW'&&/\.mp4(\?|$)/i.test(x.url||''));
+ return{id:p.id,name:p.name,image:img?img.url+'?w=480':null,previewUrl:vid?vid.url:null,price:m.price,originalPrice:m.originalPrice,discountPercent:m.discountPercent,discountEndsAt:m.endsAt,
   edition:[(p.platforms||[]).join('/'),p.localizedStoreDisplayClassification].filter(Boolean).join(' · ')||'PlayStation Store',url:'https://store.playstation.com/tr-tr/product/'+p.id,checkedAt:now};
 }
 export async function fetchGrid(kind,page,fetchImpl=fetch){
