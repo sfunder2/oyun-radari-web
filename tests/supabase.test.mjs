@@ -33,3 +33,9 @@ test('preview video is the first PREVIEW mp4',()=>{
  assert.equal(g.previewUrl,'https://v/a.mp4');
 });
 
+
+ test('sparse metadata rows are grouped without nulling absent fields',async()=>{
+  const bodies=[];const sb=supabase('https://example.test','key',async(u,o)=>{bodies.push(JSON.parse(o.body));return new Response('',{status:200});});
+  await sb.upsert('game_meta',[{id:'a',name:'A',news:[]},{id:'b',name:'B'},{id:'c',name:'C',news:[]}],'id');
+  assert.equal(bodies.length,2);for(const rows of bodies)for(const row of rows)assert.deepEqual(Object.keys(row).sort(),Object.keys(rows[0]).sort());assert.ok(!('news' in bodies.flat().find(x=>x.id==='b')));
+ });

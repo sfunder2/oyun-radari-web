@@ -15,7 +15,13 @@ export function supabase(url,key,fetchImpl=fetch){
   // SQL şeması henüz güncellenmemişse bilinmeyen sütunlar atılıp yeniden denenir
   let data=rows;
   for(let attempt=0;;attempt++){
-   try{for(let i=0;i<data.length;i+=size)await req('POST',`${table}?on_conflict=${conflict}`,{body:data.slice(i,i+size),prefer:'resolution=merge-duplicates,return=minimal'});return;}
+   try{
+    // PostgREST requires identical keys in each request. Group sparse rows rather
+    // than filling missing fields with null, which would erase saved metadata.
+    const groups=new Map();for(const row of data){const signature=Object.keys(row).sort().join(',');if(!groups.has(signature))groups.set(signature,[]);groups.get(signature).push(row);}
+    for(const group of groups.values())for(let i=0;i<group.length;i+=size)await req('POST',`${table}?on_conflict=${conflict}`,{body:group.slice(i,i+size),prefer:'resolution=merge-duplicates,return=minimal'});
+    return;
+   }
    catch(e){const col=e.message.match(/Could not find the '(\w+)' column/)?.[1];if(!col||attempt>6)throw e;console.log(`${table}.${col} sütunu yok; ilgili SQL çalıştırılana kadar atlanıyor`);data=data.map(({[col]:_,...r})=>r);}
   }
  }
