@@ -4,7 +4,7 @@ on:
     - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
   push:
-    paths: ['ps-links.json', 'scripts/update-ps-catalog.mjs', 'scripts/ps-catalog-parser.mjs', 'scripts/batch-state.mjs', '.github/workflows/update-ps-prices.yml']
+    paths: ['ps-links.json', 'scripts/update-ps-catalog.mjs', 'scripts/batch-state.mjs', '.github/workflows/update-ps-prices.yml']
 permissions:
   contents: write
 concurrency:
@@ -29,5 +29,5 @@ jobs:
         run: |
           git config user.name 'price-bot'
           git config user.email 'price-bot@users.noreply.github.com'
-          git add data/ps-index.json data/ps-prices.json data/ps-batch-status.json data/ps-history.json
+          git add data/ps-index.json data/ps-history.json
           git diff --staged --quiet || (git commit -m 'Refresh PS prices and discover games [skip ci]' && (git push || (git pull --rebase -X theirs origin main && git push)))
