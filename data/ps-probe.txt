@@ -1,16 +1,20 @@
-=== https://store.playstation.com/tr-tr/product/EP4484-PPSA03711_00-3235764131417729
-http 200 size 350951
-top ['props', 'page', 'query', 'buildId', 'runtimeConfig', 'isFallback', 'isExperimentalCompile', 'appGip', 'scriptLoader'] props ['pageProps', 'appProps', 'navTree', 'apolloState'] apollo 9
-Counter({'EMSNavItem': 5, 'EMSNavTree': 1, 'EMSExperience': 1, 'ROOT_QUERY': 1, 'Product': 1})
-PRODUCT Product:EP4484-PPSA03711_00-3235764131417729:tr-tr {"__typename": "Product", "isSearchableOnStore": true, "id": "EP4484-PPSA03711_00-3235764131417729", "name": "Hades"}
-ROOT_QUERY keys ['__typename', 'emsExperienceRetrieve({"clientId":"b6de8d4d-bf9b-11ee-ad2a-aea73dc1ea43"})', 'productRetrieve({"productId":"EP4484-PPSA03711_00-3235764131417729"})']
-=== https://store.playstation.com/tr-tr/pages/deals
-http 200 size 72419
-top ['props', 'page', 'query', 'buildId', 'runtimeConfig', 'isFallback', 'isExperimentalCompile', 'appGip', 'scriptLoader'] props ['pageProps', 'appProps', 'navTree', 'apolloState'] apollo 8
-Counter({'EMSNavItem': 5, 'EMSNavTree': 1, 'EMSExperience': 1, 'ROOT_QUERY': 1})
-ROOT_QUERY keys ['__typename', 'emsExperienceRetrieve({"clientId":"b6de8d4d-bf9b-11ee-ad2a-aea73dc1ea43"})']
-=== https://store.playstation.com/tr-tr/category/3f772501-f6f8-49b7-abac-874a88ca4897/1
-http 200 size 73704
-top ['props', 'page', 'query', 'buildId', 'runtimeConfig', 'isFallback', 'isExperimentalCompile', 'appGip', 'scriptLoader'] props ['pageProps', 'appProps', 'navTree', 'apolloState'] apollo 8
-Counter({'EMSNavItem': 5, 'EMSNavTree': 1, 'EMSExperience': 1, 'ROOT_QUERY': 1})
-ROOT_QUERY keys ['__typename', 'emsExperienceRetrieve({"clientId":"b6de8d4d-bf9b-11ee-ad2a-aea73dc1ea43"})']
+HTML len 350951
+PAT finalPrice 2
+   ...  psw-l-stack-left psw-fill-x"><span class="psw-fill-x psw-l-line-left"><span class="psw-l-line-left psw-l-line-wrap"><span data-qa="mfeCtaMain#offer0#finalPrice" class="psw-t-title-m">879,00 TL</span></span></span></div></label><div class="psw-m-t-6 psw-fill-x" data-qa="mfeCtaMain#cta" data-track-content="ctaWithPrice:ctaWithPriceImpression" data-telemetry-meta="{&quot;conceptId&quot;:&quot;100026
+   ... \u003cspan class=\"psw-fill-x psw-l-line-left\"\u003e\u003cspan class=\"psw-l-line-left psw-l-line-wrap\"\u003e\u003cspan data-qa=\"mfeCtaMain#offer0#finalPrice\" class=\"psw-t-title-m\"\u003e879,00 TL\u003c/span\u003e\u003c/span\u003e\u003c/span\u003e\u003c/div\u003e\u003c/label\u003e\u003cdiv class=\"psw-m-t-6 psw-fill-x\" data-qa=\"mfeCtaMain#cta\" data-track-content=\"ctaWithPrice:ctaWithPrice
+PAT originalPrice 22
+   ... 31417729-E003:OUTRIGHT","__typename":"GameCTA","local":{"ctaLabel":"msgid_add_cart","ctaType":"purchase","serviceIcons":[],"priceOrText":"879,00 TL","originalPrice":"","offerLabel":null,"offerAvailability":null,"discountBadgeText":"","ctaDataTrack":{"eventName":"add to cart","label":"add to cart","elementType":"button","sku":"EP4484-PPSA03711_00-3235764131417729-E003","userActionFlag":false},"ctaD
+   ... Action":"click add to cart","skuDetail":{"skuId":"EP4484-PPSA03711_00-3235764131417729-E003","skuPriceDetail":[{"rewardId":"","offerCampaignId":null,"originalPriceFormatted":"879,00 TL","originalPriceValue":87900,"discountPriceFormatted":"879,00 TL","discountPriceValue":87900,"priceCurrencyCode":"TRY","offerBranding":"NONE","offerQualification":[],"offerExclusive":false,"offerApplied":false,"offer
+PAT application/ld\+json 1
+   ... lmak üzere Supergiantın çok sevilen oyunlarının en iyi yönlerini birleştiren fevkalade bir zindan macerasıdır. " /><script id="mfe-jsonld-tags" type="application/ld+json">{"@context":"http://schema.org","@type":"Product","name":"Hades","category":"Tam Sürüm Oyun","description":"Previous special offer price valid from 17-11-2023 to 27-11-2023 was £11.99  €14.99  AU 23.97  BGN 29.94  CZK 353.4  DKK 
+PAT "price" 2
+   ... 711_00-3235764131417729","image":"https://image.api.playstation.com/vulcan/ap/rnd/202104/0517/9AcM3vy5t77zPiJyKHwRfnNT.png","offers":{"@type":"Offer","price":879,"priceCurrency":"TRY"}}</script><meta charSet="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><script type="text/javascript"></script><title>Hades</title><meta content="app-id=410896080, app-argument=" name
+   ... llService":"NONE","exclusive":false,"playabilityDate":null,"ineligibilityReasons":[{"__typename":"IneligibilityReason","type":"UNKNOWN","names":[]}]},"price":{"__typename":"Price","basePrice":"879,00 TL","discountedPrice":"879,00 TL","displayDiscountText":null,"serviceBranding":["NONE"],"endTime":null,"displayUpsellText":null,"basePriceValue":87900,"discountedValue":87900,"currencyCode":"TRY","qua
+PAT offers 1
+   ... r. ","sku":"EP4484-PPSA03711_00-3235764131417729","image":"https://image.api.playstation.com/vulcan/ap/rnd/202104/0517/9AcM3vy5t77zPiJyKHwRfnNT.png","offers":{"@type":"Offer","price":879,"priceCurrency":"TRY"}}</script><meta charSet="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><script type="text/javascript"></script><title>Hades</title><meta content="app-id=41089
+PAT TL< 1
+   ... ="psw-fill-x psw-l-line-left"><span class="psw-l-line-left psw-l-line-wrap"><span data-qa="mfeCtaMain#offer0#finalPrice" class="psw-t-title-m">879,00 TL</span></span></span></div></label><div class="psw-m-t-6 psw-fill-x" data-qa="mfeCtaMain#cta" data-track-content="ctaWithPrice:ctaWithPriceImpression" data-telemetry-meta="{&quot;conceptId&quot;:&quot;10002648&quot;,&quot;productId&quot;:&quot;EP44
+PAT basePrice 4
+   ... alse,"playabilityDate":null,"ineligibilityReasons":[{"__typename":"IneligibilityReason","type":"UNKNOWN","names":[]}]},"price":{"__typename":"Price","basePrice":"879,00 TL","discountedPrice":"879,00 TL","displayDiscountText":null,"serviceBranding":["NONE"],"endTime":null,"displayUpsellText":null,"basePriceValue":87900,"discountedValue":87900,"currencyCode":"TRY","qualifications":[],"applicability"
+   ... ,"basePrice":"879,00 TL","discountedPrice":"879,00 TL","displayDiscountText":null,"serviceBranding":["NONE"],"endTime":null,"displayUpsellText":null,"basePriceValue":87900,"discountedValue":87900,"currencyCode":"TRY","qualifications":[],"applicability":"APPLICABLE","campaignId":null,"rewardId":"","isFree":false,"isExclusive":false,"isTiedToSubscription":false,"history":null,"savingTag":"","tierLab
+GQL ERR HTTP Error 400: Bad Request b'{"errors":[{"message":"This operation has been blocked as a potential Cross-Site Request Forgery (CSRF). Please either specify a \'content-type\' header (with a type that is not one of application/x-www-form-urlencoded, multipart/form-data, text/plain) or provide a non-empty value for one of the following headers: x-apollo-operation-name, apollo-require-preflight\\n","extensions":{}}]}\n'
