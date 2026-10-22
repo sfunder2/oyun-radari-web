@@ -27,3 +27,8 @@ test('grid mapping keeps games, drops add-ons, builds official url',()=>{
  assert.equal(fromGrid({id:'a',name:'DLC',storeDisplayClassification:'ADD-ON',price:{basePriceValue:100}}),null);
 });
 test('search text ignores case, accents and trademarks',()=>{assert.equal(norm('  Pokémon™  İstanbul  ISIK '),'pokemon istanbul isik')});
+import {fromGrid as fg} from '../scripts/ps-store.mjs';
+test('preview video is the first PREVIEW mp4',()=>{
+ const g=fg({id:'EP1-A_00-X',name:'Oyun',storeDisplayClassification:'FULL_GAME',price:{basePriceValue:100,discountedValue:100},media:[{type:'VIDEO',role:'PREVIEW',url:'https://v/a.mp4'},{type:'VIDEO',role:'PREVIEW',url:'https://v/b.mp4'},{type:'IMAGE',role:'GAMEHUB_COVER_ART',url:'https://i/x.png'}]});
+ assert.equal(g.previewUrl,'https://v/a.mp4');
+});
