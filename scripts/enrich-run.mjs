@@ -4,6 +4,7 @@ import {parseOcSitemap} from './stores.mjs';
 import {titleKey} from './titles.mjs';
 import {fetchUpcoming,fetchDetails,fetchNews} from './steam-meta.mjs';
 import {fetchAllNews} from './news.mjs';
+import {fetchAccent} from './color.mjs';
 import {appendFile} from 'node:fs/promises';
 const {SUPABASE_URL,SUPABASE_SERVICE_KEY}=process.env;
 if(!SUPABASE_URL||!SUPABASE_SERVICE_KEY){console.error('SUPABASE_URL ve SUPABASE_SERVICE_KEY gerekli');process.exit(2)}
@@ -30,12 +31,12 @@ try{await sb.select('game_meta?select=title_key&limit=1');await sb.select('upcom
 const ocIndex=new Map();
 for(const r of await sb.selectAll('oc_index?select=id,slug,title_key&order=id',1000))if(!ocIndex.has(r.title_key))ocIndex.set(r.title_key,r);
 // 3) Sıradaki ürünler: hiç zenginleştirilmemiş olanlar önce (indirimliler en önde), sonra en eskiler
-const products=await sb.select(`ps_products?select=id,name,title_key&order=enriched_at.asc.nullsfirst,discount_percent.desc&limit=${BATCH}`);
-let offersN=0,scoresN=0,errN=0;const offers=[],scores=new Map(),metas=new Map(),done=[],now=new Date().toISOString();
+const products=await sb.select(`ps_products?select=id,name,title_key,image&order=enriched_at.asc.nullsfirst,discount_percent.desc&limit=${BATCH}`);
+let offersN=0,scoresN=0,errN=0;const offers=[],scores=new Map(),metas=new Map(),done=[],accents=new Map(),now=new Date().toISOString();
 for(let i=0;i<products.length;i+=3){
  await Promise.all(products.slice(i,i+3).map(async p=>{
   const r=await enrichProduct(p,{ocIndex});done.push({id:p.id,key:r.key});
-  offers.push(...r.offers);if(r.scores)scores.set(r.key,r.scores);if(r.meta)metas.set(r.key,r.meta);errN+=r.errors.length;
+  offers.push(...r.offers);if(r.scores)scores.set(r.key,r.scores);if(r.meta)metas.set(r.key,r.meta);if(r.accent)accents.set(p.id,r.accent);errN+=r.errors.length;
   if(r.errors.length)console.log(p.name,'->',r.errors.join(' | '));
  }));
  await sleep(500);
@@ -50,6 +51,13 @@ for(let i=0;i<done.length;i+=50){const chunk=done.slice(i,i+50);
  await sb.patch(`ps_products?id=in.(${chunk.map(c=>`"${c.id}"`).join(',')})`,{enriched_at:now});
  for(const c of chunk)if(c.key&&missing.has(c.id))await sb.patch(`ps_products?id=eq.${encodeURIComponent(c.id)}`,{title_key:c.key});}
 offersN=uniq.size;scoresN=scores.size;
+// Baskın vurgu rengi (v7 sütunu varsa): bu turdaki ürünler + rengi eksik olan en çok 60 ürün
+try{
+ const extra=await sb.select('ps_products?select=id,image&accent_color=is.null&image=not.is.null&enriched_at=not.is.null&order=discount_percent.desc&limit=60');
+ for(let i=0;i<extra.length;i+=6){await Promise.all(extra.slice(i,i+6).map(async x=>{try{const c=await fetchAccent(x.image);if(c)accents.set(x.id,c);}catch{}}));await sleep(300);}
+ for(const [id,c] of accents)await sb.patch(`ps_products?id=eq.${encodeURIComponent(id)}`,{accent_color:c});
+ say(`Vurgu rengi: ${accents.size}`);
+}catch(e){if(!/400|404|PGRST/.test(e.message))say('Vurgu rengi atlandı: '+e.message.slice(0,100));}
 // Daha önce zenginleştirilmiş Steam eşleşmeleri için eksik ayrıntıları tamamla (her turda en çok 40)
 if(hasMeta){
  try{
