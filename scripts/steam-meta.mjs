@@ -33,6 +33,16 @@ export async function fetchUpcoming(pages=3,f=fetch){
  }
  return[...all.values()];
 }
+const REQ_TR={'OS':'İşletim sistemi','Processor':'İşlemci','Memory':'Bellek','Graphics':'Ekran kartı','DirectX':'DirectX','Storage':'Depolama','Network':'Ağ','Sound Card':'Ses kartı','Additional Notes':'Not'};
+// Steam'in HTML gereksinim listesi -> [[etiket, değer], ...]
+export function parseRequirements(html){
+ const rows=[];
+ for(const m of String(html||'').matchAll(/<li[^>]*>\s*<strong>([^<]*?)\s*\*?:?\s*<\/strong>\s*:?\s*([\s\S]*?)<\/li>/g)){
+  const label=m[1].replace(/[*:]/g,'').trim(),value=strip(m[2].replace(/<br\s*\/?>/g,' ')).replace(/\s+/g,' ');
+  if(label&&value&&!/^(minimum|recommended)$/i.test(label))rows.push([REQ_TR[label]||label,value.slice(0,160)]);
+ }
+ return rows;
+}
 export function parseDetails(d,titleKey,now=new Date().toISOString()){
  if(!d||d.type!=='game')return null;
  const langs=String(d.supported_languages||''),rel=d.release_date||{};
@@ -42,10 +52,21 @@ export function parseDetails(d,titleKey,now=new Date().toISOString()){
   genres:(d.genres||[]).map(g=>GENRE_TR[g.description]||g.description).filter(Boolean),
   release_date:rel.coming_soon?null:parseReleaseDate(rel.date),release_text:rel.date||null,
   developers:d.developers||[],publishers:d.publishers||[],
-  turkish:/Turkish/.test(langs),turkish_audio:/Turkish<strong>\*<\/strong>/.test(langs),age,checked_at:now};
+  turkish:/Turkish/.test(langs),turkish_audio:/Turkish<strong>\*<\/strong>/.test(langs),age,
+  requirements:(()=>{const r=d.pc_requirements;if(!r||Array.isArray(r))return null;const min=parseRequirements(r.minimum),rec=parseRequirements(r.recommended);return min.length||rec.length?{min,rec}:null;})(),
+  dlc_count:Array.isArray(d.dlc)?d.dlc.length:0,checked_at:now};
 }
 export async function fetchDetails(appid,titleKey,f=fetch){
  const r=await f(`https://store.steampowered.com/api/appdetails?appids=${appid}&cc=tr&l=english`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(25000)});
  if(!r.ok)throw new Error('Steam ayrıntı HTTP '+r.status);
  const j=await r.json();const e=j[appid];return e?.success?parseDetails(e.data,titleKey):null;
+}
+
+// Geliştirici duyuruları / yama notları: en son 3 başlık
+export function parseNews(j){
+ return(j?.appnews?.newsitems||[]).slice(0,3).map(n=>({title:strip(n.title).slice(0,140),url:n.url,date:n.date?new Date(n.date*1000).toISOString().slice(0,10):null,label:n.feedlabel||null})).filter(n=>n.title&&/^https:\/\//.test(n.url||''));
+}
+export async function fetchNews(appid,f=fetch){
+ const r=await f(`https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=${appid}&count=3&maxlength=0&feeds=steam_community_announcements`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(20000)});
+ if(!r.ok)throw new Error('Steam haber HTTP '+r.status);return parseNews(await r.json());
 }
