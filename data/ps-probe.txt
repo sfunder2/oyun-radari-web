@@ -1,0 +1,12 @@
+=== https://store.playstation.com/tr-tr/product/EP4484-PPSA03711_00-3235764131417729
+http 200 size 350951
+price objects 0 []
+products 1
+=== https://store.playstation.com/tr-tr/pages/deals
+http 200 size 72419
+price objects 0 []
+products 0
+=== https://store.playstation.com/tr-tr/category/3f772501-f6f8-49b7-abac-874a88ca4897/1
+http 200 size 73704
+price objects 0 []
+products 0
