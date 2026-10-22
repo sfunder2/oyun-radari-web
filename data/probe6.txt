@@ -1,0 +1,22 @@
+URL https://opencritic.com/robots.txt 200 77 User-agent: * Sitemap: https://opencritic.com/sitemap.xml Disallow: /profile 
+URL https://opencritic.com/sitemap.xml 200 1294 <?xml version="1.0" encoding="UTF-8"?> <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">   <sitemap>     <loc>https://opencritic.com/sitemap_games_1.xml</loc>     <lastmod>2026-10-22T00:00:00.000Z</lastmod>   </sitemap>   <sitemap>     <loc>https://opencritic.com/sitemap_games_2.xml</loc>     <lastmod>2026-08-24T00:00:00.000Z</lastmod>   </sitemap>   <sitemap>     <loc>https://opencritic.com/sitemap_games_3.xml</loc>     <lastmod>2025-09-17T00:00:00.000Z</lastmod>   </sitemap>  
+URL https://opencritic.com/sitemap-games.xml 403 111 <?xml version="1.0" encoding="UTF-8"?> <Error><Code>AccessDenied</Code><Message>Access Denied</Message></Error>
+JSONLD count 2
+{
+  "@context": "http://schema.org",
+  "@type": "VideoGame",
+  "applicationCategory": "Game",
+  "url": "/game/10181/hades",
+  "dateCreated": "2020-09-17T15:34:44.103Z",
+  "name": "Hades",
+  "gamePlatform": [
+    "PC",
+    "Nintendo Switch",
+    "PlayStation 4",
+    "PlayStation 5",
+    "Xbox One",
+    "Xbox Series X/S"
+  ],
+  "description": "Hades is a god-like rogue-like dungeon crawler that combines the best aspects of Supergiant's critically acclaimed titles, including the fast-paced action of Bastion, the rich atmosphere and depth of Transistor, and the character-driven storytelling of Pyre.\n\nAs the immortal Prince of the Underworld, you'll wield the powers and mythic weapons of Olympu
+MC JSONLD 1
+{"@context":"https://schema.org","@type":"VideoGame","name":"Hades","dateCreated":"2020-09-17T00:00:00.000Z","datePublished":"2020-09-17","description":"Defy the god of death as you hack and slash your way out of the Underworld in this rogue-like dungeon crawler from the creators of Bastion and Transistor.","contentRating":"T","image":"https://www.metacritic.com/a/img/resize/d21ad266bb9e45e4495de439cfe1e66503642e2c/catalog/provider/6/12/6-1-735556-52.jpg?auto=webp&fit=crop&height=675&width=1200","url":"https://www.metacritic.com/game/hades/","aggregateRating":{"@type":"AggregateRating","name":
