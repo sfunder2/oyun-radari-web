@@ -1,6 +1,6 @@
 import {titleKey} from './titles.mjs';
 import {steamSearch,xboxSearch,switchSearch,pickExact,openCritic} from './stores.mjs';
-import {fetchDetails} from './steam-meta.mjs';
+import {fetchDetails,fetchNews} from './steam-meta.mjs';
 // Bir PlayStation ürünü için diğer mağaza teklifleri ve puanlar. Her kaynak bağımsızdır: biri başarısız olursa diğerleri yazılır.
 export async function enrichProduct(p,{ocIndex,f=fetch,now=new Date().toISOString()}={}){
  const key=titleKey(p.name),offers=[],errors=[];let metacritic=null,opencritic=null,meta=null;
@@ -11,6 +11,7 @@ export async function enrichProduct(p,{ocIndex,f=fetch,now=new Date().toISOStrin
   const hit=list&&pickExact(list,key);
   if(hit){offers.push({platform:hit.platform,store_id:hit.store_id,title_key:key,name:hit.name,image:hit.image,price:hit.price,original_price:hit.original_price,discount_percent:hit.discount_percent,currency:hit.currency,url:hit.url,edition:hit.edition,checked_at:now});
    if(c==='steam')meta=await run('steam ayrıntı',()=>fetchDetails(hit.store_id,key,f));
+   if(meta){const n=await run('steam haber',()=>fetchNews(hit.store_id,f));if(n)meta.news=n;}
    if(c==='steam'&&hit.metascore)metacritic={score:hit.metascore,platform:'PC',url:`https://www.metacritic.com/search/${encodeURIComponent(hit.name)}/?category=13`};}
  }
  const oc=ocIndex?.get(key);
