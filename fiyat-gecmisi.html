@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fiyat geçmişi · Oyun Radarı</title>
+<meta name="color-scheme" content="light dark">
+<style>
+:root{--bg:#eef2f6;--surface:#fff;--ink:#0f1d2b;--muted:#5a6b7d;--line:#d5dde6;--accent:#0b5fff;--good:#0a7d4f;--good-bg:#dff5ea;--warn:#9a4a05;--warn-bg:#fdecd2;--chip:#e3e9f0;--radius:10px;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0b1118;--surface:#121b25;--ink:#e6edf4;--muted:#93a4b6;--line:#243241;--accent:#6aa5ff;--good:#3ecf8e;--good-bg:#10321f;--warn:#f0b04a;--warn-bg:#3a2a0f;--chip:#1b2836;color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.wrap{max-width:760px;margin:0 auto;padding:0 14px 40px}
+header{padding:18px 0 10px}
+h1{font-size:1.55rem;line-height:1.15;margin:0 0 4px;letter-spacing:-.01em}
+#meta{margin:0;color:var(--muted);font-size:.9rem}
+.tools{position:sticky;top:0;z-index:5;background:var(--bg);padding:8px 0 6px;display:grid;grid-template-columns:1fr auto;gap:8px}
+input,select{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{grid-column:1/-1;display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.chips button{flex:none;font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .chips button[aria-pressed=true]{color:#06101c}}
+ul{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:8px}
+li{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+.row{all:unset;box-sizing:border-box;display:grid;grid-template-columns:56px 1fr auto;gap:12px;align-items:center;width:100%;padding:10px 12px;cursor:pointer}
+.row:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.row img,.ph{width:56px;height:56px;border-radius:8px;object-fit:cover;background:var(--chip)}
+.name{font-weight:600;overflow-wrap:anywhere}
+.sub{color:var(--muted);font-size:.85rem}
+.price{text-align:right;font-variant-numeric:tabular-nums}
+.price b{font-size:1.1rem;display:block}
+.price s{color:var(--muted);font-size:.85rem}
+.price .off{color:var(--good);font-weight:600;font-size:.85rem}
+.badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.badge{font-size:.78rem;border-radius:6px;padding:2px 7px;background:var(--good-bg);color:var(--good);font-weight:600}
+.badge.warn{background:var(--warn-bg);color:var(--warn)}
+.panel{padding:4px 12px 14px;border-top:1px solid var(--line)}
+dl{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 12px;margin:10px 0}
+dt{color:var(--muted);font-size:.8rem}
+dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.note{font-size:.88rem;color:var(--muted);margin:6px 0}
+.alert{background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 10px;font-size:.9rem;margin:8px 0}
+svg.chart{width:100%;height:auto;display:block}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .ax{fill:var(--muted);font-size:11px}
+.chart .base{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 4;fill:none}
+.chart .line{stroke:var(--accent);stroke-width:2.5;fill:none;stroke-linejoin:round}
+.chart .dot{fill:var(--good);stroke:var(--surface);stroke-width:2}
+.chart .cur{fill:var(--accent);stroke:var(--surface);stroke-width:2}
+.more{display:block;margin:14px auto 0;font:inherit;padding:10px 18px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.empty{padding:28px 8px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <h1>Fiyat geçmişi</h1>
+ <p id="meta">Veriler yükleniyor…</p>
+</header>
+<div class="tools">
+ <input id="q" type="search" placeholder="Oyun ara" autocomplete="off" aria-label="Oyun ara">
+ <select id="sort" aria-label="Sırala">
+  <option value="checked">Son kontrol</option>
+  <option value="discount">İndirim oranı</option>
+  <option value="priceAsc">Fiyat (artan)</option>
+  <option value="name">Ad</option>
+ </select>
+ <div class="chips" role="group" aria-label="Filtreler">
+  <button type="button" data-f="all" aria-pressed="true">Tümü</button>
+  <button type="button" data-f="sale" aria-pressed="false">İndirimde</button>
+  <button type="button" data-f="low" aria-pressed="false">Kayıtlı en düşük</button>
+  <button type="button" data-f="low30" aria-pressed="false">30 gün en düşük</button>
+  <button type="button" data-f="rise" aria-pressed="false">İndirim öncesi artış</button>
+ </div>
+</div>
+<ul id="list"></ul>
+<button class="more" id="more" hidden>Daha fazla göster</button>
+</div>
+<script>
+(function(){
+'use strict';
+var TRY=new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:2});
+var DF=new Intl.DateTimeFormat('tr-TR',{day:'numeric',month:'short',year:'numeric'});
+var items=[],hist={items:{}},today='',filter='all',shown=0,PAGE=40,view=[];
+var $=function(s){return document.querySelector(s)};
+var list=$('#list'),more=$('#more');
+function fmt(n){return Number.isFinite(n)?TRY.format(n):'–'}
+function fd(s){return DF.format(new Date(s+'T00:00:00'))}
+function norm(s){return String(s||'').toLocaleLowerCase('tr').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/ı/g,'i').replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim()}
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+function pj(u){return fetch(u,{cache:'no-cache'}).then(function(r){if(!r.ok)throw new Error(u+' '+r.status);return r.json()})}
+Promise.all([pj('data/ps-prices.json'),pj('data/ps-history.json').catch(function(){return {items:{}}})]).then(function(r){
+ items=(r[0].items||[]).filter(function(i){return i.platform==='playstation'&&Number.isFinite(i.price)});
+ items.forEach(function(i){i._n=norm(i.name)});
+ hist=r[1]||{items:{}};today=String(r[0].updatedAt||new Date().toISOString()).slice(0,10);
+ var since=hist.since?fd(hist.since):null;
+ $('#meta').textContent=items.length+' oyun · PlayStation Store TR'+(since?' · fiyat kaydı '+since+' tarihinde başladı':' · fiyat kaydı henüz başlamadı')+' · güncelleme '+fd(today);
+ render(true);
+}).catch(function(e){$('#meta').textContent='Veriler okunamadı. Sayfayı yenileyin; sorun sürerse veri dosyası henüz oluşmamış olabilir.';console.error(e)});
+function apply(){
+ var q=norm($('#q').value),s=$('#sort').value;
+ view=items.filter(function(i){
+  if(q&&i._n.indexOf(q)<0)return false;
+  if(filter==='sale')return i.originalPrice>i.price;
+  if(filter==='low')return i.historicalLow;
+  if(filter==='low30')return i.low30d;
+  if(filter==='rise')return !!i.priceRise;
+  return true;
+ });
+ view.sort(function(a,b){
+  if(s==='discount')return (b.discountPercent||0)-(a.discountPercent||0);
+  if(s==='priceAsc')return a.price-b.price;
+  if(s==='name')return a.name.localeCompare(b.name,'tr');
+  return String(b.checkedAt||'').localeCompare(String(a.checkedAt||''));
+ });
+}
+function render(reset){
+ if(reset){apply();shown=Math.min(PAGE,view.length);list.textContent=''}
+ for(var k=list.children.length;k<shown;k++)list.appendChild(row(view[k]));
+ if(!view.length){var e=el('li','empty',emptyText());list.appendChild(e)}
+ more.hidden=shown>=view.length;
+}
+function emptyText(){
+ if(filter==='low'||filter==='low30'||filter==='rise')return 'Bu filtreye uyan oyun yok. Fiyat kaydı yeni başladığı için rozetler birkaç gün içinde dolmaya başlar.';
+ return 'Aramaya uyan oyun bulunamadı.';
+}
+function badges(i){
+ var b=el('div','badges');
+ if(i.historicalLow)b.appendChild(el('span','badge','Kayıtlı en düşük fiyat'));
+ else if(i.low30d)b.appendChild(el('span','badge','Son 30 günün en düşüğü'));
+ if(i.priceRise)b.appendChild(el('span','badge warn','İndirim öncesi fiyat artırılmış'));
+ return b.children.length?b:null;
+}
+function row(i){
+ var li=el('li');
+ var btn=el('button','row');btn.type='button';btn.setAttribute('aria-expanded','false');
+ var img;if(i.image){img=el('img');img.src=i.image;img.alt='';img.loading='lazy';img.width=56;img.height=56}else img=el('div','ph');
+ var info=el('div');info.appendChild(el('div','name',i.name));info.appendChild(el('div','sub',i.edition||''));
+ var bd=badges(i);if(bd)info.appendChild(bd);
+ var pr=el('div','price');pr.appendChild(el('b',null,fmt(i.price)));
+ if(i.originalPrice>i.price){pr.appendChild(el('s',null,fmt(i.originalPrice)));pr.appendChild(el('span','off',' −%'+(i.discountPercent||Math.round((1-i.price/i.originalPrice)*100))))}
+ btn.appendChild(img);btn.appendChild(info);btn.appendChild(pr);li.appendChild(btn);
+ var panel=null;
+ btn.addEventListener('click',function(){
+  var open=btn.getAttribute('aria-expanded')==='true';
+  btn.setAttribute('aria-expanded',String(!open));
+  if(open){if(panel)panel.hidden=true;return}
+  if(!panel){panel=detail(i);li.appendChild(panel)}panel.hidden=false;
+ });
+ return li;
+}
+function detail(i){
+ var p=el('div','panel'),h=hist.items&&hist.items[i.id],pts=h&&h.p||[];
+ if(i.priceRise){var r=i.priceRise;p.appendChild(el('div','alert','İndirimden önce indirimsiz fiyat '+fmt(r.from)+' → '+fmt(r.to)+' (%'+r.pct+') yükselmiş; artış '+fd(r.changedAt)+' civarında kaydedildi, indirim '+fd(r.saleStart)+' tarihinde başladı. Gerçek tasarruf göründüğünden az olabilir.'))}
+ var dl=el('dl');
+ function kv(k,v){var d=el('div');d.appendChild(el('dt',null,k));d.appendChild(el('dd',null,v));dl.appendChild(d)}
+ kv('Şimdiki fiyat',fmt(i.price));
+ kv('İndirimsiz fiyat',i.originalPrice>i.price?fmt(i.originalPrice):fmt(i.price));
+ kv('Son 30 gün en düşük',Number.isFinite(i.lowest30d)?fmt(i.lowest30d):'Kayıt yok');
+ kv('Kayıtlı en düşük',Number.isFinite(i.lowestEver)?fmt(i.lowestEver):'Kayıt yok');
+ p.appendChild(dl);
+ if(pts.length>=2){p.appendChild(chart(pts,i))}
+ else p.appendChild(el('p','note','Bu oyunun fiyat kaydı '+(pts.length?fd(pts[0][0]):'bugün')+' tarihinde başladı. Fiyat değiştikçe grafik dolacak.'));
+ var d=Number.isFinite(i.historyDays)?i.historyDays:0;
+ p.appendChild(el('p','note','Kayıt süresi: '+d+' gün. “Kayıtlı en düşük” yalnızca bu radarın gördüğü fiyatlara göre hesaplanır, mağazanın tüm geçmişini göstermez.'));
+ var a=el('a','note','PlayStation Store’da aç');a.href=i.url;a.target='_blank';a.rel='noreferrer';p.appendChild(a);
+ return p;
+}
+function chart(pts,it){
+ var W=600,H=240,L=58,R=14,T=14,B=30,NS='http://www.w3.org/2000/svg';
+ var t0=Date.parse(pts[0][0]),t1=Math.max(Date.parse(today),Date.parse(pts[pts.length-1][0]));if(t1<=t0)t1=t0+864e5;
+ var vals=[];pts.forEach(function(x){vals.push(x[1],x[2])});
+ var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);if(hi===lo){hi=lo*1.05+1;lo=Math.max(0,lo*0.95)}
+ var pad=(hi-lo)*.08;lo=Math.max(0,lo-pad);hi=hi+pad;
+ function X(t){return L+(t-t0)/(t1-t0)*(W-L-R)}
+ function Y(v){return T+(1-(v-lo)/(hi-lo))*(H-T-B)}
+ function mk(n,a){var e=document.createElementNS(NS,n);for(var k in a)e.setAttribute(k,a[k]);return e}
+ var svg=mk('svg',{viewBox:'0 0 '+W+' '+H,class:'chart',role:'img','aria-label':'Fiyat geçmişi grafiği: '+it.name});
+ for(var g=0;g<4;g++){var v=lo+(hi-lo)*g/3,y=Y(v);svg.appendChild(mk('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));var tx=mk('text',{x:L-6,y:y+4,'text-anchor':'end',class:'ax'});tx.textContent=Math.round(v).toLocaleString('tr-TR');svg.appendChild(tx)}
+ function step(idx){var d='';pts.forEach(function(x,k){var xs=X(Date.parse(x[0])),ys=Y(x[idx]);d+=(k?'L':'M')+xs.toFixed(1)+' '+(k?Y(pts[k-1][idx]).toFixed(1):ys.toFixed(1))+(k?' L'+xs.toFixed(1)+' '+ys.toFixed(1):'')});d+=' L'+X(t1).toFixed(1)+' '+Y(pts[pts.length-1][idx]).toFixed(1);return d}
+ var diff=pts.some(function(x){return x[2]!==x[1]});
+ if(diff)svg.appendChild(mk('path',{d:step(2),class:'base'}));
+ svg.appendChild(mk('path',{d:step(1),class:'line'}));
+ var mn=pts.reduce(function(a,x){return x[1]<a[1]?x:a},pts[0]);
+ svg.appendChild(mk('circle',{cx:X(Date.parse(mn[0])),cy:Y(mn[1]),r:5,class:'dot'}));
+ svg.appendChild(mk('circle',{cx:X(t1),cy:Y(pts[pts.length-1][1]),r:5,class:'cur'}));
+ var a=mk('text',{x:L,y:H-8,class:'ax'});a.textContent=fd(pts[0][0]);svg.appendChild(a);
+ var b=mk('text',{x:W-R,y:H-8,'text-anchor':'end',class:'ax'});b.textContent=fd(new Date(t1).toISOString().slice(0,10));svg.appendChild(b);
+ var wrap=el('div');wrap.appendChild(svg);
+ wrap.appendChild(el('p','note','Mavi çizgi fiyat; kesikli çizgi indirimsiz fiyat. Yeşil nokta kayıtlı en düşük fiyat ('+fmt(mn[1])+', '+fd(mn[0])+').'));
+ return wrap;
+}
+$('#q').addEventListener('input',function(){render(true)});
+$('#sort').addEventListener('change',function(){render(true)});
+document.querySelectorAll('.chips button').forEach(function(b){b.addEventListener('click',function(){
+ filter=b.dataset.f;document.querySelectorAll('.chips button').forEach(function(x){x.setAttribute('aria-pressed',String(x===b))});render(true)})});
+more.addEventListener('click',function(){shown=Math.min(shown+PAGE,view.length);render(false)});
+})();
+</script>
+</body>
+</html>
