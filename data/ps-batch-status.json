@@ -1,10 +1,21 @@
 {
-  "startedAt": "2026-10-22T18:12:22.060Z",
-  "finishedAt": "2026-10-22T18:12:26.306Z",
-  "status": "partial",
-  "refreshed": 4,
-  "added": 0,
-  "total": 207,
-  "pages": [],
+  "startedAt": "2026-10-22T20:50:20.306Z",
+  "finishedAt": "2026-10-22T20:50:35.544Z",
+  "status": "ok",
+  "refreshed": 204,
+  "added": 200,
+  "total": 366,
+  "pages": [
+    {
+      "kind": "discounts",
+      "page": 1,
+      "products": 100
+    },
+    {
+      "kind": "newest",
+      "page": 1,
+      "products": 100
+    }
+  ],
   "intervalMinutes": 15
 }
