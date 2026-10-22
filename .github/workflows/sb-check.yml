@@ -1,0 +1,30 @@
+name: Supabase check
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data
+          cat > /tmp/p.py <<'PYEOF'
+          import json,urllib.request,urllib.parse
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+          H="9845afc0dbaab4965f6563fffc703f588c8e76792000e8610843b8d3ee9c4c09"
+          var={"id":"3f772501-f6f8-49b7-abac-874a88ca4897","pageArgs":{"size":100,"offset":0},"sortBy":None,"filterBy":[],"facetOptions":[]}
+          q=urllib.parse.urlencode({"operationName":"categoryGridRetrieve","variables":json.dumps(var,separators=(",",":")),"extensions":json.dumps({"persistedQuery":{"version":1,"sha256Hash":H}},separators=(",",":"))})
+          r=urllib.request.urlopen(urllib.request.Request("https://web.np.playstation.com/api/graphql/v1/op?"+q,headers={"User-Agent":UA,"x-psn-store-locale-override":"tr-TR","Accept":"application/json","content-type":"application/json","x-apollo-operation-name":"categoryGridRetrieve","apollo-require-preflight":"true","Origin":"https://store.playstation.com","Referer":"https://store.playstation.com/"}),timeout=30)
+          ps=json.load(r)["data"]["categoryGridRetrieve"]["products"]
+          n=0
+          for p in ps:
+              pr=p.get("price") or {}
+              base=pr.get("basePriceValue");d=pr.get("discountedValue")
+              if base and d and d<base*0.2 and n<4:
+                  n+=1;print("KEYS",sorted(p.keys())[:30]);print("NAME",p["name"],p.get("storeDisplayClassification"),"|",json.dumps({k:v for k,v in pr.items()},ensure_ascii=False))
+          print("toplam",len(ps),"%80+ indirimli",sum(1 for p in ps if (p.get("price") or {}).get("basePriceValue") and (p["price"].get("discountedValue") or 0)<p["price"]["basePriceValue"]*0.2))
+          PYEOF
+          python3 /tmp/p.py > data/sb-check3.txt 2>&1 || true
+          git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
+          git add data/sb-check3.txt; git commit -qm 'check [skip ci]'; git pull --rebase -q origin main; git push
