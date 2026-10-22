@@ -1,0 +1,4 @@
+ID EP4062-PPSA03797_00-OUTWARDDEFEU0000 572371
+final ['79,95\xa0TL', '79,95\xa0TL', '69,95\xa0TL'] orig [] ld ['"offers":{"@type":"Offer","price":79.95,"priceCurrency":"TRY"}']
+ID EP4062-CUSA10853_00-OTWADVBUNDLEEU00 556816
+final ['69,95\xa0TL', '79,95\xa0TL', '69,95\xa0TL'] orig [] ld ['"offers":{"@type":"Offer","price":69.95,"priceCurrency":"TRY"}']
