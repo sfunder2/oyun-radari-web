@@ -1,10 +1,10 @@
 name: Update PlayStation prices
 on:
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
   push:
-    paths: ['ps-links.json']
+    paths: ['ps-links.json', 'scripts/update-ps-catalog.mjs', 'scripts/ps-catalog-parser.mjs', 'scripts/batch-state.mjs', '.github/workflows/update-ps-prices.yml']
 permissions:
   contents: write
 concurrency:
@@ -13,15 +13,21 @@ concurrency:
 jobs:
   prices:
     runs-on: ubuntu-latest
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node scripts/update-ps-catalog.mjs
+      - name: Refresh prices and discover games
+        run: node scripts/update-ps-catalog.mjs
+      - name: Batch report
+        if: always()
+        run: cat data/ps-batch-summary.md >> "$GITHUB_STEP_SUMMARY"
       - name: Save price index
+        if: always()
         run: |
           git config user.name 'price-bot'
           git config user.email 'price-bot@users.noreply.github.com'
-          git add data/ps-index.json data/ps-prices.json
-          git diff --staged --quiet || (git commit -m 'Update PlayStation price index' && git push)
+          git add data/ps-index.json data/ps-prices.json data/ps-batch-status.json
+          git diff --staged --quiet || (git commit -m 'Refresh PS prices and discover games [skip ci]' && git push)

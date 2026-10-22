@@ -10,9 +10,13 @@ export function parsePSCatalog(html,page=0){
   if(/demo|trial|add.on|DLC/i.test(type))continue;
   // The schema price may be the PS Plus price. Read only the regular offer span.
   const regular=body.match(/<span\b[^>]*class="game-collection-item-price(?:\s[^"]*)?"[^>]*>([\s\S]*?)<\/span>/)?.[1];
-  const price=parseTRY(regular),image=decode(body.match(/<img[^>]*itemprop="image"[^>]*content="([^"]+)"/)?.[1]||body.match(/<img[^>]*itemprop="image"[^>]*data-src="([^"]+)"/)?.[1]);
+  const basePrice=parseTRY(regular),salePrice=parseTRY(body.match(/<span\b[^>]*class="game-collection-item-price-discount"[^>]*>([\s\S]*?)<\/span>/)?.[1]);
+  const onSale=salePrice!==null&&basePrice!==null&&salePrice<basePrice;
+  const price=onSale?salePrice:basePrice,originalPrice=onSale?basePrice:null,discountPercent=onSale?Math.round((1-price/basePrice)*100):0;
+  const discountEndsAt=onSale?body.match(/itemprop="priceValidUntil"[^>]*>([\s\S]*?)<\/span>/)?.[1]?.trim()||null:null;
+  const image=decode(body.match(/<img[^>]*itemprop="image"[^>]*content="([^"]+)"/)?.[1]||body.match(/<img[^>]*itemprop="image"[^>]*data-src="([^"]+)"/)?.[1]);
   const console=text(body.match(/class="game-collection-item-top-platform"[^>]*>([\s\S]*?)<\/span>/)?.[1]);
-  items.push({id:'playstation:psdeals:'+m[2],providerId:m[2],storeId:m[2],platform:'playstation',name,image,price,currency:price===null?null:'TRY',region:'TR',edition:console+' · '+type,url:origin+decode(m[1]),source:origin+decode(m[1]),sourceKind:'psdeals',sourceLabel:'PS Deals · TR',checkedAt:new Date().toISOString(),purchaseEligible:!!regular&&price!==null});
+  items.push({id:'playstation:psdeals:'+m[2],providerId:m[2],storeId:m[2],platform:'playstation',name,image,price,originalPrice,discountPercent,discountEndsAt,currency:price===null?null:'TRY',region:'TR',edition:console+' · '+type,url:origin+decode(m[1]),source:origin+decode(m[1]),sourceKind:'psdeals',sourceLabel:'PS Deals · TR',checkedAt:new Date().toISOString(),purchaseEligible:!!regular&&price!==null});
  }
  const count=html.match(/We found\s+([\d,.\s]+)\s+results/i)?.[1];
  const hasMore=/<li\b[^>]*class="next"/.test(html);if(!/class="game-collection-item-link"/.test(html)&&!/We found\s+0\s+results|No results|No games found/i.test(html))throw new Error('PlayStation fiyat kataloğu okunamadı');
