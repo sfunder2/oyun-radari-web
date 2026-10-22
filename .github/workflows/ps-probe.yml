@@ -11,24 +11,17 @@ jobs:
         run: |
           mkdir -p data
           cat > /tmp/probe.py <<'PYEOF'
-          import re,json,urllib.request,urllib.parse
+          import json,urllib.request,urllib.parse
           UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'
-          u='https://store.playstation.com/tr-tr/product/EP4484-PPSA03711_00-3235764131417729'
-          s=urllib.request.urlopen(urllib.request.Request(u,headers={'User-Agent':UA,'Accept-Language':'tr-TR,tr;q=0.9'}),timeout=30).read().decode('utf-8','replace')
-          print('HTML len',len(s))
-          for pat in ['finalPrice','originalPrice','application/ld\\+json','"price"','offers','TL<','basePrice']:
-              ms=[m.start() for m in re.finditer(pat,s)]
-              print('PAT',pat,len(ms))
-              for i in ms[:2]: print('   ...',s[max(0,i-150):i+250].replace(chr(10),' '))
-          # GraphQL category grid
           H='9845afc0dbaab4965f6563fffc703f588c8e76792000e8610843b8d3ee9c4c09'
-          var={'id':'3f772501-f6f8-49b7-abac-874a88ca4897','pageArgs':{'size':5,'offset':0},'sortBy':None,'filterBy':[],'facetOptions':[]}
-          q=urllib.parse.urlencode({'operationName':'categoryGridRetrieve','variables':json.dumps(var,separators=(',',':')),'extensions':json.dumps({'persistedQuery':{'version':1,'sha256Hash':H}},separators=(',',':'))})
-          try:
-              r=urllib.request.urlopen(urllib.request.Request('https://web.np.playstation.com/api/graphql/v1/op?'+q,headers={'User-Agent':UA,'x-psn-store-locale-override':'tr-TR','Accept':'application/json','Origin':'https://store.playstation.com','Referer':'https://store.playstation.com/'}),timeout=30)
-              t=r.read().decode(); print('GQL http',r.status,len(t)); print(t[:2500])
-          except Exception as e:
-              print('GQL ERR',e, getattr(e,'read',lambda:b'')()[:500])
+          for cat in ['3f772501-f6f8-49b7-abac-874a88ca4897','44d8bb20-653e-431e-8ad0-c0a365f68d2f']:
+              var={'id':cat,'pageArgs':{'size':4,'offset':0},'sortBy':None,'filterBy':[],'facetOptions':[]}
+              q=urllib.parse.urlencode({'operationName':'categoryGridRetrieve','variables':json.dumps(var,separators=(',',':')),'extensions':json.dumps({'persistedQuery':{'version':1,'sha256Hash':H}},separators=(',',':'))})
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request('https://web.np.playstation.com/api/graphql/v1/op?'+q,headers={'User-Agent':UA,'x-psn-store-locale-override':'tr-TR','Accept':'application/json','content-type':'application/json','x-apollo-operation-name':'categoryGridRetrieve','apollo-require-preflight':'true','Origin':'https://store.playstation.com','Referer':'https://store.playstation.com/'}),timeout=30)
+                  t=r.read().decode(); print('GQL',cat,'http',r.status,len(t)); print(t[:1800])
+              except Exception as e:
+                  print('GQL ERR',cat,e, getattr(e,'read',lambda:b'')()[:400])
           PYEOF
           python3 /tmp/probe.py > data/ps-probe.txt 2>&1 || true
           git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
