@@ -1,12 +1,16 @@
 === https://store.playstation.com/tr-tr/product/EP4484-PPSA03711_00-3235764131417729
 http 200 size 350951
-price objects 0 []
-products 1
+top ['props', 'page', 'query', 'buildId', 'runtimeConfig', 'isFallback', 'isExperimentalCompile', 'appGip', 'scriptLoader'] props ['pageProps', 'appProps', 'navTree', 'apolloState'] apollo 9
+Counter({'EMSNavItem': 5, 'EMSNavTree': 1, 'EMSExperience': 1, 'ROOT_QUERY': 1, 'Product': 1})
+PRODUCT Product:EP4484-PPSA03711_00-3235764131417729:tr-tr {"__typename": "Product", "isSearchableOnStore": true, "id": "EP4484-PPSA03711_00-3235764131417729", "name": "Hades"}
+ROOT_QUERY keys ['__typename', 'emsExperienceRetrieve({"clientId":"b6de8d4d-bf9b-11ee-ad2a-aea73dc1ea43"})', 'productRetrieve({"productId":"EP4484-PPSA03711_00-3235764131417729"})']
 === https://store.playstation.com/tr-tr/pages/deals
 http 200 size 72419
-price objects 0 []
-products 0
+top ['props', 'page', 'query', 'buildId', 'runtimeConfig', 'isFallback', 'isExperimentalCompile', 'appGip', 'scriptLoader'] props ['pageProps', 'appProps', 'navTree', 'apolloState'] apollo 8
+Counter({'EMSNavItem': 5, 'EMSNavTree': 1, 'EMSExperience': 1, 'ROOT_QUERY': 1})
+ROOT_QUERY keys ['__typename', 'emsExperienceRetrieve({"clientId":"b6de8d4d-bf9b-11ee-ad2a-aea73dc1ea43"})']
 === https://store.playstation.com/tr-tr/category/3f772501-f6f8-49b7-abac-874a88ca4897/1
 http 200 size 73704
-price objects 0 []
-products 0
+top ['props', 'page', 'query', 'buildId', 'runtimeConfig', 'isFallback', 'isExperimentalCompile', 'appGip', 'scriptLoader'] props ['pageProps', 'appProps', 'navTree', 'apolloState'] apollo 8
+Counter({'EMSNavItem': 5, 'EMSNavTree': 1, 'EMSExperience': 1, 'ROOT_QUERY': 1})
+ROOT_QUERY keys ['__typename', 'emsExperienceRetrieve({"clientId":"b6de8d4d-bf9b-11ee-ad2a-aea73dc1ea43"})']
