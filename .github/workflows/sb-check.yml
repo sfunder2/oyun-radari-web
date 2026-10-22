@@ -1,0 +1,31 @@
+name: Supabase check
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data
+          cat > /tmp/p.py <<'PYEOF'
+          import json,urllib.request,urllib.parse
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+          H="9845afc0dbaab4965f6563fffc703f588c8e76792000e8610843b8d3ee9c4c09"
+          var={"id":"44d8bb20-653e-431e-8ad0-c0a365f68d2f","pageArgs":{"size":6,"offset":0},"sortBy":None,"filterBy":[],"facetOptions":[]}
+          q=urllib.parse.urlencode({"operationName":"categoryGridRetrieve","variables":json.dumps(var,separators=(",",":")),"extensions":json.dumps({"persistedQuery":{"version":1,"sha256Hash":H}},separators=(",",":"))})
+          r=urllib.request.urlopen(urllib.request.Request("https://web.np.playstation.com/api/graphql/v1/op?"+q,headers={"User-Agent":UA,"x-psn-store-locale-override":"tr-TR","Accept":"application/json","content-type":"application/json","x-apollo-operation-name":"categoryGridRetrieve","apollo-require-preflight":"true","Origin":"https://store.playstation.com","Referer":"https://store.playstation.com/"}),timeout=30)
+          ps=json.load(r)["data"]["categoryGridRetrieve"]["products"]
+          p=ps[0];print("ROLES",[(m["role"],m["type"]) for m in p["media"]])
+          img=[m for m in p["media"] if m["role"]=="BACKGROUND" and m["type"]=="IMAGE"] or [m for m in p["media"] if m["role"]=="MASTER"] or [m for m in p["media"] if m["role"]=="GAMEHUB_COVER_ART"]
+          u=img[0]["url"];print("IMG",u)
+          for label,url in (("orig",u),("w1280",u+"?w=1280"),("w480",u+"?w=480")):
+              try:
+                  rr=urllib.request.urlopen(urllib.request.Request(url,headers={"User-Agent":UA,"Origin":"https://sfunder2.github.io"}),timeout=30);b=rr.read()
+                  print("CORS",label,rr.status,len(b),"ACAO=",rr.headers.get("access-control-allow-origin"),rr.headers.get("content-type"))
+              except Exception as e:print("CORS",label,"ERR",str(e)[:80])
+          PYEOF
+          python3 /tmp/p.py > data/sb-check9.txt 2>&1 || true
+          git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
+          git add data/sb-check9.txt; git commit -qm 'check [skip ci]'; git pull --rebase -q origin main; git push
