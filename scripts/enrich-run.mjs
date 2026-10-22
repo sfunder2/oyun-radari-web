@@ -2,6 +2,7 @@ import {supabase} from './supabase.mjs';
 import {enrichProduct} from './enrich.mjs';
 import {parseOcSitemap} from './stores.mjs';
 import {titleKey} from './titles.mjs';
+import {fetchUpcoming,fetchDetails} from './steam-meta.mjs';
 import {appendFile} from 'node:fs/promises';
 const {SUPABASE_URL,SUPABASE_SERVICE_KEY}=process.env;
 if(!SUPABASE_URL||!SUPABASE_SERVICE_KEY){console.error('SUPABASE_URL ve SUPABASE_SERVICE_KEY gerekli');process.exit(2)}
@@ -22,16 +23,18 @@ async function buildOcIndex(){
  say(`OpenCritic dizini: ${rows.size} oyun`);
 }
 await buildOcIndex();
+let hasMeta=true;
+try{await sb.select('game_meta?select=title_key&limit=1');await sb.select('upcoming_games?select=id&limit=1');}catch(e){if(/404|PGRST205/.test(e.message)){hasMeta=false;console.log('supabase/schema-v4.sql henüz çalıştırılmamış; tür/tarih/takvim verisi atlanıyor.');}else throw e;}
 // 2) OpenCritic dizinini belleğe al (title_key -> {id,slug}); aynı anahtarda en küçük id korunur
 const ocIndex=new Map();
 for(const r of await sb.selectAll('oc_index?select=id,slug,title_key&order=id',1000))if(!ocIndex.has(r.title_key))ocIndex.set(r.title_key,r);
 // 3) Sıradaki ürünler: hiç zenginleştirilmemiş olanlar önce (indirimliler en önde), sonra en eskiler
 const products=await sb.select(`ps_products?select=id,name,title_key&order=enriched_at.asc.nullsfirst,discount_percent.desc&limit=${BATCH}`);
-let offersN=0,scoresN=0,errN=0;const offers=[],scores=new Map(),done=[],now=new Date().toISOString();
+let offersN=0,scoresN=0,errN=0;const offers=[],scores=new Map(),metas=new Map(),done=[],now=new Date().toISOString();
 for(let i=0;i<products.length;i+=3){
  await Promise.all(products.slice(i,i+3).map(async p=>{
   const r=await enrichProduct(p,{ocIndex});done.push({id:p.id,key:r.key});
-  offers.push(...r.offers);if(r.scores)scores.set(r.key,r.scores);errN+=r.errors.length;
+  offers.push(...r.offers);if(r.scores)scores.set(r.key,r.scores);if(r.meta)metas.set(r.key,r.meta);errN+=r.errors.length;
   if(r.errors.length)console.log(p.name,'->',r.errors.join(' | '));
  }));
  await sleep(500);
@@ -40,10 +43,32 @@ for(let i=0;i<products.length;i+=3){
 const uniq=new Map(offers.map(o=>[o.platform+':'+o.store_id,o]));
 await sb.upsert('store_offers',[...uniq.values()],'platform,store_id');
 await sb.upsert('game_scores',[...scores.values()],'title_key');
+if(hasMeta&&metas.size)await sb.upsert('game_meta',[...metas.values()],'title_key');
 const missing=new Map(products.filter(p=>!p.title_key).map(p=>[p.id,true]));
 for(let i=0;i<done.length;i+=50){const chunk=done.slice(i,i+50);
  await sb.patch(`ps_products?id=in.(${chunk.map(c=>`"${c.id}"`).join(',')})`,{enriched_at:now});
  for(const c of chunk)if(c.key&&missing.has(c.id))await sb.patch(`ps_products?id=eq.${encodeURIComponent(c.id)}`,{title_key:c.key});}
 offersN=uniq.size;scoresN=scores.size;
+// Daha önce zenginleştirilmiş Steam eşleşmeleri için eksik ayrıntıları tamamla (her turda en çok 40)
+if(hasMeta){
+ try{
+  const st=await sb.select('store_offers?select=title_key,store_id&platform=eq.steam&order=checked_at.desc&limit=300');
+  const list=st.filter(o=>o.title_key).map(o=>`"${o.title_key}"`).join(',');
+  const have=new Set(list?(await sb.selectAll(`game_meta?select=title_key&title_key=in.(${list})`)).map(r=>r.title_key):[]);
+  const todo=st.filter(o=>!have.has(o.title_key)&&!metas.has(o.title_key)).slice(0,40),got=[];
+  for(const o of todo){try{const m=await fetchDetails(o.store_id,o.title_key);if(m)got.push(m);}catch(e){console.log('ayrıntı hatası',o.store_id,e.message);}await sleep(500);}
+  if(got.length)await sb.upsert('game_meta',got,'title_key');
+  say(`Ayrıntı tamamlama: ${got.length}/${todo.length}`);
+ }catch(e){say('Ayrıntı tamamlama atlandı: '+e.message.slice(0,120));}
+ // Yaklaşan oyunlar: günde bir
+ try{
+  const last=(await sb.select('ps_state?select=value&key=eq.upcoming'))?.[0]?.value?.at;
+  if(!last||Date.now()-Date.parse(last)>20*3600e3){
+   const ups=await fetchUpcoming(3);await sb.upsert('upcoming_games',ups,'id');
+   const today=new Date(Date.now()+3*3600e3).toISOString().slice(0,10);await sb.del(`upcoming_games?release_date=lt.${today}`);
+   await sb.upsert('ps_state',[{key:'upcoming',value:{at:new Date().toISOString(),count:ups.length}}],'key');say(`Yaklaşan oyunlar: ${ups.length}`);
+  }
+ }catch(e){say('Yaklaşan oyunlar atlandı: '+e.message.slice(0,120));}
+}
 say(`Ürün: ${products.length} · mağaza teklifi: ${offersN} · puan kaydı: ${scoresN} · kaynak hatası: ${errN}`);
 if(process.env.GITHUB_STEP_SUMMARY)await appendFile(process.env.GITHUB_STEP_SUMMARY,'### Zenginleştirme\n\n'+log.map(l=>'- '+l).join('\n')+'\n');
