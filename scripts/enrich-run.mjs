@@ -2,7 +2,8 @@ import {supabase} from './supabase.mjs';
 import {enrichProduct} from './enrich.mjs';
 import {parseOcSitemap} from './stores.mjs';
 import {titleKey} from './titles.mjs';
-import {fetchUpcoming,fetchDetails} from './steam-meta.mjs';
+import {fetchUpcoming,fetchDetails,fetchNews} from './steam-meta.mjs';
+import {fetchAllNews} from './news.mjs';
 import {appendFile} from 'node:fs/promises';
 const {SUPABASE_URL,SUPABASE_SERVICE_KEY}=process.env;
 if(!SUPABASE_URL||!SUPABASE_SERVICE_KEY){console.error('SUPABASE_URL ve SUPABASE_SERVICE_KEY gerekli');process.exit(2)}
@@ -55,11 +56,25 @@ if(hasMeta){
   const st=await sb.select('store_offers?select=title_key,store_id&platform=eq.steam&order=checked_at.desc&limit=300');
   const list=st.filter(o=>o.title_key).map(o=>`"${o.title_key}"`).join(',');
   const have=new Set(list?(await sb.selectAll(`game_meta?select=title_key&title_key=in.(${list})`)).map(r=>r.title_key):[]);
-  const todo=st.filter(o=>!have.has(o.title_key)&&!metas.has(o.title_key)).slice(0,40),got=[];
-  for(const o of todo){try{const m=await fetchDetails(o.store_id,o.title_key);if(m)got.push(m);}catch(e){console.log('ayrıntı hatası',o.store_id,e.message);}await sleep(500);}
+  const todo=st.filter(o=>!have.has(o.title_key)&&!metas.has(o.title_key)).slice(0,25),got=[];
+  try{ // v5: gereksinim/DLC/duyuru alanları boş olan mevcut kayıtları tamamla
+   const stale=await sb.select('game_meta?select=title_key,steam_appid&requirements=is.null&steam_appid=not.is.null&order=checked_at.asc&limit=25');
+   for(const m of stale)todo.push({title_key:m.title_key,store_id:String(m.steam_appid),refresh:true});
+  }catch(e){if(!/400|404|PGRST/.test(e.message))throw e;}
+  for(const o of todo){try{const m=await fetchDetails(o.store_id,o.title_key);if(m){try{const n=await fetchNews(o.store_id);if(n.length)m.news=n;}catch{}got.push(m);}}catch(e){console.log('ayrıntı hatası',o.store_id,e.message);}await sleep(500);}
   if(got.length)await sb.upsert('game_meta',got,'title_key');
   say(`Ayrıntı tamamlama: ${got.length}/${todo.length}`);
  }catch(e){say('Ayrıntı tamamlama atlandı: '+e.message.slice(0,120));}
+ // Haber şeridi: 3 saatte bir
+ try{
+  const last=(await sb.select('ps_state?select=value&key=eq.news'))?.[0]?.value?.at;
+  if(!last||Date.now()-Date.parse(last)>3*3600e3){
+   const {items,errors}=await fetchAllNews();
+   if(items.length){await sb.upsert('news_items',items.map(i=>({...i,checked_at:new Date().toISOString()})),'url');await sb.del(`news_items?published_at=lt.${new Date(Date.now()-10*864e5).toISOString()}`);
+    await sb.upsert('ps_state',[{key:'news',value:{at:new Date().toISOString(),count:items.length}}],'key');}
+   say(`Haberler: ${items.length}${errors.length?' · hata: '+errors.join('; '):''}`);
+  }
+ }catch(e){say('Haberler atlandı: '+e.message.slice(0,120));}
  // Yaklaşan oyunlar: günde bir
  try{
   const last=(await sb.select('ps_state?select=value&key=eq.upcoming'))?.[0]?.value?.at;
