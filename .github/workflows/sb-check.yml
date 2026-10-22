@@ -1,0 +1,32 @@
+name: Supabase check
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data
+          cat > /tmp/p.py <<'PYEOF'
+          import json,urllib.request,urllib.parse,re
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+          def get(u):
+              r=urllib.request.urlopen(urllib.request.Request(u,headers={"User-Agent":UA}),timeout=30);return r.read().decode("utf-8","replace")
+          t=get("https://store.steampowered.com/search/results/?query&start=0&count=50&filter=popularcomingsoon&cc=tr&l=english&infinite=1")
+          j=json.loads(t);h=j["results_html"];print("UPCOMING total",j.get("total_count"),"len",len(h))
+          rows=re.findall(r'<a[^>]*data-ds-appid="(\d+)"[^>]*>(.*?)</a>',h,re.S)
+          print("rows",len(rows))
+          for aid,body in rows[:6]:
+              name=re.search(r'class="title">(.*?)</span>',body,re.S);rel=re.search(r'search_released[^>]*>(.*?)</div>',body,re.S)
+              print("ROW",aid,name.group(1).strip() if name else None,"|",rel.group(1).strip() if rel else None)
+          d=json.loads(get("https://store.steampowered.com/api/appdetails?appids=1145360&cc=tr&l=english"))["1145360"]["data"]
+          print("DETAILS keys",sorted(d.keys()))
+          print("genres",d.get("genres"),"release",d.get("release_date"),"age",d.get("required_age"),"ratings",json.dumps(d.get("ratings"))[:300])
+          print("devs",d.get("developers"),d.get("publishers"));print("langs",d.get("supported_languages")[:200])
+          print("cats",[c["description"] for c in d.get("categories",[])][:12])
+          PYEOF
+          python3 /tmp/p.py > data/sb-check5.txt 2>&1 || true
+          git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
+          git add data/sb-check5.txt; git commit -qm 'check [skip ci]'; git pull --rebase -q origin main; git push
