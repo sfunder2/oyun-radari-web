@@ -44,7 +44,7 @@ begin
   from public.library l join public.ps_products p using(id)
   where (not deals_only or l.discount_percent>0 and l.price<l.original_price)
    and (coalesce(opts->>'platform','')='' or l.edition ilike '%'||(opts->>'platform')||'%')
-   and (nullif(opts->>'minScore','') is null or l.best_score>=(opts->>'minScore')::numeric)
+   and (coalesce(nullif(opts->>'minScore','')::numeric,0)<=0 or l.best_score>=(opts->>'minScore')::numeric)
    and (nullif(opts->>'maxPrice','') is null or l.price<=(opts->>'maxPrice')::numeric)
    and (coalesce(opts->>'genre','')='' or l.genres @> array[opts->>'genre'])
    and (coalesce(opts->>'developer','')='' or l.developers @> array[opts->>'developer'])
@@ -52,7 +52,7 @@ begin
    and (coalesce(opts->>'turkish','false')<>'true' or l.turkish is true)
  ), matched as (
   select b.*,case when q='' then 0 when b.title_key=q or b.searchable=q then 0
-   when b.searchable like q||'%' then 1 when b.searchable like '%'||q||'%' then 2 else 3 end as relevance,
+   when b.searchable like q||'%' then 1 when b.searchable like '%'||q||'%' then 2 when b.searchable like split_part(q,' ',1)||'%' then 3 else 4 end as relevance,
    case when q='' then true else not exists(select 1 from unnest(string_to_array(q,' ')) word where strpos(b.searchable,word)=0) end as token_match,
    public.word_similarity(q,b.searchable) as similarity_score
   from base b
