@@ -1,0 +1,9 @@
+STEAMNEWS 200 {"appnews":{"appid":1145360,"newsitems":[{"gid":"1835236783574995","title":"Watch the Hades Orchestral Concert, Live from London!","url":"https://steamstore-a.akamaihd.net/news/externalpost/steam_community_announcements/1835236783574995","is_external_url":true,"author":"kid_zomb","contents":"On June 27 at London's Royal Festival Hall, our composer 
+REQ {"minimum": "<strong>Minimum:</strong><br><ul class=\"bb_ul\"><li><strong>OS *:</strong> Windows 7 SP1<br></li><li><strong>Processor:</strong> Dual Core 2.4 GHz<br></li><li><strong>Memory:</strong> 4 GB RAM<br></li><li><strong>Graphics:</strong> 1GB VRAM / DirectX 10+ support<br></li><li><strong>Storage:</strong> 15 GB available space</li></ul>", "recommended": "<strong>Recommended:</strong><br><ul class=\"bb_ul\"><li><strong>OS *:</strong> Windows 7 SP1<br></li><li><strong>Processor:</strong> Dual Core 3.0 GHz+<br></li><li><strong>Memory:</strong> 8 GB RAM<br></li><li><strong>Graphics:</strong> 2GB VRAM / DirectX 10+ support<br></li><li><strong>Storage:</strong> 20 GB available space</li></
+DLC [1206340]
+RSS IGN 200 20 Cyberpunk 2 Associate Director Says Half of Game's Quest Team Are Former Modders
+RSS GameSpot 200 30 After The BioWare Shutdown, Mass Effect Spiritual Successor Exodus Gets A New Lo
+RSS Eurogamer 200 100 Smash Bros. director Masahiro Sakurai thinks gen-AI will cause a surge of unorig
+RSS PCGamer 200 50 My GOTY is $7 and has 253 Steam reviews
+RSS RPS 200 100 A Line Held Tight is a charcoal visual novel about a miner's strike in the 32nd 
+RSS Polygon 200 10 'Mass Effect Universe' Leak Promised What Fans Have Waited Decades For
