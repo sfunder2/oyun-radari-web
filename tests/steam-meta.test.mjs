@@ -23,3 +23,20 @@ test('enrich returns Steam metadata next to offers',async()=>{
   return new Response('x',{status:500})};
  const r=await enrichProduct({id:'E',name:'Hades'},{f,now:'T'});assert.equal(r.meta.title_key,'hades');assert.deepEqual(r.meta.genres,['Aksiyon']);assert.equal(r.meta.turkish,true);
 });
+import {parseRequirements,parseNews} from '../scripts/steam-meta.mjs';
+import {parseRss} from '../scripts/news.mjs';
+test('system requirements parse into labelled rows',()=>{
+ const html='<strong>Minimum:</strong><br><ul class="bb_ul"><li><strong>OS *:</strong> Windows 7 SP1<br></li><li><strong>Processor:</strong> Dual Core 2.4 GHz<br></li><li><strong>Memory:</strong> 4 GB RAM<br></li><li><strong>Graphics:</strong> 1GB VRAM / DirectX 10+ support<br></li><li><strong>Storage:</strong> 15 GB available space</li></ul>';
+ assert.deepEqual(parseRequirements(html),[['İşletim sistemi','Windows 7 SP1'],['İşlemci','Dual Core 2.4 GHz'],['Bellek','4 GB RAM'],['Ekran kartı','1GB VRAM / DirectX 10+ support'],['Depolama','15 GB available space']]);
+ assert.deepEqual(parseRequirements(''),[]);
+ const d={type:'game',steam_appid:1,genres:[],release_date:{date:'1 Jan, 2020'},supported_languages:'',pc_requirements:{minimum:html,recommended:''},dlc:[1,2,3]};
+ const m=parseDetails(d,'x');assert.equal(m.requirements.min.length,5);assert.equal(m.dlc_count,3);assert.equal(parseDetails({...d,pc_requirements:[]},'x').requirements,null);
+});
+test('steam news: three titles with https links only',()=>{
+ const j={appnews:{newsitems:[{title:'Patch 1.2 &amp; fixes',url:'https://steamstore-a.akamaihd.net/n/1',date:1760000000,feedlabel:'Community Announcements'},{title:'Bad',url:'javascript:x',date:1},{title:'B',url:'https://x/2',date:1760000001},{title:'C',url:'https://x/3',date:1},{title:'D',url:'https://x/4',date:1}]}};
+ const n=parseNews(j);assert.equal(n.length,2);assert.equal(n[0].title,'Patch 1.2 & fixes');assert.equal(n[0].date,'2025-10-09');
+});
+test('rss parsing: CDATA titles, https links, dates, limit',()=>{
+ const xml='<rss><channel><item><title><![CDATA[Big &amp; News]]></title><link>https://ign.com/a</link><pubDate>Thu, 22 Oct 2026 20:00:00 GMT</pubDate></item><item><title>No link</title><link>http://insecure/x</link><pubDate>Thu, 22 Oct 2026 20:00:00 GMT</pubDate></item><item><title>Atom date</title><link>https://x/b</link><dc:date>2026-10-21T10:00:00Z</dc:date></item></channel></rss>';
+ const r=parseRss(xml,'IGN');assert.equal(r.length,2);assert.equal(r[0].title,'Big & News');assert.equal(r[0].published_at,'2026-10-22T20:00:00.000Z');assert.equal(r[1].url,'https://x/b');
+});
