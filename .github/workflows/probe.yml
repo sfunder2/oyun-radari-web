@@ -1,0 +1,29 @@
+name: probe
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data
+          cat > /tmp/p.py <<'PYEOF'
+          import json,urllib.request,urllib.parse,re
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+          def get(u,h=None):
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request(u,headers={"User-Agent":UA,**(h or {})}),timeout=25);return r.status,r.read().decode("utf-8","replace")
+              except urllib.error.HTTPError as e:return e.code,e.read().decode("utf-8","replace")[:200]
+              except Exception as e:return "ERR",str(e)[:150]
+          for u in ("https://opencritic.com/robots.txt","https://opencritic.com/sitemap.xml","https://opencritic.com/sitemap-games.xml"):
+              s,t=get(u);print("URL",u,s,len(t),t[:500].replace(chr(10)," "))
+          s,t=get("https://opencritic.com/game/10181/hades")
+          m=re.findall(r'<script[^>]*ld\+json[^>]*>(.*?)</script>',t,re.S);print("JSONLD count",len(m));print(m[0][:700] if m else "none")
+          s,t=get("https://www.metacritic.com/game/hades/")
+          m=re.findall(r'<script[^>]*ld\+json[^>]*>(.*?)</script>',t,re.S);print("MC JSONLD",len(m));print(m[0][:600] if m else "none")
+          PYEOF
+          python3 /tmp/p.py > data/probe6.txt 2>&1 || true
+          git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
+          git add data/probe6.txt; git commit -qm 'probe [skip ci]'; git pull --rebase -q origin main; git push
