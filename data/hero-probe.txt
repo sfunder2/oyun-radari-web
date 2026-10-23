@@ -1,0 +1,5 @@
+GORSEL katı (select=*) (400, 1.18, '{"code":"42703","details":null,"hint":null,"message":"column library.hero_url does not exist"}')
+GORSEL gevşek (select=*) (400, 0.71, '{"code":"42703","details":null,"hint":null,"message":"column library.hero_url does not exist"}')
+GORSEL katı (az sütun) (400, 0.32, '{"code":"42703","details":null,"hint":null,"message":"column library.hero_url does not exist"}')
+GORSEL ps_products hero (200, 0.8, 5)
+GORSEL puanlı sayı (200, 0.3, 1)
