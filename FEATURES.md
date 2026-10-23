@@ -120,7 +120,7 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 ## Dağıtım ve doğrulama
 
 - Kaynak: `sfunder2/oyun-radari`, yayın ve toplayıcılar: `sfunder2/oyun-radari-web`.
-- PS fiyat zamanlayıcısı ve dağıtılmış kilidi korunur. Tüm katalog aynı 15 dakikalık turda yenilenmez.
+- PS fiyat zamanlayıcısı ve dağıtılmış kilidi korunur. Tüm katalog aynı 5 dakikalık turda yenilenmez.
 - Topluluk yazıları Supabase Auth oturumu ve sahiplik RLS politikalarıyla korunur. E-posta sağlayıcısının doğrulama ve gönderim koşulları geçerlidir.
 - Yorum ve oy için gerçek kullanıcı girişi gerekir. Test hesabı, sahte inceleme, sahte oy veya sahte takipçi üretim verisine eklenmez.
 - `tests/experience-rls.sql` iki kullanıcılı yetki testini tek işlemde çalıştırır ve bütün kayıtları geri alır.
