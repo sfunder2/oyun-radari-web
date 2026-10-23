@@ -20,10 +20,12 @@ export function parseXbox(j){
   return{platform:'xbox',store_id:productId,name:p.title,image:p.images?.boxArt?.url||p.images?.superHeroArt?.url||null,price:o.price.listPrice,original_price:msrp,discount_percent:msrp?Math.round((1-o.price.listPrice/msrp)*100):0,currency:'TRY',url:`https://www.xbox.com/tr-TR/games/store/game/${productId}`,edition:p.productKind||'Mağaza ürünü'};
  }).filter(Boolean);
 }
-export async function xboxSearch(name,f=fetch){
+// Ham arama yanıtı (ürün özetleri + fiyatlar); takvim de aynı servisi kullanır.
+export async function xboxSearchJson(name,f=fetch){
  const r=await f('https://emerald.xboxservices.com/xboxcomfd/search/games?locale=tr-TR',{method:'POST',headers:{'Content-Type':'application/json','X-MS-API-Version':'1.1','MS-CV':'OyunRadariCatalog000000.0'},body:JSON.stringify({ReturnFilters:false,ChannelKeyToBeUsedInResponse:'SEARCH_CHANNELID=GAMES',Filters:'',ChannelId:'Games',Query:cleanTitle(name).slice(0,80)}),signal:t(20000)});
- if(!r.ok)throw new Error('Xbox arama HTTP '+r.status);return parseXbox(await r.json());
+ if(!r.ok)throw new Error('Xbox arama HTTP '+r.status);return r.json();
 }
+export async function xboxSearch(name,f=fetch){return parseXbox(await xboxSearchJson(name,f));}
 // Nintendo'nun tarayıcı paketinde yer alan herkese açık, yalnız arama yapabilen anahtar (yönetici anahtarı değildir).
 const NA='U3B6GR4UA3',NK='a29c6927638bfd8cee23993e51e721c9';
 export async function switchSearch(name,f=fetch){
