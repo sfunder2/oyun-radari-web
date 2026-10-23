@@ -1,0 +1,34 @@
+name: Supabase check
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data
+          cat > /tmp/p.py <<'PYEOF'
+          import json,urllib.request
+          URL="https://dsosckshigzijnsxmlwh.supabase.co";PUB="sb_publishable_SjkjwIlJ_HFqd5hWhILF5g_6QJThaNO"
+          def rq(path,extra=None):
+              h={"apikey":PUB,"Authorization":"Bearer "+PUB};h.update(extra or {})
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request(URL+"/rest/v1/"+path,headers=h),timeout=30);return r.headers,json.loads(r.read().decode())
+              except urllib.error.HTTPError as e:return None,"HTTP %s %s"%(e.code,e.read().decode()[:140])
+          C={"Prefer":"count=exact"}
+          h,r=rq("ps_state?select=key,value&key=in.(batch,cursors)");print("sayi durum",json.dumps(r,ensure_ascii=False)[:700])
+          h,r=rq("ps_products?select=id&limit=1",C);print("sayi toplam urun",h.get("content-range") if h else r)
+          h,r=rq("ps_products?select=checked_at&order=checked_at.desc&limit=1");print("sayi en son kontrol",r)
+          h,r=rq("ps_products?select=checked_at&order=checked_at.asc&limit=1");print("sayi en eski kontrol",r)
+          import datetime
+          cut=(datetime.datetime.utcnow()-datetime.timedelta(hours=6)).strftime("%Y-%m-%dT%H:%M:%S")
+          h,r=rq("ps_products?select=id&checked_at=gte."+cut+"&limit=1",C);print("sayi son 6 saatte guncellenen",h.get("content-range") if h else r)
+          h,r=rq("ps_products?select=id&discount_percent=gt.0&limit=1",C);print("sayi indirimli",h.get("content-range") if h else r)
+          h,r=rq("ps_price_history?select=day&limit=1",C);print("sayi gecmis satiri",h.get("content-range") if h else r)
+          h,r=rq("ps_products?select=id&preview_url=not.is.null&limit=1",C);print("sayi videolu",h.get("content-range") if h else r)
+          PYEOF
+          python3 /tmp/p.py > data/sb-check10.txt 2>&1 || true
+          git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
+          git add data/sb-check10.txt; git commit -qm 'check [skip ci]'; git pull --rebase -q origin main; git push
