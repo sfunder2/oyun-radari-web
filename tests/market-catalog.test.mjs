@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {parseSteam,parseXbox,parseSwitch,parseEpic,parseGog,fetchEpicPage,fetchGogPage} from '../scripts/market-catalog.mjs';
+import {parseSteam,parseXbox,xboxDevices,parseSwitch,parseEpic,parseGog,fetchEpicPage,fetchGogPage} from '../scripts/market-catalog.mjs';
 test('steam: price, discount, free games; rows without a price are skipped',()=>{
  const html=`<a href="x" data-ds-appid="1145360" class="search_result_row"><img src="https://cdn/hades.jpg"><span class="title">Hades&reg;</span><div class="discount_block" data-price-final="1237" data-price-original="2475"><div class="discount_original_price">$24.75</div></div></a>
  <a data-ds-appid="570" class="search_result_row"><span class="title">Dota 2</span><div>Free To Play</div></a>
@@ -11,7 +11,7 @@ test('steam: price, discount, free games; rows without a price are skipped',()=>
 test('xbox: TRY purchase offers only, continuation token is returned',()=>{
  const j={channels:{c:{products:[{productId:'A'},{productId:'B'},{productId:'C'}],encodedCT:'TOKEN'}},productSummaries:[{productId:'A',title:'Cuphead'},{productId:'B',title:'USD Only'},{productId:'C',title:'Dlc'}],
   availabilitySummaries:[{productId:'A',actions:['Purchase'],price:{currency:'TRY',listPrice:300,msrp:400,eligibilityInfo:{eligibility:'None'}}},{productId:'B',actions:['Purchase'],price:{currency:'USD',listPrice:5,eligibilityInfo:{eligibility:'None'}}}]};
- const r=parseXbox(j,'T');assert.equal(r.rows.length,1);assert.equal(r.rows[0].platform,'xbox');assert.equal(r.rows[0].discount_percent,25);assert.equal(r.next,'TOKEN');
+ const r=parseXbox(j,'T');assert.equal(r.rows.length,1);assert.deepEqual(r.rows[0].devices,[]);assert.equal(r.rows[0].platform,'xbox');assert.equal(r.rows[0].discount_percent,25);assert.equal(r.next,'TOKEN');
  assert.throws(()=>parseXbox({}),/okunamadı/);
 });
 test('switch: US store prices in USD, paging info',()=>{
@@ -43,4 +43,10 @@ test('epic/gog fetchers: request shape and paging',async()=>{
  const v=JSON.parse(calls[0].init.body).variables;assert.equal(calls[0].init.method,'POST');assert.deepEqual([v.country,v.start,v.count,v.category],['TR',80,40,'games/edition/base']);assert.equal(e.hasMore,true);
  const g=await fetchGogPage(136,f({pages:137,products:[]}));const u=new URL(calls[1].url);
  assert.deepEqual([u.searchParams.get('page'),u.searchParams.get('countryCode'),u.searchParams.get('currencyCode'),u.searchParams.get('productType')],['137','TR','TRY','in:game']);assert.equal(g.hasMore,false);
+});
+
+test('xbox: cihazlar mağazanın availableOn listesinden gelir, bilinmeyenler atılır',()=>{
+ assert.deepEqual(xboxDevices({availableOn:['XboxSeriesX','XboxOne','PC','XCloud']}),['pc','xbox_one','xbox_series']);
+ assert.deepEqual(xboxDevices({availableOn:['XboxSeriesX','XboxSeriesS']}),['xbox_series']);
+ assert.deepEqual(xboxDevices({}),[]);
 });

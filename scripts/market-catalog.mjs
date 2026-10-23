@@ -4,7 +4,7 @@ import {norm} from './ps-store.mjs';
 import {mapStoreGenres} from './store-genres.mjs';
 const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const strip=s=>String(s||'').replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').replace(/&#39;|&apos;/g,"'").replace(/&quot;/g,'"').replace(/&reg;|&trade;/g,'').replace(/\s+/g,' ').trim();
-const toRow=o=>({platform:o.platform,store_id:String(o.store_id),title_key:titleKey(o.name),name:String(o.name).slice(0,200),name_search:norm(o.name),image:o.image||null,price:o.price,original_price:o.original_price??null,discount_percent:o.discount_percent||0,currency:o.currency,url:o.url,edition:o.edition||null,checked_at:o.checked_at,...o.labels?mapStoreGenres(o.labels):{}});
+const toRow=o=>({platform:o.platform,store_id:String(o.store_id),title_key:titleKey(o.name),name:String(o.name).slice(0,200),name_search:norm(o.name),image:o.image||null,price:o.price,original_price:o.original_price??null,discount_percent:o.discount_percent||0,currency:o.currency,url:o.url,edition:o.edition||null,checked_at:o.checked_at,...o.labels?mapStoreGenres(o.labels):{},...o.devices?{devices:o.devices}:{}});
 export function parseSteam(j,now=new Date().toISOString()){
  const rows=[];
  for(const m of String(j?.results_html||'').matchAll(/<a\b([^>]*data-ds-appid[^>]*)>([\s\S]*?)<\/a>/g)){
@@ -22,6 +22,9 @@ export async function fetchSteamPage(page,size=100,f=fetch){
  const r=await f('https://store.steampowered.com/search/results/?'+p,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(25000)});
  if(!r.ok)throw new Error('Steam katalog HTTP '+r.status);const out=parseSteam(await r.json());return{...out,hasMore:(page+1)*size<Math.min(out.total,20000)};
 }
+// Xbox ürününün oynanabildiği cihazlar (mağazanın availableOn listesi). Bilinmeyen değerler atılır; liste yoksa boş kalır, uydurulmaz.
+const XBOX_DEVICES={XboxSeriesX:'xbox_series',XboxSeriesS:'xbox_series',XboxOne:'xbox_one',PC:'pc'};
+export const xboxDevices=p=>[...new Set((Array.isArray(p?.availableOn)?p.availableOn:[]).map(x=>XBOX_DEVICES[x]).filter(Boolean))].sort();
 export function parseXbox(j,now=new Date().toISOString()){
  const c=Object.values(j?.channels||{})[0];if(!c)throw new Error('Xbox kataloğu okunamadı');
  const products=new Map((j.productSummaries||[]).map(p=>[p.productId,p])),rows=[];
@@ -30,7 +33,7 @@ export function parseXbox(j,now=new Date().toISOString()){
   const a=(j.availabilitySummaries||[]).filter(a=>a.productId===productId&&a.actions?.includes('Purchase')&&a.price?.currency==='TRY'&&Number.isFinite(a.price.listPrice)&&a.price.eligibilityInfo?.eligibility==='None');
   const paid=a.filter(a=>a.price.listPrice>0),pool=paid.length?paid:a.filter(a=>a.price.listPrice===0&&!a.price.hasXPriceOffer);pool.sort((x,y)=>x.price.listPrice-y.price.listPrice);const o=pool[0];if(!o)continue;
   const msrp=o.price.msrp>o.price.listPrice?o.price.msrp:null;
-  rows.push(toRow({platform:'xbox',store_id:productId,name:p.title,image:p.images?.boxArt?.url||p.images?.superHeroArt?.url,price:o.price.listPrice,original_price:msrp,discount_percent:msrp?Math.round((1-o.price.listPrice/msrp)*100):0,currency:'TRY',url:`https://www.xbox.com/tr-TR/games/store/game/${productId}`,edition:p.productKind||'Mağaza ürünü',labels:p.categories||[],checked_at:now}));
+  rows.push(toRow({platform:'xbox',store_id:productId,name:p.title,image:p.images?.boxArt?.url||p.images?.superHeroArt?.url,price:o.price.listPrice,original_price:msrp,discount_percent:msrp?Math.round((1-o.price.listPrice/msrp)*100):0,currency:'TRY',url:`https://www.xbox.com/tr-TR/games/store/game/${productId}`,edition:p.productKind||'Mağaza ürünü',labels:p.categories||[],devices:xboxDevices(p),checked_at:now}));
  }
  return{rows,next:c.encodedCT||null,total:c.totalItems||null};
 }
