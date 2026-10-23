@@ -1,0 +1,26 @@
+/tmp/p.py:8: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  now=datetime.datetime.utcnow()
+sayi durum upcoming güncelleme: 2026-10-22T22:39:29 | {"count": 150}
+sayi durum news güncelleme: 2026-10-22T22:49:32 | {"count": 32}
+sayi durum market güncelleme: 2026-10-23T05:17:15 | {"stats": {"xbox": 69, "steam": 295, "switch": 300}, "errors": [], "finishedAt": "2026-10-23T05:17:15.830Z"}
+sayi durum cursors güncelleme: 2026-10-22T21:42:18 | {}
+sayi durum batch güncelleme: 2026-10-22T21:42:18 | {"engine": "supabase-cron", "errors": [], "status": "ok", "refreshed": 898, "finishedAt": "2026-10-23T09:00:18.273Z", "intervalMinutes": 15}
+sayi PS toplam 9725
+sayi PS: son 1 saatte yenilenmemiş 1729
+sayi PS: son 6 saatte yenilenmemiş 0
+sayi PS: son 24 saatte yenilenmemiş 0
+sayi PS fiyatı 0 veya negatif 325
+sayi PS indirimsiz fiyat < satış fiyatı (tutarsız) None
+sayi PS %90+ indirim 11
+sayi PS indirim var ama eski fiyat yok 0
+sayi PS title_key boş 0
+sayi PS görselsiz 0
+sayi PS hero görselli 9725
+sayi PS vurgu renkli 511
+sayi steam: toplam 588 | 24 saat+ bayat 0 | fiyat 0 51 | name_search boş 0
+sayi xbox: toplam 453 | 24 saat+ bayat 0 | fiyat 0 12 | name_search boş 0
+sayi switch: toplam 566 | 24 saat+ bayat 0 | fiyat 0 24 | name_search boş 0
+sayi offers tutarsız indirim None
+sayi geçmiş tarihli takvim kaydı 0 []
+sayi puan>100 bozuk 0
+sayi oc>100 bozuk 0
