@@ -1,7 +1,7 @@
 // PlayStation Store TR: kategori listesi (GraphQL) -> ürün kayıtları
 const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const GQL='https://web.np.playstation.com/api/graphql/v1/op';
-const HASH='9845afc0dbaab4965f6563fffc703f588c8e76792000e8610843b8d3ee9c4c09';
+export const HASH='9845afc0dbaab4965f6563fffc703f588c8e76792000e8610843b8d3ee9c4c09';
 // newest = PS4 oyunları kategorisi (tarihsel ad), ps5 = PS5 oyunları. PS5'e özel ve PS4 & PS5 paketli oyunlar (ör. ELDEN RING) yalnızca ps5'te listelenir.
 export const CATS={discounts:'3f772501-f6f8-49b7-abac-874a88ca4897',newest:'44d8bb20-653e-431e-8ad0-c0a365f68d2f',ps5:'4cbf39e2-5749-4970-ba81-93a489e4570c'};
 // Tüm oyunlar (concept) listesi: PS4/PS5 ürün listelerinde görünmeyen paketleri/sürümleri (ör. Batman: Arkham Collection) yakalamak için.
@@ -39,7 +39,7 @@ export async function fetchGrid(kind,page,fetchImpl=fetch){
  const g=j.data?.categoryGridRetrieve;if(!g||!Array.isArray(g.products))throw new Error('PS Store katalog yanıtı okunamadı');
  return{items:g.products.map(p=>fromGrid(p)).filter(Boolean),raw:g.products.length,hasMore:g.pageInfo?.isLast===false,total:g.pageInfo?.totalCount??null};
 }
-async function gql(operationName,variables,sha256Hash,fetchImpl){
+export async function gql(operationName,variables,sha256Hash,fetchImpl){
  const q=new URLSearchParams({operationName,variables:JSON.stringify(variables),extensions:JSON.stringify({persistedQuery:{version:1,sha256Hash}})});
  const r=await fetchImpl(GQL+'?'+q,{headers:{'User-Agent':UA,'x-psn-store-locale-override':'tr-TR',Accept:'application/json','content-type':'application/json','x-apollo-operation-name':operationName,'apollo-require-preflight':'true',Origin:'https://store.playstation.com',Referer:'https://store.playstation.com/'},signal:AbortSignal.timeout(30000)});
  if(!r.ok)throw new Error('PS Store '+operationName+' HTTP '+r.status);

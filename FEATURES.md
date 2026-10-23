@@ -8,7 +8,7 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 |---|---|
 | Holografik / 3D kart | Fare konumuyla sınırlı perspektif eğimi ve ışık katmanı; dokunmatik ve azaltılmış harekette kapalı. |
 | Akışkan tipografi | Ana başlık, bölüm, kart, modal ve metinlerde clamp ile sürekli ölçek. |
-| Görsel tür filtreleri | Keşfet ve Fırsatlar'da arama çubuğunun altında her zaman görünen tür şeridi (Aksiyon, Macera, RPG, Strateji, Simülasyon, Spor, Yarış, Bağımsız, Rahat, MMO). Tür bilgisi Steam eşleşmesi olan oyunlarda bulunur. |
+| Görsel tür filtreleri | Keşfet ve Fırsatlar'da arama çubuğunun altında her zaman görünen tür şeridi (Aksiyon, Macera, RPG, Strateji, Simülasyon, Spor, Yarış, Bağımsız, Rahat, MMO). Türler PlayStation Store'un kendi tür listesinden (oyun-radari-web refresh-genres, schema-v19-turler.sql) ve Steam eşleşmesinden gelir. |
 | Oyuncu tarzı (persona) | Kayıt formunda veya ilk girişte en çok 3 tarz seçilir (Hikâye avcısı, Aksiyon tutkunu, Stratejist, Kâşif, Rekabetçi, Rahat oyuncu, Birlikte oynayan, Gerilim seven, Bağımsız ruh). Seçim hesaba senkronlanır, Keşfet'teki şeritten düzenlenir. |
 | Sana göre sıralama | Tarz seçilince Keşfet varsayılan olarak "Sana göre" sıralanır: tarzın türleri ve Steam etiketleri puanla birlikte öne çekilir (supabase/schema-v16.sql). Uyan kartlarda "Tarzına uygun" etiketi görünür; favori yoksa öneri şeridi de tarzı kullanır. |
 | Dergi inceleme düzeni | Oyun dosyasında asimetrik görsel, büyük alıntı, serif metin, kaynak etiketi ve kişisel editör notu. Steam özeti bağımsız inceleme gibi sunulmaz. |
