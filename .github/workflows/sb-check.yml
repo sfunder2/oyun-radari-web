@@ -1,0 +1,30 @@
+name: Supabase check
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data
+          cat > /tmp/p.py <<'PYEOF'
+          import json,urllib.request,time
+          URL="https://dsosckshigzijnsxmlwh.supabase.co";PUB="sb_publishable_SjkjwIlJ_HFqd5hWhILF5g_6QJThaNO"
+          def rq(path):
+              t=time.time()
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request(URL+"/rest/v1/"+path,headers={"apikey":PUB,"Authorization":"Bearer "+PUB}),timeout=40);b=json.loads(r.read().decode());return r.status,round(time.time()-t,2),len(b)
+              except urllib.error.HTTPError as e:return e.code,round(time.time()-t,2),e.read().decode()[:150]
+          q1="library?select=*&limit=5&hero_url=not.is.null&best_score=gte.75&order=discount_percent.desc,best_score.desc.nullslast"
+          q2="library?select=*&limit=5&hero_url=not.is.null&order=discount_percent.desc,best_score.desc.nullslast"
+          q3="library?select=id,name,hero_url,best_score,discount_percent&limit=5&hero_url=not.is.null&best_score=gte.75&order=discount_percent.desc,best_score.desc.nullslast"
+          q4="ps_products?select=id,name,hero_url,discount_percent&limit=5&hero_url=not.is.null&order=discount_percent.desc"
+          q5="library?select=id&limit=1&best_score=gte.75"
+          for n,q in (("katı (select=*)",q1),("gevşek (select=*)",q2),("katı (az sütun)",q3),("ps_products hero",q4),("puanlı sayı",q5)):
+              print("GORSEL",n,rq(q))
+          PYEOF
+          python3 /tmp/p.py > data/hero-probe.txt 2>&1 || true
+          git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
+          git add data/hero-probe.txt; git commit -qm 'check [skip ci]'; git pull --rebase -q origin main; git push
