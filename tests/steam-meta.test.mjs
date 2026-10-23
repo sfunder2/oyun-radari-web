@@ -49,3 +49,20 @@ test('age notes come from PEGI first, then ESRB, deduplicated',()=>{
 
 
  test('editorial metadata preserves only source descriptions and HTTPS screenshots',()=>{const m=parseDetails({type:'game',short_description:'<b>Official</b> &amp; summary',about_the_game:'A real game description',categories:[{description:'Online Co-op'}],screenshots:[{path_full:'https://cdn.example/test.jpg'},{path_full:'javascript:bad'}]},'test');assert.equal(m.summary,'Official & summary');assert.deepEqual(m.categories,['Online Co-op']);assert.equal(m.screenshots.length,1);assert.equal(m.description,'A real game description');});
+import {parsePrice,parseMoney,fetchUpcoming} from '../scripts/steam-meta.mjs';
+test('upcoming rows carry pre-order price, discount and currency',()=>{
+ const row=(price)=>`<a data-ds-appid="1"><span class="title">A</span><div class="search_released">1 Dec, 2026</div>${price}</a>`;
+ const full='<div class="col search_price_discount_combined" data-price-final="2999"><div class="discount_block search_discount_block no_discount" data-price-final="2999" data-discount="0"><div class="discount_prices"><div class="discount_final_price">$29.99</div></div></div></div>';
+ const sale='<div class="discount_block" data-price-final="4799" data-discount="20"><div class="discount_pct">-20%</div><div class="discount_prices"><div class="discount_original_price">$59.99</div><div class="discount_final_price">$47.99</div></div></div>';
+ const [a]=parseUpcoming(row(full),'T');assert.equal(a.price,29.99);assert.equal(a.currency,'USD');assert.equal(a.original_price,null);assert.equal(a.wishlist_rank,null);
+ const [b]=parseUpcoming(row(sale),'T');assert.equal(b.price,47.99);assert.equal(b.original_price,59.99);assert.equal(b.discount_percent,20);
+ const [c]=parseUpcoming(row(''),'T');assert.equal(c.price,null);assert.equal(c.currency,null);
+ assert.deepEqual(parseMoney('₺1.299,00'),{value:1299,currency:'TRY'});assert.equal(parseMoney('Free To Play').value,0);
+ assert.equal(parsePrice('<div class="discount_final_price">Free</div>').price,0);
+});
+test('upcoming merges near-term list with wishlist ranks and skips released wishlist games',async()=>{
+ const html=(ids,date)=>ids.map(id=>`<a data-ds-appid="${id}"><span class="title">G${id}</span><div class="search_released">${date}</div></a>`).join('');
+ const f=async(url)=>({ok:true,json:async()=>({results_html:url.includes('popularwishlist')?html([2],'Q3 2027')+html([3],'1 Jan, 2020')+html([1],'1 Dec, 2099'):html([1],'1 Dec, 2099')})});
+ const r=await fetchUpcoming(1,1,f);const by=Object.fromEntries(r.map(g=>[g.id,g]));
+ assert.equal(by[2].wishlist_rank,1);assert.equal(by[1].wishlist_rank,3);assert.equal(by[3],undefined);
+});

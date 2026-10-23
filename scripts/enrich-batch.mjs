@@ -80,7 +80,7 @@ if(hasMeta){
  try{
   const last=(await sb.select('ps_state?select=value&key=eq.upcoming'))?.[0]?.value?.at;
   if(!last||Date.now()-Date.parse(last)>20*3600e3){
-   const ups=await fetchUpcoming(3);await sb.upsert('upcoming_games',ups,'id');
+   const ups=await fetchUpcoming();await sb.upsert('upcoming_games',ups,'id');
    const today=new Date(Date.now()+3*3600e3).toISOString().slice(0,10);await sb.del(`upcoming_games?release_date=lt.${today}`);
    await sb.upsert('ps_state',[{key:'upcoming',value:{at:new Date().toISOString(),count:ups.length}}],'key');say(`Yaklaşan oyunlar: ${ups.length}`);
   }
