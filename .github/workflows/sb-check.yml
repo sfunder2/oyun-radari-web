@@ -1,0 +1,46 @@
+name: Supabase check
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data
+          cat > /tmp/p.py <<'PYEOF'
+          import json,urllib.request,datetime
+          URL="https://dsosckshigzijnsxmlwh.supabase.co";PUB="sb_publishable_SjkjwIlJ_HFqd5hWhILF5g_6QJThaNO"
+          def rq(path):
+              h={"apikey":PUB,"Authorization":"Bearer "+PUB,"Prefer":"count=exact"}
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request(URL+"/rest/v1/"+path,headers=h),timeout=30);return (r.headers.get("content-range") or "").split("/")[-1],json.loads(r.read().decode())
+              except urllib.error.HTTPError as e:return None,e.read().decode()[:100]
+          now=datetime.datetime.utcnow()
+          def ago(h):return (now-datetime.timedelta(hours=h)).strftime("%Y-%m-%dT%H:%M:%S")
+          n,r=rq("ps_state?select=key,value,updated_at&key=in.(batch,market,cursors,upcoming,news)")
+          for x in r:
+              v=x["value"];print("sayi durum",x["key"],"güncelleme:",x["updated_at"][:19],"|",(json.dumps({k:v[k] for k in v if k in("status","refreshed","finishedAt","intervalMinutes","engine","stats","errors","count")},ensure_ascii=False))[:230])
+          tot,_=rq("ps_products?select=id&limit=1");print("sayi PS toplam",tot)
+          for h in (1,6,24):
+              n,_=rq("ps_products?select=id&limit=1&checked_at=lt."+ago(h));print(f"sayi PS: son {h} saatte yenilenmemiş",n)
+          n,_=rq("ps_products?select=id&limit=1&price=lte.0");print("sayi PS fiyatı 0 veya negatif",n)
+          n,_=rq("ps_products?select=id&limit=1&original_price=lt.price&original_price=not.is.null");print("sayi PS indirimsiz fiyat < satış fiyatı (tutarsız)",n)
+          n,_=rq("ps_products?select=id&limit=1&discount_percent=gt.90");print("sayi PS %90+ indirim",n)
+          n,_=rq("ps_products?select=id&limit=1&discount_percent=gt.0&original_price=is.null");print("sayi PS indirim var ama eski fiyat yok",n)
+          n,_=rq("ps_products?select=id&limit=1&title_key=is.null");print("sayi PS title_key boş",n)
+          n,_=rq("ps_products?select=id&limit=1&image=is.null");print("sayi PS görselsiz",n)
+          n,_=rq("ps_products?select=id&limit=1&hero_url=not.is.null");print("sayi PS hero görselli",n)
+          n,_=rq("ps_products?select=id&limit=1&accent_color=not.is.null");print("sayi PS vurgu renkli",n)
+          for p in ("steam","xbox","switch"):
+              t,_=rq("store_offers?select=store_id&limit=1&platform=eq."+p);o,_=rq("store_offers?select=store_id&limit=1&platform=eq."+p+"&checked_at=lt."+ago(24));s0,_=rq("store_offers?select=store_id&limit=1&platform=eq."+p+"&price=lte.0")
+              ns,_=rq("store_offers?select=store_id&limit=1&platform=eq."+p+"&name_search=is.null");print(f"sayi {p}: toplam {t} | 24 saat+ bayat {o} | fiyat 0 {s0} | name_search boş {ns}")
+          n,_=rq("store_offers?select=store_id&limit=1&original_price=lt.price&original_price=not.is.null");print("sayi offers tutarsız indirim",n)
+          n,r=rq("upcoming_games?select=name,release_date&release_date=lt."+now.strftime("%Y-%m-%d")+"&limit=3");print("sayi geçmiş tarihli takvim kaydı",n,r[:2])
+          n,_=rq("game_scores?select=title_key&limit=1&metacritic=gt.100");print("sayi puan>100 bozuk",n)
+          n,_=rq("game_scores?select=title_key&limit=1&opencritic=gt.100");print("sayi oc>100 bozuk",n)
+          PYEOF
+          python3 /tmp/p.py > data/sb-check12.txt 2>&1 || true
+          git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
+          git add data/sb-check12.txt; git commit -qm 'check [skip ci]'; git pull --rebase -q origin main; git push
