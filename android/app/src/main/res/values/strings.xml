@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Oyun Radarı</string>
+    <string name="offline_title">Bağlantı yok</string>
+    <string name="offline_body">Oyun Radarı fiyatları canlı çeker. İnternet bağlantını kontrol edip yeniden dene.</string>
+    <string name="retry">Yeniden dene</string>
+    <string name="no_app">Bu bağlantıyı açacak uygulama bulunamadı.</string>
+</resources>

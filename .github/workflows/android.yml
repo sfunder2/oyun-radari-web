@@ -1,0 +1,41 @@
+name: Android APK
+on:
+  workflow_dispatch:
+  push:
+    paths: ['android/**', '.github/workflows/android.yml']
+permissions:
+  contents: write
+concurrency:
+  group: android-apk
+  cancel-in-progress: false
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Build APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          ./gradlew --no-daemon assembleRelease
+          cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/oyun-radari.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oyun-radari-apk
+          path: ${{ runner.temp }}/oyun-radari.apk
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="apk-${GITHUB_RUN_NUMBER}"
+          gh release create "$tag" "$RUNNER_TEMP/oyun-radari.apk" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Oyun Radarı Android 1.0.${GITHUB_RUN_NUMBER}" \
+            --notes "Android telefona kurulacak APK. Dosyayı indirip açın; ilk kurulumda 'Bilinmeyen kaynaklardan yükleme' iznini verin. Uygulama siteyi (https://sfunder2.github.io/oyun-radari-web/) canlı açar, site güncellendikçe uygulama da güncel kalır."
