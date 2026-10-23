@@ -1,11 +1,11 @@
 import {recordHistory,computeStats} from './ps-history.mjs';
 import {titleKey} from './titles.mjs';
 import {norm} from './ps-store.mjs';
-export async function runPsBatch({sb,fetchGrid,fetchConcepts,fetchConceptProducts,conceptLimit=20,pagesPerKind=4,sleep=ms=>new Promise(r=>setTimeout(r,1000)),clock=()=>new Date(),token=crypto.randomUUID(),engine='github-actions'}){
+export async function runPsBatch({sb,fetchGrid,fetchConcepts,fetchConceptProducts,fetchEndTime,endTimeLimit=30,conceptLimit=20,pagesPerKind=4,sleep=ms=>new Promise(r=>setTimeout(r,1000)),clock=()=>new Date(),token=crypto.randomUUID(),engine='github-actions'}){
  const claimed=await sb.rpc('claim_ps_batch',{lease_token:token});
  if(!claimed)return {status:'skipped',reason:'Önceki fiyat güncellemesi sürüyor'};
  const startedAt=clock().toISOString(),today=new Date(clock().getTime()+3*3600000).toISOString().slice(0,10),errors=[],pages=[],found=new Map();
- let cursors={discounts:1,newest:1,ps5:1,concepts:1},status='ok',saved=0;
+ let ends=null,cursors={discounts:1,newest:1,ps5:1,concepts:1},status='ok',saved=0;
  try{
   const previous=await sb.select('ps_state?select=value&key=eq.cursors');cursors={...cursors,...previous?.[0]?.value};
   const previousBatch=(await sb.select('ps_state?select=value&key=eq.batch'))?.[0]?.value;
@@ -30,6 +30,10 @@ export async function runPsBatch({sb,fetchGrid,fetchConcepts,fetchConceptProduct
   else{
    const ids=[...found.keys()],hist={items:{}};
    for(let i=0;i<ids.length;i+=80){const list=ids.slice(i,i+80).map(x=>'"'+x+'"').join(',');for(const row of await sb.selectAll('ps_price_history?select=product_id,day,price,base_price,low_price&product_id=in.('+list+')&order=product_id,day'))(hist.items[row.product_id]??={p:[]}).p.push([row.day,Number(row.price),Number(row.base_price),row.low_price===null?Number(row.price):Number(row.low_price)]);}
+   // İndirim bitiş zamanı: listede gelmez. Kayıtlı olanı (aynı indirim sürerken) koru, eksikleri ürün sayfasından sınırlı sayıda tamamla.
+   ends={filled:0,tried:0,kept:0};const nowMs=clock().getTime();
+   for(let i=0;i<ids.length;i+=80){const list=ids.slice(i,i+80).map(x=>'"'+x+'"').join(',');for(const row of await sb.select('ps_products?select=id,price,discount_percent,discount_ends_at&discount_ends_at=not.is.null&id=in.('+list+')')||[]){const it=found.get(row.id);if(it&&!it.discountEndsAt&&it.discountPercent>0&&Number(row.price)===it.price&&row.discount_percent===it.discountPercent&&Date.parse(row.discount_ends_at)>nowMs){it.discountEndsAt=row.discount_ends_at;ends.kept++;}}}
+   if(fetchEndTime)for(const it of [...found.values()].filter(x=>x.discountPercent>0&&!x.discountEndsAt).slice(0,endTimeLimit)){ends.tried++;try{const end=await fetchEndTime(it);if(end&&Date.parse(end)>nowMs){it.discountEndsAt=end;ends.filled++;}}catch{}await sleep(500);}
    const before=new Map(ids.map(id=>[id,JSON.stringify(hist.items[id]?.p.at(-1))]));recordHistory(hist,[...found.values()],today);
    const products=[],historyRows=[];
    for(const it of found.values()){
@@ -40,7 +44,7 @@ export async function runPsBatch({sb,fetchGrid,fetchConcepts,fetchConceptProduct
    await sb.upsert('ps_products',products,'id');await sb.upsert('ps_price_history',historyRows,'product_id,day');saved=products.length;
   }
   if(errors.length&&status!=='failed')status='partial';
-  const batch={startedAt,finishedAt:clock().toISOString(),status,refreshed:saved,pages,errors,intervalMinutes:5,engine,previousFinishedAt:previousBatch?.finishedAt||null};
+  const batch={startedAt,finishedAt:clock().toISOString(),status,refreshed:saved,pages,errors,intervalMinutes:5,engine,endTimes:ends,previousFinishedAt:previousBatch?.finishedAt||null};
   // Advance discovery cursors only when product/history persistence completed successfully.
   if(saved)await sb.upsert('ps_state',[{key:'cursors',value:cursors}],'key');
   await sb.upsert('ps_state',[{key:'batch',value:batch}],'key');

@@ -21,3 +21,19 @@ test('concept backfill adds games missing from category grids and advances its c
  assert.ok(sb.writes.some(([t,rows])=>t==='ps_products'&&rows.some(x=>x.id==='EP_ARKHAM')));
  assert.ok(sb.writes.some(([t,rows])=>t==='ps_state'&&rows[0].key==='cursors'&&rows[0].value.concepts===8));
 });
+test('discount end time comes from the product page offer that matches the listed price',async()=>{
+ const {parseEndTime}=await import('../scripts/ps-store.mjs');
+ const html='x"price":{"__typename":"Price","basePrice":"1.749,00 TL","discountedPrice":"1.574,10 TL","displayDiscountText":"-10%","serviceBranding":["PS_PLUS"],"endTime":"1793289600000","displayUpsellText":"","basePriceValue":174900,"discountedValue":157410,"currencyCode":"TRY","qualifications":[]}'
+  +'y"price":{"__typename":"Price","basePrice":"2.149,00 TL","discountedPrice":"859,60 TL","displayDiscountText":"","serviceBranding":["NONE"],"endTime":"1793836740000","displayUpsellText":"","basePriceValue":214900,"discountedValue":85960,"currencyCode":"TRY","qualifications":[]}'
+  +'z"price":{"__typename":"Price","basePrice":"3.999,00 TL","discountedPrice":"3.999,00 TL","displayDiscountText":null,"serviceBranding":["NONE"],"endTime":null,"basePriceValue":399900,"discountedValue":399900,"currencyCode":"TRY"}';
+ assert.equal(parseEndTime(html,{price:859.6}),new Date(1793836740000).toISOString());
+ assert.equal(parseEndTime(html,{price:1574.1}),null); // yalnız PS Plus teklifi
+ assert.equal(parseEndTime(html,{price:3999}),null);
+});
+test('batch keeps a stored end time while the same discount runs and fills missing ones within the limit',async()=>{
+ const future='2099-01-01T00:00:00.000Z',a={...item,id:'EP_A',price:500,originalPrice:1000,discountPercent:50,discountEndsAt:null},b={...a,id:'EP_B'},c={...a,id:'EP_C'};
+ const sb=db();sb.select=async path=>path.includes('discount_ends_at=not.is.null')?[{id:'EP_A',price:'500.00',discount_percent:50,discount_ends_at:future}]:path.includes('cursors')?[{value:{}}]:[];
+ const asked=[];const r=await runPsBatch({sb,pagesPerKind:1,endTimeLimit:1,sleep:async()=>{},fetchGrid:async()=>({items:[a,b,c],hasMore:false}),fetchEndTime:async it=>(asked.push(it.id),future)});
+ assert.deepEqual(asked,['EP_B']);assert.deepEqual(r.endTimes,{filled:1,tried:1,kept:1});
+ const rows=sb.writes.find(([t])=>t==='ps_products')[1];assert.equal(rows.find(x=>x.id==='EP_A').discount_ends_at,future);assert.equal(rows.find(x=>x.id==='EP_B').discount_ends_at,future);assert.equal(rows.find(x=>x.id==='EP_C').discount_ends_at,null);
+});
