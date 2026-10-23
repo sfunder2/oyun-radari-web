@@ -1,13 +1,27 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {parseXboxProducts,parseSwitchUpcoming,psReleaseDate,isoDay,fetchPsUpcoming,refreshUpcoming} from '../scripts/upcoming.mjs';
+import {parseXboxUpcoming,xboxCandidates,fetchXboxUpcoming,parseSwitchUpcoming,psReleaseDate,isoDay,fetchPsUpcoming,refreshUpcoming} from '../scripts/upcoming.mjs';
 const T='2026-10-23';
 test('placeholder store dates count as unknown',()=>{assert.equal(isoDay('9998-12-30T00:00:00.0000000Z'),null);assert.equal(isoDay('2100-01-01'),null);assert.equal(isoDay('2026-11-14T00:00:00Z'),'2026-11-14');assert.equal(isoDay('TBD'),null);});
-test('Xbox catalog products become upcoming rows with TRY price; released ones are skipped',()=>{
- const p=(id,date,price)=>({ProductId:id,LocalizedProperties:[{ProductTitle:'Game '+id,Images:[{ImagePurpose:'BoxArt',Uri:'//store-images.s-microsoft.com/x'}]}],MarketProperties:[{OriginalReleaseDate:date}],DisplaySkuAvailabilities:[{Availabilities:[{Actions:['Details','Purchase'],OrderManagementData:{Price:{CurrencyCode:'TRY',ListPrice:price,MSRP:price}}}]}]});
- const r=parseXboxProducts({Products:[p('9A','2026-12-05T00:00:00.0000000Z',2499),p('9B','2020-01-01T00:00:00Z',100),p('9C','9998-12-30T00:00:00Z',0)]},'N',T);
- assert.equal(r.length,2);assert.deepEqual([r[0].id,r[0].platform,r[0].release_date,r[0].price,r[0].currency,r[0].title_key],['xbox:9A','xbox','2026-12-05',2499,'TRY','game 9a']);
- assert.equal(r[0].image,'https://store-images.s-microsoft.com/x');assert.equal(r[0].release_text,'5 Ara 2026');
- assert.equal(r[1].release_date,null);assert.equal(r[1].price,null);assert.equal(r[1].currency,null);
+test('Xbox search hit becomes an upcoming row: own date, else the other store date; TRY price',()=>{
+ const j=(date,price)=>({productSummaries:[{productId:'9OTHER',title:'Grand Theft Auto VI Soundtrack'},{productId:'9GTA',title:'Grand Theft Auto VI',releaseDate:date,images:{boxArt:{url:'https://img/x'}}}],
+  availabilitySummaries:[{productId:'9GTA',actions:['Details','PreOrder'],price:{currency:'TRY',listPrice:price,msrp:price,eligibilityInfo:{eligibility:'None'}}},{productId:'9GTA',price:{currency:'TRY',listPrice:0,eligibilityInfo:{eligibility:'GamePass'}}}]});
+ const c={key:'grand theft auto vi',name:'Grand Theft Auto VI',date:'2026-11-18',text:null};
+ const r=parseXboxUpcoming(j('2026-11-19T00:00:00.0000000Z',3999),c,'N',T);
+ assert.deepEqual([r.id,r.platform,r.release_date,r.price,r.currency,r.image],['xbox:9GTA','xbox','2026-11-19',3999,'TRY','https://img/x']);
+ assert.equal(parseXboxUpcoming(j('9998-12-31T00:00:00Z',3999),c,'N',T).release_date,'2026-11-18');
+ assert.equal(parseXboxUpcoming(j('2020-01-01T00:00:00Z',100),c,'N',T),null);
+ assert.equal(parseXboxUpcoming(j(null,0),c,'N',T).price,null);
+ assert.equal(parseXboxUpcoming(j(null,1),{...c,key:'fable'},'N',T),null);
+});
+test('Xbox candidates: wishlist and PlayStation titles, one per key, best rank first',()=>{
+ const rows=[{platform:'steam',title_key:'a',name:'A',wishlist_rank:5,release_date:'2026-12-01'},{platform:'playstation',title_key:'a',name:'A',release_date:'2026-11-30'},
+  {platform:'steam',title_key:'indie',name:'Indie',wishlist_rank:null},{platform:'switch',title_key:'s',name:'S'},{platform:'playstation',title_key:'big',name:'Big',price:3999}];
+ const c=xboxCandidates(rows);assert.deepEqual(c.map(x=>x.key),['a','big']);assert.equal(c[0].date,'2026-11-30');
+});
+test('Xbox source fails loudly only when the search service is unreachable',async()=>{
+ await assert.rejects(fetchXboxUpcoming(fetch,Array.from({length:8},(_,i)=>({key:'k'+i,name:'K'+i})),{search:async()=>{throw new Error('fetch failed')}}),/ulaşılamadı/);
+ const rows=await fetchXboxUpcoming(fetch,[{key:'fable',name:'Fable',date:'2027-02-23'}],{search:async()=>({productSummaries:[{productId:'9F',title:'Fable'}],availabilitySummaries:[]})});
+ assert.equal(rows[0].id,'xbox:9F');assert.equal(rows[0].release_date,'2027-02-23');
 });
 test('Switch coming-soon hits keep USD price and date',()=>{
  const {rows}=parseSwitchUpcoming({hits:[{title:'Kirby X',urlKey:'kirby-x-switch',releaseDate:'2026-11-20T08:00:00.000Z',price:{finalPrice:69.99,regPrice:69.99}},{title:'Old',urlKey:'old',releaseDate:'2019-01-01T00:00:00Z'},{title:'TBA game',objectID:'o1',releaseDateDisplay:'Coming 2027'}],nbPages:1},'N',T);

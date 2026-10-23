@@ -3,6 +3,7 @@
 import {titleKey} from './titles.mjs';
 import {fetchUpcoming as fetchSteamUpcoming} from './steam-meta.mjs';
 import {fetchGrid} from './ps-store.mjs';
+import {xboxSearchJson} from './stores.mjs';
 const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const t=ms=>AbortSignal.timeout(ms);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -13,27 +14,29 @@ const dayText=d=>`${+d.slice(8,10)} ${TR_MONTHS[+d.slice(5,7)-1]} ${d.slice(0,4)
 export function isoDay(v){const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);if(!m||+m[1]<2000||+m[1]>2035)return null;return `${m[1]}-${m[2]}-${m[3]}`;}
 const row=o=>({id:o.id,platform:o.platform,title_key:titleKey(o.name),name:String(o.name).slice(0,200),image:o.image||null,release_text:o.release_text??(o.release_date?dayText(o.release_date):null),release_date:o.release_date||null,url:o.url,checked_at:o.checked_at,price:o.price??null,original_price:o.original_price??null,discount_percent:o.discount_percent||0,currency:o.price==null?null:o.currency,wishlist_rank:o.wishlist_rank??null});
 
-// --- Xbox: Microsoft "Coming Soon" öneri listesi + DisplayCatalog ürün ayrıntısı (TR mağazası, TRY) ---
-export function parseXboxProducts(j,now=new Date().toISOString(),today=trToday()){
- const out=[];
- for(const p of j?.Products||[]){
-  const name=p.LocalizedProperties?.[0]?.ProductTitle;if(!p.ProductId||!name)continue;
-  const date=isoDay(p.MarketProperties?.[0]?.OriginalReleaseDate);if(date&&date<today)continue;
-  const imgs=p.LocalizedProperties?.[0]?.Images||[],img=imgs.find(i=>i.ImagePurpose==='SuperHeroArt')||imgs.find(i=>i.ImagePurpose==='BoxArt')||imgs.find(i=>i.ImagePurpose==='Poster')||imgs[0];
-  const prices=(p.DisplaySkuAvailabilities||[]).flatMap(s=>s.Availabilities||[]).filter(a=>(a.Actions||[]).includes('Purchase')).map(a=>a.OrderManagementData?.Price).filter(x=>x&&x.CurrencyCode==='TRY'&&Number.isFinite(x.ListPrice)&&x.ListPrice>0).sort((a,b)=>a.ListPrice-b.ListPrice);
-  const pr=prices[0],msrp=pr&&pr.MSRP>pr.ListPrice?pr.MSRP:null;
-  out.push(row({id:'xbox:'+p.ProductId,platform:'xbox',name,image:img?.Uri?(img.Uri.startsWith('//')?'https:'+img.Uri:img.Uri):null,release_date:date,url:`https://www.xbox.com/tr-TR/games/store/game/${p.ProductId}`,checked_at:now,price:pr?.ListPrice??null,original_price:msrp,discount_percent:msrp?Math.round((1-pr.ListPrice/msrp)*100):0,currency:'TRY'}));
- }
- return out;
+// --- Xbox: TR mağazasının arama servisi (emerald). Microsoft'un "yakında" listesine Supabase'den erişilemediği için
+// bu turda diğer mağazalardan gelen çok beklenen/konsol oyunları Xbox'ta aranır; birebir eşleşen ürünün tarihi ve TRY fiyatı alınır.
+export function parseXboxUpcoming(j,cand,now=new Date().toISOString(),today=trToday()){
+ const p=(j?.productSummaries||[]).find(x=>x?.productId&&titleKey(x.title)===cand.key);if(!p)return null;
+ const own=isoDay(p.releaseDate),date=own||cand.date||null;if(date&&date<today)return null;
+ const prices=(j.availabilitySummaries||[]).filter(a=>a.productId===p.productId&&a.price?.currency==='TRY'&&Number.isFinite(a.price.listPrice)&&a.price.listPrice>0&&(a.price.eligibilityInfo?.eligibility??'None')==='None').map(a=>a.price).sort((x,y)=>x.listPrice-y.listPrice);
+ const pr=prices[0],msrp=pr&&pr.msrp>pr.listPrice?pr.msrp:null;
+ return row({id:'xbox:'+p.productId,platform:'xbox',name:p.title,image:p.images?.superHeroArt?.url||p.images?.boxArt?.url||p.images?.poster?.url||null,release_date:date,release_text:date?null:cand.text||null,url:`https://www.xbox.com/tr-TR/games/store/game/${p.productId}`,checked_at:now,price:pr?.listPrice??null,original_price:msrp,discount_percent:msrp?Math.round((1-pr.listPrice/msrp)*100):0,currency:'TRY'});
 }
-export async function fetchXboxUpcoming(f=fetch,count=200){
- const r=await f(`https://reco-public.rec.mp.microsoft.com/channels/Reco/V8.0/Lists/Computed/ComingSoon?Market=TR&Language=TR&ItemTypes=Game&deviceFamily=Windows.Xbox&count=${count}&skipitems=0`,{headers:{'User-Agent':UA},signal:t(20000)});
- if(!r.ok)throw new Error('Xbox yakında listesi HTTP '+r.status);
- const ids=[...new Set(((await r.json()).Items||[]).map(i=>i.Id).filter(Boolean))],out=[];
- for(let i=0;i<ids.length;i+=20){
-  const d=await f(`https://displaycatalog.mp.microsoft.com/v7.0/products?bigIds=${ids.slice(i,i+20).join(',')}&market=TR&languages=tr-tr`,{headers:{'User-Agent':UA},signal:t(20000)});
-  if(!d.ok)throw new Error('Xbox katalog HTTP '+d.status);
-  out.push(...parseXboxProducts(await d.json()));await sleep(300);
+// Aday seçimi: istek listesi sırası olanlar ve PlayStation çıkışları (konsol oyunları), başlık anahtarı başına bir kez.
+export function xboxCandidates(rows,limit=80){
+ const by=new Map();
+ for(const r of rows){if(!r.title_key||r.platform==='xbox'||r.platform==='switch')continue;if(r.wishlist_rank==null&&r.platform!=='playstation')continue;
+  const c=by.get(r.title_key)||{key:r.title_key,name:r.name,date:null,text:null,rank:Infinity};
+  if(r.release_date&&(!c.date||r.release_date<c.date))c.date=r.release_date;c.text=c.text||r.release_text;c.rank=Math.min(c.rank,r.wishlist_rank??(r.price>=2000?40:120));by.set(r.title_key,c);}
+ return[...by.values()].sort((a,b)=>a.rank-b.rank).slice(0,limit);
+}
+export async function fetchXboxUpcoming(f=fetch,cands=[],{search=xboxSearchJson,concurrency=4}={}){
+ const out=[];let ok=0,fail=0;
+ for(let i=0;i<cands.length;i+=concurrency){
+  await Promise.all(cands.slice(i,i+concurrency).map(async c=>{try{const r=parseXboxUpcoming(await search(c.name,f),c);ok++;if(r)out.push(r);}catch{fail++;}}));
+  if(fail>=8&&!ok)throw new Error('Xbox arama servisine ulaşılamadı');
+  await sleep(250);
  }
  return out;
 }
@@ -94,10 +97,10 @@ export async function fetchPsUpcoming(f=fetch,{maxPages=100,gridPages=3,grid=fet
 
 // --- Tüm kaynaklar ---
 export async function refreshUpcoming(sb,{say=console.log,f=fetch,sources}={}){
- const src=sources||{steam:()=>fetchSteamUpcoming().then(rows=>rows.map(g=>row({...g,platform:'steam'}))),xbox:()=>fetchXboxUpcoming(f),switch:()=>fetchSwitchUpcoming(f),playstation:async()=>{const known=new Map(((await sb.select('upcoming_games?select=id,release_date&platform=eq.playstation&release_date=not.is.null').catch(()=>[]))||[]).map(r=>[String(r.id).replace(/^ps:/,''),r.release_date]));return fetchPsUpcoming(f,{known});}};
- const stats={},errors={};
+ const src=sources||{steam:()=>fetchSteamUpcoming().then(rows=>rows.map(g=>row({...g,platform:'steam'}))),switch:()=>fetchSwitchUpcoming(f),playstation:async()=>{const known=new Map(((await sb.select('upcoming_games?select=id,release_date&platform=eq.playstation&release_date=not.is.null').catch(()=>[]))||[]).map(r=>[String(r.id).replace(/^ps:/,''),r.release_date]));return fetchPsUpcoming(f,{known});},xbox:prev=>fetchXboxUpcoming(f,xboxCandidates(prev))};
+ const stats={},errors={},all=[];
  for(const [name,run] of Object.entries(src)){
-  try{const rows=[...new Map((await run()).map(r=>[r.id,r])).values()];await sb.upsert('upcoming_games',rows,'id');stats[name]=rows.length;say(`Yaklaşan (${name}): ${rows.length}`);}
+  try{const rows=[...new Map((await run(all)).map(r=>[r.id,r])).values()];all.push(...rows);await sb.upsert('upcoming_games',rows,'id');stats[name]=rows.length;say(`Yaklaşan (${name}): ${rows.length}`);}
   catch(e){errors[name]=e.message.slice(0,160);say(`Yaklaşan (${name}) atlandı: ${errors[name]}`);}
  }
  const today=trToday();
