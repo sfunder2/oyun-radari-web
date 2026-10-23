@@ -23,6 +23,5 @@ export async function fetchAccent(imageUrl,f=fetch){
  const base=String(imageUrl||'').replace(/\?.*$/,'');if(!/^https:\/\/image\.api\.playstation\.com\//.test(base))return null;
  const r=await f(base+'?w=64',{headers:{'User-Agent':'Mozilla/5.0'},signal:AbortSignal.timeout(20000)});
  if(!r.ok)throw new Error('Görsel HTTP '+r.status);
- return colorFromJpeg(Buffer.from(await r.arrayBuffer()));
+ return colorFromJpeg(new Uint8Array(await r.arrayBuffer()));
 }
-
