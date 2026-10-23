@@ -1,0 +1,15 @@
+GORSEL PS kapak | (referanssız, referanslı, KB): [(200, 200, 28), (200, 200, 14), (200, 200, 15), (200, 200, 16), (200, 200, 34)]
+   örnek: https://image.api.playstation.com/vulcan/ap/rnd/202403/0114/793f3583eb966697622c8297aa36a046d6fb796bfd2d4cb2.JPG?w=480
+GORSEL PS hero | (referanssız, referanslı, KB): [(200, 200, 347), (200, 200, 1), (200, 200, 160)]
+   örnek: https://image.api.playstation.com/vulcan/ap/rnd/202609/1006/bbf62de5f9ba76f2dfd5ee762882a649289f9784f1c20606.jpg?w=1600
+GORSEL Steam | (referanssız, referanslı, KB): [(200, 200, 12), (200, 200, 12), (200, 200, 9), (200, 200, 13), (200, 200, 12)]
+   örnek: https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/3450310/b38d9e6151305e42163707ded29f2e6fb0d81f52/caps
+GORSEL Xbox | (referanssız, referanslı, KB): [(200, 200, 1622), (200, 200, 645), (200, 200, 784), (200, 200, 227), (200, 200, 168)]
+   örnek: https://store-images.s-microsoft.com/image/apps.54560.13662065475218063.34063d08-8b45-4ed3-bab5-137253b2b61a.d3903709-98
+GORSEL Switch | (referanssız, referanslı, KB): [(200, 200, 22), (200, 200, 33), (200, 200, 19), (200, 200, 24), (200, 200, 29)]
+   örnek: https://assets.nintendo.com/image/upload/f_auto/q_auto/w_600/store/software/switch/70010000026794/e95132a518a41294dc771d
+GORSEL https olmayan ps_products 0 []
+GORSEL https olmayan store_offers 0 []
+GORSEL site 200 976 ['/oyun-radari-web/assets/index-BOrHWhXK.js', '/oyun-radari-web/assets/index-DBQ2Qjij.css']
+GORSEL varlık /oyun-radari-web/assets/index-BOrHWhXK.js (200, 470028)
+GORSEL varlık /oyun-radari-web/assets/index-DBQ2Qjij.css (200, 116321)
