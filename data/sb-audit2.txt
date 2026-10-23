@@ -1,0 +1,15 @@
+AUDIT collector_leases     oku: 401 | ekle: 401 {"code":"42501","details":null,"hint":"Grant the required pr | sil: 400 | güncelle: 400 {"code":"PGRST204","details":null,"hint":null,"mes | sütunlar: -
+Traceback (most recent call last):
+  File "/tmp/p.py", line 14, in <module>
+    print("AUDIT",tb.ljust(20),"oku:",s,"| ekle:",sw,rw[:60].replace(chr(10)," "),"| sil:",sd,"| güncelle:",sp,rp[:50].replace(chr(10)," "),"| sütunlar:",(list(json.loads(r)[0].keys())[:7] if s==200 and r.startswith("[{") else "-"))
+                                                                                                                                                                ^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 201 (char 200)
