@@ -54,6 +54,9 @@ export function parseDetails(d,titleKey,now=new Date().toISOString()){
  const pegi=d.ratings?.pegi?.rating,esrb=d.ratings?.esrb?.rating;
  const age=pegi?'PEGI '+pegi:esrb?'ESRB '+String(esrb).toUpperCase():Number(d.required_age)>0?Number(d.required_age)+'+':null;
  return{title_key:titleKey,steam_appid:Number(d.steam_appid)||null,
+  summary:strip(d.short_description).slice(0,1500)||null,description:strip(d.about_the_game||d.detailed_description).slice(0,14000)||null,
+  screenshots:(d.screenshots||[]).slice(0,12).filter(x=>/^https:\/\//.test(x.path_full||'')).map(x=>({url:x.path_full,thumbnail:x.path_thumbnail||x.path_full})),
+  categories:(d.categories||[]).map(c=>strip(c.description)).filter(Boolean),
   genres:(d.genres||[]).map(g=>GENRE_TR[g.description]||g.description).filter(Boolean),
   release_date:rel.coming_soon?null:parseReleaseDate(rel.date),release_text:rel.date||null,
   developers:d.developers||[],publishers:d.publishers||[],
@@ -65,7 +68,9 @@ export function parseDetails(d,titleKey,now=new Date().toISOString()){
 export async function fetchDetails(appid,titleKey,f=fetch){
  const r=await f(`https://store.steampowered.com/api/appdetails?appids=${appid}&cc=tr&l=english`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(25000)});
  if(!r.ok)throw new Error('Steam ayrıntı HTTP '+r.status);
- const j=await r.json();const e=j[appid];return e?.success?parseDetails(e.data,titleKey):null;
+ const j=await r.json();const e=j[appid];if(!e?.success)return null;const meta=parseDetails(e.data,titleKey);if(!meta)return null;
+ try{const page=await f(`https://store.steampowered.com/app/${appid}/?l=english`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(8000)});if(page.ok){const html=await page.text();const tags=[...new Set([...html.matchAll(/<a[^>]*class="app_tag"[^>]*>([\s\S]*?)<\/a>/g)].map(m=>strip(m[1])).filter(Boolean))].slice(0,30);if(tags.length)meta.tags=tags;}}catch{}
+ return meta;
 }
 
 // Geliştirici duyuruları / yama notları: en son 3 başlık

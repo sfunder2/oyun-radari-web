@@ -4,7 +4,7 @@ on:
     - cron: '12,27,42,57 * * * *'
   workflow_dispatch:
   push:
-    paths: ['scripts/enrich*.mjs', 'scripts/stores.mjs', 'scripts/score-merge.mjs', 'scripts/news.mjs', 'scripts/supabase.mjs']
+    paths: ['scripts/**', '.github/workflows/enrich.yml']
 concurrency:
   group: enrich
   cancel-in-progress: false

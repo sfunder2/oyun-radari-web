@@ -71,7 +71,7 @@ if(hasMeta){
   const todo=st.filter(o=>!have.has(o.title_key)&&!metas.has(o.title_key)).slice(0,25),got=[];
   try{ // v5: gereksinim/DLC/duyuru alanları boş olan mevcut kayıtları tamamla
    let stale;
-   try{stale=await sb.select('game_meta?select=title_key,steam_appid&or=(requirements.is.null,age_notes.is.null)&steam_appid=not.is.null&order=checked_at.asc&limit=25');}
+   try{stale=await sb.select('game_meta?select=title_key,steam_appid&or=(requirements.is.null,age_notes.is.null,summary.is.null)&steam_appid=not.is.null&order=checked_at.asc&limit=25');}
    catch(e){if(!/400|PGRST/.test(e.message))throw e;stale=await sb.select('game_meta?select=title_key,steam_appid&requirements=is.null&steam_appid=not.is.null&order=checked_at.asc&limit=25');}
    for(const m of stale)todo.push({title_key:m.title_key,store_id:String(m.steam_appid),refresh:true});
   }catch(e){if(!/400|404|PGRST/.test(e.message))throw e;}

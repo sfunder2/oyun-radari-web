@@ -47,3 +47,5 @@ test('age notes come from PEGI first, then ESRB, deduplicated',()=>{
  assert.deepEqual(ageNotes(undefined),[]);
 });
 
+
+ test('editorial metadata preserves only source descriptions and HTTPS screenshots',()=>{const m=parseDetails({type:'game',short_description:'<b>Official</b> &amp; summary',about_the_game:'A real game description',categories:[{description:'Online Co-op'}],screenshots:[{path_full:'https://cdn.example/test.jpg'},{path_full:'javascript:bad'}]},'test');assert.equal(m.summary,'Official & summary');assert.deepEqual(m.categories,['Online Co-op']);assert.equal(m.screenshots.length,1);assert.equal(m.description,'A real game description');});
