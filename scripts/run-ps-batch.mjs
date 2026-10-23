@@ -31,11 +31,11 @@ export async function runPsBatch({sb,fetchGrid,pagesPerKind=4,sleep=ms=>new Prom
    await sb.upsert('ps_products',products,'id');await sb.upsert('ps_price_history',historyRows,'product_id,day');saved=products.length;
   }
   if(errors.length&&status!=='failed')status='partial';
-  const batch={startedAt,finishedAt:clock().toISOString(),status,refreshed:saved,pages,errors,intervalMinutes:15,engine,previousFinishedAt:previousBatch?.finishedAt||null};
+  const batch={startedAt,finishedAt:clock().toISOString(),status,refreshed:saved,pages,errors,intervalMinutes:5,engine,previousFinishedAt:previousBatch?.finishedAt||null};
   // Advance discovery cursors only when product/history persistence completed successfully.
   if(saved)await sb.upsert('ps_state',[{key:'cursors',value:cursors}],'key');
   await sb.upsert('ps_state',[{key:'batch',value:batch}],'key');
   return batch;
- }catch(e){const batch={startedAt,finishedAt:clock().toISOString(),status:'failed',refreshed:saved,pages,errors:[...errors,{source:'veri kaydı',error:e.message}],intervalMinutes:15,engine};try{await sb.upsert('ps_state',[{key:'batch',value:batch}],'key')}catch{}return batch;}
+ }catch(e){const batch={startedAt,finishedAt:clock().toISOString(),status:'failed',refreshed:saved,pages,errors:[...errors,{source:'veri kaydı',error:e.message}],intervalMinutes:5,engine};try{await sb.upsert('ps_state',[{key:'batch',value:batch}],'key')}catch{}return batch;}
  finally{await sb.rpc('release_ps_batch',{lease_token:token}).catch(()=>{});}
 }
