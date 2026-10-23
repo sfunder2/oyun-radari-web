@@ -5,12 +5,12 @@ export async function runPsBatch({sb,fetchGrid,pagesPerKind=4,sleep=ms=>new Prom
  const claimed=await sb.rpc('claim_ps_batch',{lease_token:token});
  if(!claimed)return {status:'skipped',reason:'Önceki fiyat güncellemesi sürüyor'};
  const startedAt=clock().toISOString(),today=new Date(clock().getTime()+3*3600000).toISOString().slice(0,10),errors=[],pages=[],found=new Map();
- let cursors={discounts:1,newest:1},status='ok',saved=0;
+ let cursors={discounts:1,newest:1,ps5:1},status='ok',saved=0;
  try{
   const previous=await sb.select('ps_state?select=value&key=eq.cursors');cursors={...cursors,...previous?.[0]?.value};
   const previousBatch=(await sb.select('ps_state?select=value&key=eq.batch'))?.[0]?.value;
   // Always revisit the first release page so newly listed games are not delayed by a full catalog sweep.
-  const jobs=[{kind:'newest',page:1,advance:false},...['discounts','newest'].flatMap(kind=>Array.from({length:pagesPerKind},()=>({kind,advance:true})))];
+  const jobs=[{kind:'newest',page:1,advance:false},{kind:'ps5',page:1,advance:false},...['discounts','newest','ps5'].flatMap(kind=>Array.from({length:pagesPerKind},()=>({kind,advance:true})))];
   const exhausted=new Set();
   for(const job of jobs){if(exhausted.has(job.kind))continue;const page=job.page||cursors[job.kind];
    try{const feed=await fetchGrid(job.kind,page);for(const item of feed.items)found.set(item.id,item);pages.push({kind:job.kind,page,products:feed.items.length});if(job.advance)cursors[job.kind]=feed.hasMore?page+1:1;if(!feed.hasMore)exhausted.add(job.kind);}
