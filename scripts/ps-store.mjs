@@ -40,6 +40,22 @@ export async function fetchGrid(kind,page,fetchImpl=fetch){
  const g=j.data?.categoryGridRetrieve;if(!g||!Array.isArray(g.products))throw new Error('PS Store katalog yanıtı okunamadı');
  return{items:g.products.map(p=>fromGrid(p)).filter(Boolean),raw:g.products.length,hasMore:g.pageInfo?.isLast===false,total:g.pageInfo?.totalCount??null};
 }
+// İndirim bitiş zamanı kategori listesinde yok; ürün sayfasındaki fiyat nesnelerinde (price.endTime, ms) var.
+// Yalnız aboneliksiz ve fiyatı listedeki indirimli fiyatla birebir aynı olan teklif kabul edilir.
+export function parseEndTime(html,item){
+ const want=Math.round(Number(item?.price)*100);if(!Number.isFinite(want))return null;
+ for(const m of String(html||'').matchAll(/"price":\{"__typename":"Price",([^{}]*?)"endTime":"(\d{12,14})"([^{}]*?)(?:\}|"qualifications")/g)){
+  const body=m[1]+m[3],brand=body.match(/"serviceBranding":\[([^\]]*)\]/)?.[1]||'',value=Number(body.match(/"discountedValue":(\d+)/)?.[1]);
+  if(value!==want||!/^"NONE"$/.test(brand.trim()))continue;
+  const end=new Date(Number(m[2]));if(!isNaN(end))return end.toISOString();
+ }
+ return null;
+}
+export async function fetchEndTime(item,fetchImpl=fetch){
+ const r=await fetchImpl('https://store.playstation.com/tr-tr/product/'+encodeURIComponent(item.id),{headers:{'User-Agent':UA,'Accept-Language':'tr-TR,tr;q=0.9'},signal:AbortSignal.timeout(20000)});
+ if(!r.ok)throw new Error('PS Store ürün sayfası HTTP '+r.status);
+ return parseEndTime(await r.text(),item);
+}
 export async function gql(operationName,variables,sha256Hash,fetchImpl){
  const q=new URLSearchParams({operationName,variables:JSON.stringify(variables),extensions:JSON.stringify({persistedQuery:{version:1,sha256Hash}})});
  const r=await fetchImpl(GQL+'?'+q,{headers:{'User-Agent':UA,'x-psn-store-locale-override':'tr-TR',Accept:'application/json','content-type':'application/json','x-apollo-operation-name':operationName,'apollo-require-preflight':'true',Origin:'https://store.playstation.com',Referer:'https://store.playstation.com/'},signal:AbortSignal.timeout(30000)});
