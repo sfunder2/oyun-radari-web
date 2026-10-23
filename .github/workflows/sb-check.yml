@@ -1,0 +1,29 @@
+name: Supabase check
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data
+          cat > /tmp/p.py <<'PYEOF'
+          import json,urllib.request
+          URL="https://dsosckshigzijnsxmlwh.supabase.co";PUB="sb_publishable_SjkjwIlJ_HFqd5hWhILF5g_6QJThaNO"
+          def rq(path):
+              h={"apikey":PUB,"Authorization":"Bearer "+PUB,"Prefer":"count=exact"}
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request(URL+"/rest/v1/"+path,headers=h),timeout=30);return r.headers.get("content-range"),json.loads(r.read().decode())
+              except urllib.error.HTTPError as e:return None,e.read().decode()[:100]
+          for p in ("steam","xbox","switch"):
+              c,_=rq("store_offers?select=store_id&platform=eq."+p+"&limit=1");print("sayi",p,c)
+          c,r=rq("ps_state?select=value&key=eq.market");print("sayi durum",json.dumps(r,ensure_ascii=False)[:420])
+          c,r=rq("store_offers?select=platform,name,price,currency,discount_percent&platform=eq.steam&order=checked_at.desc&limit=3");print("sayi ornek steam",json.dumps(r,ensure_ascii=False)[:300])
+          c,r=rq("store_offers?select=platform,name,price,currency&platform=eq.xbox&limit=2");print("sayi ornek xbox",json.dumps(r,ensure_ascii=False)[:240])
+          c,r=rq("store_offers?select=platform,name,price,currency&platform=eq.switch&limit=2");print("sayi ornek switch",json.dumps(r,ensure_ascii=False)[:240])
+          PYEOF
+          python3 /tmp/p.py > data/sb-check11.txt 2>&1 || true
+          git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
+          git add data/sb-check11.txt; git commit -qm 'check [skip ci]'; git pull --rebase -q origin main; git push
