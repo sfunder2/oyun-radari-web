@@ -1,7 +1,0 @@
-sayi steam 0-0/558
-sayi xbox 0-0/404
-sayi switch 0-0/538
-sayi durum [{"value": {"stats": {"xbox": 69, "steam": 295, "switch": 300}, "errors": [], "cursors": {"xbox": "eyJIYXNNb3JlIjp0cnVlLCJTa2lwQ291bnQiOjc4LCJUb3RhbENvdW50IjoxNzc3NiwiUHJldmlvdXNQYWdlUHJvZHVjdElkcyI6WyI5UERGUjhKMUpQN1giLCI5UFBGNzJaSDZSUDgiLCI5UEI3NVdGTlBESlMiLCI5UEs0RkQ2RzNDSjciLCI5TjBYUTlaVERTVDUiLCI5TkIzTTMyUUQ0OVEiLCI5TVhUQzBKTTI0WkoiLCI5UDRWNFdKSzJQMTQiLCI5TVNQS1dSTEhRM1ciLCI5TlJMU0ZNMDFYVFAiLCI5UDI1NzhaMDlaSDUiL
-sayi ornek steam [{"platform": "steam", "name": "Dick Wilde 2", "price": 10.49, "currency": "USD", "discount_percent": 0}, {"platform": "steam", "name": "Minute of Islands", "price": 10.49, "currency": "USD", "discount_percent": 0}, {"platform": "steam", "name": "FORECLOSED", "price": 8.99, "currency": "USD", "disco
-sayi ornek xbox [{"platform": "xbox", "name": "Borderlands 3: Ultimate Edition", "price": 141.8, "currency": "TRY"}, {"platform": "xbox", "name": "Tiny Tina's Wonderlands: Next-Level Edition", "price": 209.8, "currency": "TRY"}]
-sayi ornek switch [{"platform": "switch", "name": "Borderlands 3 Ultimate Edition", "price": 17.99, "currency": "USD"}, {"platform": "switch", "name": "DOOM", "price": 19.99, "currency": "USD"}]
