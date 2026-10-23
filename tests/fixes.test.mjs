@@ -10,3 +10,14 @@ const item={id:'EP1_TEST',name:'Test',price:50,checkedAt:'2026-10-22T00:00:00Z'}
 test('batch revisits latest releases and advances persisted cursors',async()=>{const sb=db(),calls=[];const r=await runPsBatch({sb,pagesPerKind:1,sleep:async()=>{},fetchGrid:async(k,p)=>(calls.push([k,p]),{items:[item],hasMore:true})});assert.equal(r.status,'ok');assert.deepEqual(calls,[['newest',1],['ps5',1],['discounts',10],['newest',20],['ps5',1]]);assert.ok(sb.writes.some(([t,rows])=>t==='ps_state'&&rows[0].key==='cursors'&&rows[0].value.newest===21));});
 test('failed persistence cannot advance discovery cursors and releases lease',async()=>{const sb=db(true);let released=false;sb.rpc=async n=>n==='claim_ps_batch'?true:(released=true);const r=await runPsBatch({sb,pagesPerKind:1,sleep:async()=>{},fetchGrid:async()=>({items:[item],hasMore:true})});assert.equal(r.status,'failed');assert.ok(!sb.writes.some(([t,rows])=>t==='ps_state'&&rows[0].key==='cursors'));assert.ok(released);});
 test('overlapping batch is skipped without reading or writing data',async()=>{const sb={rpc:async()=>false};assert.equal((await runPsBatch({sb})).status,'skipped');});
+test('concept backfill adds games missing from category grids and advances its cursor',async()=>{
+ const sb=db();sb.select=async path=>path.includes('cursors')?[{value:{newest:20,discounts:10,ps5:3,concepts:7}}]:path.startsWith('ps_products?select=id')?[{id:'EP_KNOWN'}]:[];
+ const asked=[];
+ const r=await runPsBatch({sb,pagesPerKind:1,sleep:async()=>{},fetchGrid:async()=>({items:[item],hasMore:true}),
+  fetchConcepts:async p=>({concepts:[{id:'1',productIds:['EP_KNOWN','EP_OTHER']},{id:'2',productIds:['EP_ARKHAM','EP_ARKHAM2']},{id:'3',productIds:[]}],hasMore:true}),
+  fetchConceptProducts:async id=>(asked.push(id),[{id:'EP_ARKHAM',name:'Batman: Arkham Collection',price:2099,checkedAt:'2026-10-22T00:00:00Z'}])});
+ assert.equal(r.status,'ok');assert.deepEqual(asked,['EP_ARKHAM']);
+ assert.ok(r.pages.some(p=>p.kind==='concepts'&&p.page===7&&p.products===1));
+ assert.ok(sb.writes.some(([t,rows])=>t==='ps_products'&&rows.some(x=>x.id==='EP_ARKHAM')));
+ assert.ok(sb.writes.some(([t,rows])=>t==='ps_state'&&rows[0].key==='cursors'&&rows[0].value.concepts===8));
+});

@@ -4,6 +4,8 @@ const GQL='https://web.np.playstation.com/api/graphql/v1/op';
 const HASH='9845afc0dbaab4965f6563fffc703f588c8e76792000e8610843b8d3ee9c4c09';
 // newest = PS4 oyunları kategorisi (tarihsel ad), ps5 = PS5 oyunları. PS5'e özel ve PS4 & PS5 paketli oyunlar (ör. ELDEN RING) yalnızca ps5'te listelenir.
 export const CATS={discounts:'3f772501-f6f8-49b7-abac-874a88ca4897',newest:'44d8bb20-653e-431e-8ad0-c0a365f68d2f',ps5:'4cbf39e2-5749-4970-ba81-93a489e4570c'};
+// Tüm oyunlar (concept) listesi: PS4/PS5 ürün listelerinde görünmeyen paketleri/sürümleri (ör. Batman: Arkham Collection) yakalamak için.
+export const CONCEPTS='28c9c2b2-cecc-415c-9a08-482a605cb104',CONCEPT_PRODUCTS_HASH='0a4c9f3693b3604df1c8341fdc3e481f42eeecf961a996baaa65e65a657a6433';
 export const PAGE=100,KEEP=new Set(['FULL_GAME','PREMIUM_EDITION','GAME_BUNDLE']);
 // Arama metni: arayüzdeki (lib/ps-supabase.mjs) norm ile birebir aynı olmalı.
 export const norm=s=>String(s||'').replace(/[™®©]/g,'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('tr').replace(/ı/g,'i').replace(/\s+/g,' ').trim();
@@ -37,4 +39,21 @@ export async function fetchGrid(kind,page,fetchImpl=fetch){
  const g=j.data?.categoryGridRetrieve;if(!g||!Array.isArray(g.products))throw new Error('PS Store katalog yanıtı okunamadı');
  return{items:g.products.map(p=>fromGrid(p)).filter(Boolean),raw:g.products.length,hasMore:g.pageInfo?.isLast===false,total:g.pageInfo?.totalCount??null};
 }
-
+async function gql(operationName,variables,sha256Hash,fetchImpl){
+ const q=new URLSearchParams({operationName,variables:JSON.stringify(variables),extensions:JSON.stringify({persistedQuery:{version:1,sha256Hash}})});
+ const r=await fetchImpl(GQL+'?'+q,{headers:{'User-Agent':UA,'x-psn-store-locale-override':'tr-TR',Accept:'application/json','content-type':'application/json','x-apollo-operation-name':operationName,'apollo-require-preflight':'true',Origin:'https://store.playstation.com',Referer:'https://store.playstation.com/'},signal:AbortSignal.timeout(30000)});
+ if(!r.ok)throw new Error('PS Store '+operationName+' HTTP '+r.status);
+ const j=await r.json();if(j.errors?.length&&!j.data)throw new Error('PS Store '+operationName+': '+String(j.errors[0].message).slice(0,160));
+ return j.data;
+}
+// Concept listesinin bir sayfası: her concept için ürün kimlikleri (fiyat içermez).
+export async function fetchConcepts(page,fetchImpl=fetch){
+ const vars={id:CONCEPTS,pageArgs:{size:PAGE,offset:(page-1)*PAGE},sortBy:null,filterBy:[],facetOptions:[]};
+ const g=(await gql('categoryGridRetrieve',vars,HASH,fetchImpl))?.categoryGridRetrieve;if(!g||!Array.isArray(g.concepts))throw new Error('PS Store concept listesi okunamadı');
+ return{concepts:g.concepts.map(c=>({id:c.id,name:c.name,productIds:(c.products||[]).map(p=>p.id).filter(Boolean)})),hasMore:g.pageInfo?.isLast===false};
+}
+// Bir ürünün concept'indeki satın alınabilir tüm sürümler, liste kaydı biçiminde.
+export async function fetchConceptProducts(productId,fetchImpl=fetch){
+ const d=await gql('metGetConceptByProductIdQuery',{productId},CONCEPT_PRODUCTS_HASH,fetchImpl);
+ return(d?.productRetrieve?.concept?.selectableProducts?.purchasableProducts||[]).map(p=>fromGrid(p)).filter(Boolean);
+}
