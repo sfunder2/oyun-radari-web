@@ -1,0 +1,31 @@
+name: Supabase check
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  c:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data
+          cat > /tmp/p.py <<'PYEOF'
+          import json,urllib.request
+          URL="https://dsosckshigzijnsxmlwh.supabase.co";PUB="sb_publishable_SjkjwIlJ_HFqd5hWhILF5g_6QJThaNO"
+          def req(path,method="GET",body=None,extra=None):
+              h={"apikey":PUB,"Authorization":"Bearer "+PUB,"Content-Type":"application/json"};h.update(extra or {})
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request(URL+path,data=json.dumps(body).encode() if body is not None else None,method=method,headers=h),timeout=30);return r.status,r.read().decode()[:200]
+              except urllib.error.HTTPError as e:return e.code,e.read().decode()[:160]
+          s,t=req("/rest/v1/");spec=json.loads(t) if s==200 else {}
+          paths=[p for p in spec.get("paths",{}) if p!="/"]
+          tables=[p[1:] for p in paths if not p.startswith("/rpc/")];rpcs=[p[5:] for p in paths if p.startswith("/rpc/")]
+          print("TABLO/GORUNUM",len(tables),sorted(tables));print("RPC",sorted(rpcs))
+          for tb in sorted(tables):
+              s,r=req("/rest/v1/"+tb+"?select=*&limit=1");rd=("OKU "+str(s))
+              sw,rw=req("/rest/v1/"+tb,"POST",{},{"Prefer":"return=minimal"})
+              print("AUDIT",tb.ljust(22),rd,"| yazma:",sw,rw[:70].replace(chr(10)," "),"| ilk kayıt anahtarları:",(list(json.loads(r)[0].keys())[:8] if s==200 and r.startswith("[{") else "-"))
+          PYEOF
+          python3 /tmp/p.py > data/sb-audit.txt 2>&1 || true
+          git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
+          git add data/sb-audit.txt; git commit -qm 'check [skip ci]'; git pull --rebase -q origin main; git push
