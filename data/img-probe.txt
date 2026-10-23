@@ -1,4 +1,0 @@
-  File "/tmp/p.py", line 28
-    r=urllib.request.urlopen(urllib.request.Request(REF,headers={"User-Agent":UA}),timeout=30);html=r.read().decode();print("GORSEL site",r.status,len(html),re.findall(r"assets/[^"']+",html)[:4])
-                                                                                                                                                                                    ^
-SyntaxError: unterminated string literal (detected at line 28)
