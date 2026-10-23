@@ -1,7 +1,6 @@
 name: Market catalogs (Steam, Xbox, Switch)
 on:
-  schedule:
-    - cron: '3,18,33,48 * * * *'
+  # Automatic schedule runs in Supabase Cron every 5 minutes (schema-v12.sql). This workflow is the manual fallback.
   workflow_dispatch:
 concurrency:
   group: market-catalogs

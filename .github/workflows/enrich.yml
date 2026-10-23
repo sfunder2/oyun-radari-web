@@ -1,7 +1,6 @@
 name: Enrich games (other stores and scores)
 on:
-  schedule:
-    - cron: '12,27,42,57 * * * *'
+  # Automatic schedule runs in Supabase Cron every 5 minutes (schema-v12.sql). This workflow is the manual fallback.
   workflow_dispatch:
   push:
     paths: ['scripts/**', '.github/workflows/enrich.yml']
