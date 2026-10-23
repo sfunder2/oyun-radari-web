@@ -53,3 +53,9 @@ test('enrich batch: a due calendar refresh runs alone and ends the round',async(
   assert.ok(r.upcoming);assert.equal(sb.calls.patch.length,0);assert.ok(sb.calls.upsert.some(u=>u.t==='ps_state'&&u.rows[0].key==='upcoming'));
  }finally{globalThis.fetch=realFetch}
 });
+test('market batch: epic and gog cursors advance and wrap',async()=>{
+ const sb=fakeSb({'key=eq.market':[{value:{cursors:{epic:4,gog:136}}}]});const seen=[];
+ const r=await runMarketBatch({sb,pages:{epic:2,gog:2},say:()=>{},fetchers:{epic:async c=>{seen.push(['epic',c]);return{rows:[row('epic',c)],hasMore:true}},gog:async c=>{seen.push(['gog',c]);return{rows:[row('gog',c)],hasMore:false}}}});
+ assert.deepEqual(seen,[['epic',4],['gog',136],['epic',5]]);assert.equal(r.status,'ok');assert.deepEqual(Object.keys(r.stats).sort(),['epic','gog']);
+ const state=sb.calls.upsert.find(u=>u.t==='ps_state').rows[0].value;assert.equal(state.cursors.epic,6);assert.equal(state.cursors.gog,0);
+});
