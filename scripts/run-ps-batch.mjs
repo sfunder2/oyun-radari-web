@@ -1,11 +1,11 @@
 import {recordHistory,computeStats} from './ps-history.mjs';
 import {titleKey} from './titles.mjs';
 import {norm} from './ps-store.mjs';
-export async function runPsBatch({sb,fetchGrid,pagesPerKind=4,sleep=ms=>new Promise(r=>setTimeout(r,1000)),clock=()=>new Date(),token=crypto.randomUUID(),engine='github-actions'}){
+export async function runPsBatch({sb,fetchGrid,fetchConcepts,fetchConceptProducts,conceptLimit=20,pagesPerKind=4,sleep=ms=>new Promise(r=>setTimeout(r,1000)),clock=()=>new Date(),token=crypto.randomUUID(),engine='github-actions'}){
  const claimed=await sb.rpc('claim_ps_batch',{lease_token:token});
  if(!claimed)return {status:'skipped',reason:'Önceki fiyat güncellemesi sürüyor'};
  const startedAt=clock().toISOString(),today=new Date(clock().getTime()+3*3600000).toISOString().slice(0,10),errors=[],pages=[],found=new Map();
- let cursors={discounts:1,newest:1,ps5:1},status='ok',saved=0;
+ let cursors={discounts:1,newest:1,ps5:1,concepts:1},status='ok',saved=0;
  try{
   const previous=await sb.select('ps_state?select=value&key=eq.cursors');cursors={...cursors,...previous?.[0]?.value};
   const previousBatch=(await sb.select('ps_state?select=value&key=eq.batch'))?.[0]?.value;
@@ -16,6 +16,15 @@ export async function runPsBatch({sb,fetchGrid,pagesPerKind=4,sleep=ms=>new Prom
    try{const feed=await fetchGrid(job.kind,page);for(const item of feed.items)found.set(item.id,item);pages.push({kind:job.kind,page,products:feed.items.length});if(job.advance)cursors[job.kind]=feed.hasMore?page+1:1;if(!feed.hasMore)exhausted.add(job.kind);}
    catch(e){errors.push({source:job.kind+' sayfa '+page,error:e.message});exhausted.add(job.kind);}
    await sleep(1000);
+  }
+  // Kategori listelerinde hiç görünmeyen oyunlar: concept listesinden eksik olanları tek tek tamamla.
+  if(fetchConcepts&&fetchConceptProducts&&found.size){const page=cursors.concepts;
+   try{const feed=await fetchConcepts(page),ids=feed.concepts.flatMap(c=>c.productIds),known=new Set(found.keys());
+    for(let i=0;i<ids.length;i+=80){const list=ids.slice(i,i+80).map(x=>'"'+x+'"').join(',');for(const row of await sb.select('ps_products?select=id&id=in.('+list+')')||[])known.add(row.id);}
+    const missing=feed.concepts.filter(c=>c.productIds.length&&!c.productIds.some(id=>known.has(id))).slice(0,conceptLimit);let added=0;
+    for(const c of missing){try{for(const item of await fetchConceptProducts(c.productIds[0])){found.set(item.id,item);added++;}}catch(e){errors.push({source:'concept '+c.id,error:e.message});}}
+    pages.push({kind:'concepts',page,products:added});cursors.concepts=feed.hasMore?page+1:1;}
+   catch(e){errors.push({source:'concepts sayfa '+page,error:e.message});}
   }
   if(!found.size)status='failed';
   else{
