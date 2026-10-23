@@ -40,3 +40,8 @@ test('enrich batch: marks processed products, survives failing sources, honors t
   assert.equal(r2.processed,0);assert.equal(sb2.calls.patch.filter(c=>c.b.enriched_at).length,0);   // süre doluysa hiçbir ürün işaretlenmez
  }finally{globalThis.fetch=realFetch}
 });
+test('market batch: per-store page limits',async()=>{
+ const n={steam:0,xbox:0,switch:0};const f=k=>async()=>{n[k]++;return{rows:[row(k,n[k])],hasMore:true,next:'T'}};
+ const r=await runMarketBatch({sb:fakeSb(),pages:{steam:3,xbox:1,switch:0},say:()=>{},fetchers:{steam:f('steam'),xbox:f('xbox'),switch:f('switch')}});
+ assert.deepEqual(n,{steam:3,xbox:1,switch:0});assert.equal(r.status,'ok');
+});

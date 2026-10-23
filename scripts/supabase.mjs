@@ -1,9 +1,15 @@
 // Supabase PostgREST için küçük istemci (SDK gerekmez).
-export function supabase(url,key,fetchImpl=fetch){
+export function supabase(url,key,fetchImpl=fetch,{retries=2,retryDelay=1500}={}){
  const base=url.replace(/\/$/,'')+'/rest/v1/';
  const headers={apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'};
  async function req(method,path,{body,prefer}={}){
-  const r=await fetchImpl(base+path,{method,headers:{...headers,...(prefer?{Prefer:prefer}:{})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(30000)});
+  // 502/503/504 ağ geçidi hataları geçicidir; okuma ve merge-duplicates upsert'leri tekrarlanabilir olduğundan iki kez yeniden denenir.
+  let r;
+  for(let attempt=0;;attempt++){
+   r=await fetchImpl(base+path,{method,headers:{...headers,...(prefer?{Prefer:prefer}:{})},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(30000)});
+   if(![502,503,504].includes(r.status)||attempt>=retries)break;
+   await r.text().catch(()=>{});await new Promise(ok=>setTimeout(ok,retryDelay*(attempt+1)));
+  }
   if(!r.ok)throw new Error(`Supabase ${method} ${path.split('?')[0]} HTTP ${r.status}: ${(await r.text()).slice(0,200)}`);
   const t=await r.text();return t?JSON.parse(t):null;
  }

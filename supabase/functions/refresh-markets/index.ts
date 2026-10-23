@@ -7,6 +7,6 @@ Deno.serve(async req=>{
  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(key))),x=>x.toString(16).padStart(2,'0')).join('');
  if(req.method!=='POST'||hash!==expected)return new Response('Unauthorized',{status:401});
  const sb=supabase(Deno.env.get('SUPABASE_URL'),Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
- try{const result=await runMarketBatch({sb,pages:3,deadlineMs:100000});return Response.json(result,{status:result.status==='failed'?502:200});}
+ try{const result=await runMarketBatch({sb,pages:{steam:10,xbox:20,switch:8},deadlineMs:100000});return Response.json(result,{status:result.status==='failed'?502:200});}
  catch(e){console.error('Market batch:',e.message);return Response.json({error:'Katalog güncellemesi tamamlanamadı'},{status:502});}
 });
