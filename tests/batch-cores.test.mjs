@@ -29,14 +29,15 @@ test('market batch: time budget stops work and leaves the cursor for the next ro
 });
 test('enrich batch: marks processed products, survives failing sources, honors the time budget',async()=>{
  const products=[{id:'EP1',name:'Hades',title_key:null,image:null},{id:'EP2',name:'Celeste',title_key:'celeste',image:null}];
- const sb=fakeSb({'enriched_at=is.null':products});
+ const fresh={'key=eq.upcoming':[{value:{at:new Date().toISOString()}}]};
+ const sb=fakeSb({...fresh,'enriched_at=is.null':products});
  const realFetch=globalThis.fetch;globalThis.fetch=async()=>new Response('x',{status:500});
  try{
   const logs=[];const r=await runEnrichBatch({sb,batch:2,say:m=>logs.push(m),concurrency:2,ocIndex:new Map()});
   assert.equal(r.products,2);assert.equal(r.processed,2);
   const marked=sb.calls.patch.filter(c=>c.b.enriched_at);assert.equal(marked.length,2);assert.ok(marked.every(c=>'store_status' in c.b));
   assert.ok(sb.calls.patch.some(c=>c.b.title_key==='hades'));                    // eksik title_key tamamlandı
-  const sb2=fakeSb({'enriched_at=is.null':products});const r2=await runEnrichBatch({sb:sb2,batch:2,say:()=>{},deadlineMs:-1,ocIndex:new Map()});
+  const sb2=fakeSb({...fresh,'enriched_at=is.null':products});const r2=await runEnrichBatch({sb:sb2,batch:2,say:()=>{},deadlineMs:-1,ocIndex:new Map()});
   assert.equal(r2.processed,0);assert.equal(sb2.calls.patch.filter(c=>c.b.enriched_at).length,0);   // süre doluysa hiçbir ürün işaretlenmez
  }finally{globalThis.fetch=realFetch}
 });
@@ -44,4 +45,11 @@ test('market batch: per-store page limits',async()=>{
  const n={steam:0,xbox:0,switch:0};const f=k=>async()=>{n[k]++;return{rows:[row(k,n[k])],hasMore:true,next:'T'}};
  const r=await runMarketBatch({sb:fakeSb(),pages:{steam:3,xbox:1,switch:0},say:()=>{},fetchers:{steam:f('steam'),xbox:f('xbox'),switch:f('switch')}});
  assert.deepEqual(n,{steam:3,xbox:1,switch:0});assert.equal(r.status,'ok');
+});
+test('enrich batch: a due calendar refresh runs alone and ends the round',async()=>{
+ const realFetch=globalThis.fetch;globalThis.fetch=async()=>new Response('x',{status:500});
+ try{const sb=fakeSb({'enriched_at=is.null':[{id:'EP1',name:'Hades',title_key:null,image:null}]});
+  const r=await runEnrichBatch({sb,batch:1,say:()=>{},ocIndex:new Map()});
+  assert.ok(r.upcoming);assert.equal(sb.calls.patch.length,0);assert.ok(sb.calls.upsert.some(u=>u.t==='ps_state'&&u.rows[0].key==='upcoming'));
+ }finally{globalThis.fetch=realFetch}
 });

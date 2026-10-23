@@ -1,7 +1,8 @@
 import {mergeScores} from './score-merge.mjs';
 import {enrichProduct} from './enrich.mjs';
 import {titleKey} from './titles.mjs';
-import {fetchUpcoming,fetchDetails,fetchNews} from './steam-meta.mjs';
+import {fetchDetails,fetchNews} from './steam-meta.mjs';
+import {refreshUpcoming} from './upcoming.mjs';
 import {fetchAllNews} from './news.mjs';
 import {fetchAccent} from './color.mjs';
 // Zenginleştirme turunun çekirdeği. Hem GitHub Actions (CLI) hem Supabase Edge Function aynı kodu çalıştırır.
@@ -15,6 +16,14 @@ export async function runEnrichBatch({sb,batch=60,say=console.log,deadlineMs=0,a
  const sleep=ms=>new Promise(r=>setTimeout(r,ms)),deadline=deadlineMs?Date.now()+deadlineMs:Infinity;
 let hasMeta=true;
 try{await sb.select('game_meta?select=title_key&limit=1');await sb.select('upcoming_games?select=id&limit=1');}catch(e){if(/404|PGRST205/.test(e.message)){hasMeta=false;say('supabase/schema-v4.sql henüz çalıştırılmamış; tür/tarih/takvim verisi atlanıyor.');}else throw e;}
+// Yaklaşan oyunlar (dört mağaza): günde bir. O tur yalnız takvimi yeniler; ürün zenginleştirme 5 dk sonraki tura kalır (Edge süre sınırı).
+if(hasMeta){
+ const last=(await sb.select('ps_state?select=value&key=eq.upcoming'))?.[0]?.value?.at;
+ if(!last||Date.now()-Date.parse(last)>20*3600e3){
+  try{const u=await refreshUpcoming(sb,{say});say(`Yaklaşan oyunlar: ${u.count}`);return{upcoming:u};}
+  catch(e){say('Yaklaşan oyunlar atlandı: '+e.message.slice(0,120));}
+ }
+}
 // 2) OpenCritic dizinini belleğe al (title_key -> {id,slug}); aynı anahtarda en küçük id korunur
 ocIndex=ocIndex||await loadOcIndex(sb);
 // 3) Sıradaki ürünler: hiç zenginleştirilmemiş olanlar önce (indirimliler en önde), sonra en eskiler
@@ -76,15 +85,6 @@ if(hasMeta){
    say(`Haberler: ${items.length}${errors.length?' · hata: '+errors.join('; '):''}`);
   }
  }catch(e){say('Haberler atlandı: '+e.message.slice(0,120));}
- // Yaklaşan oyunlar: günde bir
- try{
-  const last=(await sb.select('ps_state?select=value&key=eq.upcoming'))?.[0]?.value?.at;
-  if(!last||Date.now()-Date.parse(last)>20*3600e3){
-   const ups=await fetchUpcoming();await sb.upsert('upcoming_games',ups,'id');
-   const today=new Date(Date.now()+3*3600e3).toISOString().slice(0,10);await sb.del(`upcoming_games?release_date=lt.${today}`);
-   await sb.upsert('ps_state',[{key:'upcoming',value:{at:new Date().toISOString(),count:ups.length}}],'key');say(`Yaklaşan oyunlar: ${ups.length}`);
-  }
- }catch(e){say('Yaklaşan oyunlar atlandı: '+e.message.slice(0,120));}
 }
 say(`Ürün: ${products.length} · mağaza teklifi: ${offersN} · puan kaydı: ${scoresN} · kaynak hatası: ${errN}`);
 return{products:products.length,processed:done.length,offers:offersN,scores:scoresN,errors:errN,accents:accents.size};
