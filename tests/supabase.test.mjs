@@ -19,7 +19,7 @@ test('errors include status and table',async()=>{
 test('price parsing: sale, subscription-only discount, free',()=>{
  assert.deepEqual(money({basePriceValue:129900,discountedValue:64950,currencyCode:'TRY'}),{price:649.5,originalPrice:1299,discountPercent:50,endsAt:null});
  const plus=money({basePriceValue:100000,discountedValue:50000,serviceBranding:['PS_PLUS']});assert.equal(plus.price,1000);assert.equal(plus.originalPrice,null);
- assert.equal(money({isFree:true}).price,0);assert.equal(tr('1.299,00 TL'),1299);
+ assert.equal(money({isFree:true}).price,0);assert.equal(money({basePriceValue:0,discountedValue:0}).price,null);assert.equal(money({basePrice:'Ücretsiz'}).price,0);assert.equal(money({basePriceValue:49900,discountedValue:0}).price,0);assert.equal(tr('1.299,00 TL'),1299);
 });
 test('grid mapping keeps games, drops add-ons, builds official url',()=>{
  const g=fromGrid({id:'EP1-X_00-A',name:'Oyun',storeDisplayClassification:'FULL_GAME',platforms:['PS5'],localizedStoreDisplayClassification:'Tam Sürüm Oyun',price:{basePriceValue:50000,discountedValue:50000},media:[{type:'IMAGE',role:'GAMEHUB_COVER_ART',url:'https://i/x.png'}]});

@@ -15,7 +15,8 @@ export function money(p){
  let disc=Number.isFinite(p.discountedValue)?p.discountedValue/100:tr(p.discountedPrice);
  const plusOnly=p.isTiedToSubscription===true||(p.serviceBranding||[]).some(x=>x&&x!=='NONE');
  if(plusOnly||disc===null)disc=base; // abonelik fiyatı karşılaştırmaya alınmaz
- if(p.isFree)return{price:0,originalPrice:null,discountPercent:0,endsAt:null};
+ if(p.isFree||/^(ücretsiz|free)$/i.test(String(p.discountedPrice??p.basePrice??'').trim()))return{price:0,originalPrice:null,discountPercent:0,endsAt:null};
+ if(disc===0&&!(base>0))return{price:null,originalPrice:null,discountPercent:0,endsAt:null}; // ücretsiz işareti ve gerçek bir indirim yokken görünen 0 doğrulanmamış sayılır
  const sale=base!==null&&disc!==null&&disc<base;
  const end=sale&&p.endTime?new Date(Number(p.endTime)||p.endTime):null;
  return{price:disc,originalPrice:sale?base:null,discountPercent:sale?Math.round((1-disc/base)*100):0,endsAt:end&&!isNaN(end)?end.toISOString():null};
