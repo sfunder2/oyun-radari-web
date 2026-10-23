@@ -1,9 +1,10 @@
 // Steam, Xbox, Nintendo Switch, Epic Games Store ve GOG mağaza kataloglarını sayfa sayfa okur -> store_offers satırları.
 import {titleKey} from './titles.mjs';
 import {norm} from './ps-store.mjs';
+import {mapStoreGenres} from './store-genres.mjs';
 const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const strip=s=>String(s||'').replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').replace(/&#39;|&apos;/g,"'").replace(/&quot;/g,'"').replace(/&reg;|&trade;/g,'').replace(/\s+/g,' ').trim();
-const toRow=o=>({platform:o.platform,store_id:String(o.store_id),title_key:titleKey(o.name),name:String(o.name).slice(0,200),name_search:norm(o.name),image:o.image||null,price:o.price,original_price:o.original_price??null,discount_percent:o.discount_percent||0,currency:o.currency,url:o.url,edition:o.edition||null,checked_at:o.checked_at});
+const toRow=o=>({platform:o.platform,store_id:String(o.store_id),title_key:titleKey(o.name),name:String(o.name).slice(0,200),name_search:norm(o.name),image:o.image||null,price:o.price,original_price:o.original_price??null,discount_percent:o.discount_percent||0,currency:o.currency,url:o.url,edition:o.edition||null,checked_at:o.checked_at,...o.labels?mapStoreGenres(o.labels):{}});
 export function parseSteam(j,now=new Date().toISOString()){
  const rows=[];
  for(const m of String(j?.results_html||'').matchAll(/<a\b([^>]*data-ds-appid[^>]*)>([\s\S]*?)<\/a>/g)){
@@ -29,7 +30,7 @@ export function parseXbox(j,now=new Date().toISOString()){
   const a=(j.availabilitySummaries||[]).filter(a=>a.productId===productId&&a.actions?.includes('Purchase')&&a.price?.currency==='TRY'&&Number.isFinite(a.price.listPrice)&&a.price.eligibilityInfo?.eligibility==='None');
   const paid=a.filter(a=>a.price.listPrice>0),pool=paid.length?paid:a.filter(a=>a.price.listPrice===0&&!a.price.hasXPriceOffer);pool.sort((x,y)=>x.price.listPrice-y.price.listPrice);const o=pool[0];if(!o)continue;
   const msrp=o.price.msrp>o.price.listPrice?o.price.msrp:null;
-  rows.push(toRow({platform:'xbox',store_id:productId,name:p.title,image:p.images?.boxArt?.url||p.images?.superHeroArt?.url,price:o.price.listPrice,original_price:msrp,discount_percent:msrp?Math.round((1-o.price.listPrice/msrp)*100):0,currency:'TRY',url:`https://www.xbox.com/tr-TR/games/store/game/${productId}`,edition:p.productKind||'Mağaza ürünü',checked_at:now}));
+  rows.push(toRow({platform:'xbox',store_id:productId,name:p.title,image:p.images?.boxArt?.url||p.images?.superHeroArt?.url,price:o.price.listPrice,original_price:msrp,discount_percent:msrp?Math.round((1-o.price.listPrice/msrp)*100):0,currency:'TRY',url:`https://www.xbox.com/tr-TR/games/store/game/${productId}`,edition:p.productKind||'Mağaza ürünü',labels:p.categories||[],checked_at:now}));
  }
  return{rows,next:c.encodedCT||null,total:c.totalItems||null};
 }
@@ -42,7 +43,7 @@ export function parseSwitch(j,now=new Date().toISOString()){
  const rows=[];
  for(const h of j?.hits||[]){
   if(!Number.isFinite(h.price?.finalPrice)||!h.title)continue;const fin=h.price.finalPrice,reg=h.price.regPrice>fin?h.price.regPrice:null;
-  rows.push(toRow({platform:'switch',store_id:h.urlKey||h.objectID,name:h.title,image:h.productImage?`https://assets.nintendo.com/image/upload/f_auto/q_auto/w_800/${h.productImage}`:null,price:fin,original_price:reg,discount_percent:reg?Math.round((1-fin/reg)*100):0,currency:'USD',url:`https://www.nintendo.com/us/store/products/${encodeURIComponent(h.urlKey||h.objectID)}/`,edition:(h.editions||[]).join(' / ')||'ABD mağazası',checked_at:now}));
+  rows.push(toRow({platform:'switch',store_id:h.urlKey||h.objectID,name:h.title,image:h.productImage?`https://assets.nintendo.com/image/upload/f_auto/q_auto/w_800/${h.productImage}`:null,price:fin,original_price:reg,discount_percent:reg?Math.round((1-fin/reg)*100):0,currency:'USD',url:`https://www.nintendo.com/us/store/products/${encodeURIComponent(h.urlKey||h.objectID)}/`,edition:(h.editions||[]).join(' / ')||'ABD mağazası',labels:[...(h.gameGenreLabels||[]),...(h.gameFeatureLabels||[])],checked_at:now}));
  }
  return{rows,page:j?.page??0,pages:j?.nbPages??0};
 }
@@ -54,7 +55,7 @@ export async function fetchSwitchPage(page,f=fetch){
  if(!r.ok)throw new Error('Nintendo katalog HTTP '+r.status);const out=parseSwitch(await r.json());return{...out,hasMore:out.page+1<out.pages};
 }
 // Epic Games Store TR: mağaza sitesinin GraphQL arama sorgusu (ana oyunlar). Fiyatlar kuruş cinsinden gelir, ondalık sayısı yanıttadır.
-const EPIC_QUERY=`query searchStoreQuery($country:String!,$locale:String,$count:Int,$start:Int,$category:String,$sortBy:String,$sortDir:String){Catalog{searchStore(country:$country,locale:$locale,count:$count,start:$start,category:$category,sortBy:$sortBy,sortDir:$sortDir,allowCountries:$country){elements{title id namespace productSlug urlSlug offerType keyImages{type url} catalogNs{mappings(pageType:"productHome"){pageSlug pageType}} offerMappings{pageSlug pageType} price(country:$country){totalPrice{discountPrice originalPrice currencyCode currencyInfo{decimals}}}} paging{count total}}}}`;
+const EPIC_QUERY=`query searchStoreQuery($country:String!,$locale:String,$count:Int,$start:Int,$category:String,$sortBy:String,$sortDir:String){Catalog{searchStore(country:$country,locale:$locale,count:$count,start:$start,category:$category,sortBy:$sortBy,sortDir:$sortDir,allowCountries:$country){elements{title id namespace productSlug urlSlug offerType tags{name groupName} keyImages{type url} catalogNs{mappings(pageType:"productHome"){pageSlug pageType}} offerMappings{pageSlug pageType} price(country:$country){totalPrice{discountPrice originalPrice currencyCode currencyInfo{decimals}}}} paging{count total}}}}`;
 const epicSlug=e=>[e.catalogNs?.mappings?.[0]?.pageSlug,e.offerMappings?.[0]?.pageSlug,e.productSlug?.replace(/\/home$/,''),e.urlSlug].find(s=>/^[a-zA-Z0-9/_-]+$/.test(s||''));
 const epicImage=e=>['OfferImageWide','DieselStoreFrontWide','Thumbnail','OfferImageTall'].map(t=>e.keyImages?.find(x=>x.type===t)?.url).find(Boolean)||null;
 export function parseEpic(j,now=new Date().toISOString()){
@@ -64,7 +65,7 @@ export function parseEpic(j,now=new Date().toISOString()){
   const t=e.price?.totalPrice,slug=epicSlug(e);if(!t||!e.title||!e.id||!slug||!['TRY','USD'].includes(t.currencyCode))continue;
   const d=10**(t.currencyInfo?.decimals??2),fin=Number(t.discountPrice)/d,base=Number(t.originalPrice)/d;if(!Number.isFinite(fin)||fin<0)continue;
   const orig=base>fin?base:null;
-  rows.push(toRow({platform:'epic',store_id:e.id,name:e.title,image:epicImage(e),price:fin,original_price:orig,discount_percent:orig?Math.round((1-fin/orig)*100):0,currency:t.currencyCode,url:'https://store.epicgames.com/tr/p/'+slug,edition:'Ana oyun',checked_at:now}));
+  rows.push(toRow({platform:'epic',store_id:e.id,name:e.title,image:epicImage(e),price:fin,original_price:orig,discount_percent:orig?Math.round((1-fin/orig)*100):0,currency:t.currencyCode,url:'https://store.epicgames.com/tr/p/'+slug,edition:'Ana oyun',labels:(e.tags||[]).filter(x=>x&&['genre','feature'].includes(x.groupName)).map(x=>x.name),checked_at:now}));
  }
  return{rows,total:Number(s.paging?.total)||0};
 }
@@ -81,7 +82,7 @@ export function parseGog(j,now=new Date().toISOString()){
   const fm=p.price?.finalMoney,bm=p.price?.baseMoney,fin=Number(fm?.amount),base=Number(bm?.amount);
   if(!p.id||!p.title||!fm||!Number.isFinite(fin)||fin<0||!['TRY','USD'].includes(fm.currency))continue;
   const orig=base>fin?base:null;
-  rows.push(toRow({platform:'gog',store_id:p.id,name:p.title,image:p.coverHorizontal||p.coverVertical||null,price:fin,original_price:orig,discount_percent:orig?Math.round((1-fin/orig)*100):0,currency:fm.currency,url:/^https:\/\/www\.gog\.com\//.test(p.storeLink||'')?p.storeLink:'https://www.gog.com/en/game/'+encodeURIComponent(p.slug||p.id),edition:'Ana oyun',checked_at:now}));
+  rows.push(toRow({platform:'gog',store_id:p.id,name:p.title,image:p.coverHorizontal||p.coverVertical||null,price:fin,original_price:orig,discount_percent:orig?Math.round((1-fin/orig)*100):0,currency:fm.currency,url:/^https:\/\/www\.gog\.com\//.test(p.storeLink||'')?p.storeLink:'https://www.gog.com/en/game/'+encodeURIComponent(p.slug||p.id),edition:'Ana oyun',labels:[...(p.genres||[]),...(p.tags||[])].map(x=>x?.name),checked_at:now}));
  }
  return{rows,page:Number(j.currentPage)||null,pages:Number(j.pages)||0,total:Number(j.productCount)||0};
 }

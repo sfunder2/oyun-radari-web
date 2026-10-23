@@ -47,6 +47,7 @@ from ps_products p
 left join game_scores gs on gs.title_key = p.title_key
 left join game_meta   gm on gm.title_key = p.title_key;
 
+-- search_games: tam library kaydı (mağaza teklifleri dahil) yalnız sayfadaki 25 sonuç için kurulur; tüm katalog için kurmak süreyi ikiye katlıyordu.
 create or replace function public.search_games(
  query_text text default '', page_number integer default 0, page_size integer default 25,
  filter_options jsonb default '{}'::jsonb, sort_order text default 'default', deals_only boolean default false
@@ -60,7 +61,7 @@ declare
 begin
  q:=trim(regexp_replace(q,'\s+',' ','g'));
  with base as (
-  select l.*,p.store_status,p.hero_url,p.accent_color,gm.tags,gm.categories,
+  select l.id,l.name,l.name_search,l.title_key,l.genres,l.developers,l.release_date,l.turkish,l.best_score,l.price,l.original_price,l.discount_percent,l.edition,l.first_seen,l.scores,gm.tags,gm.categories,
    (select count(*) from public.radar_posts rp where rp.game_id=l.id and rp.kind='review') as discussion_count,
    regexp_replace(p.name_search,'[^a-z0-9 ]','','g') as searchable,
    public.taste_score(l.genres,coalesce(gm.tags,'{}')||coalesce(gm.categories,'{}')||coalesce(l.ps_tags,'{}'),l.best_score,l.discount_percent,pref_g,pref_t) as taste_score
@@ -101,7 +102,7 @@ begin
   select * from sorted where result_number>greatest(0,least(page_number,10000))*greatest(1,least(page_size,50))
    and result_number<=(greatest(0,least(page_number,10000))+1)*greatest(1,least(page_size,50))
  ) select jsonb_build_object(
-  'items',coalesce((select jsonb_agg(to_jsonb(p)-'searchable'-'relevance'-'token_match'-'similarity_score'-'result_number'-'taste_score' order by result_number) from paged p),'[]'::jsonb),
+  'items',coalesce((select jsonb_agg((select to_jsonb(r) from (select l2.*,p2.store_status,p2.hero_url,p2.accent_color,gm2.tags,gm2.categories,p.discussion_count from public.library l2 join public.ps_products p2 using(id) left join public.game_meta gm2 on gm2.title_key=l2.title_key where l2.id=p.id) r) order by result_number) from paged p),'[]'::jsonb),
   'total',(select count(*) from eligible),
   'fuzzy',q<>'' and not exists(select 1 from matched where token_match) and exists(select 1 from eligible),
   'query',q,
@@ -113,7 +114,8 @@ $$;
 revoke all on function public.search_games(text,integer,integer,jsonb,text,boolean) from public;
 grant execute on function public.search_games(text,integer,integer,jsonb,text,boolean) to anon,authenticated,service_role;
 
--- search_market: canlıdaki tanımın (Epic/GOG marketleri ve Tümü'nde en ucuz teklif tekilleştirmesi dahil) üzerine kurulur.
+-- search_market: PS satırlarının tam kaydı (to_jsonb(library)) yalnız sayfadaki sonuçlar için kurulur; 17 bin satırda kurmak sorguyu ~7 sn'ye çıkarıp anon zaman sınırını (3 sn) aşıyordu.
+-- canlıdaki tanımın (Epic/GOG marketleri ve Tümü'nde en ucuz teklif tekilleştirmesi dahil) üzerine kurulur.
 create or replace function public.search_market(
  market text default 'all', query_text text default '', page_number integer default 0, page_size integer default 25,
  filter_options jsonb default '{}'::jsonb, sort_order text default 'default', deals_only boolean default false
@@ -149,7 +151,7 @@ begin
          regexp_replace(coalesce(l.name_search,''),'[^a-z0-9 ]','','g') as searchable, l.image, l.price, l.original_price, l.discount_percent, l.currency, l.url, l.edition,
          l.checked_at, l.first_seen, l.mc_score, l.oc_score, null::integer as opencritic_reviews, l.best_score, l.genres, l.release_date, l.developers,
          l.turkish, l.turkish_audio, l.age, coalesce(lm.tags,'{}') as tags, coalesce(lm.tags,'{}') || coalesce(lm.categories,'{}') || coalesce(l.ps_tags,'{}') as taste_tags,
-         l.price as price_try, to_jsonb(l) || jsonb_build_object('tags', coalesce(lm.tags,'{}'), 'categories', coalesce(lm.categories,'{}')) as library_row
+         l.price as price_try, null::jsonb as library_row
   from library l left join game_meta lm on lm.title_key = l.title_key where m = 'all'
  ), base as (
   select * from market_rows union all select * from ps_rows
@@ -172,7 +174,7 @@ begin
   from filtered f
  ), eligible as (
   -- Tümü: aynı oyun birden çok PC/konsol mağazasında filtreleri geçiyorsa yalnız en ucuz teklif listelenir; diğerleri 'offers' içinde kalır.
-  select * from (select mt.*, row_number() over (partition by case when m = 'all' and mt.library_row is null and mt.title_key <> '' then mt.title_key else mt.id end
+  select * from (select mt.*, row_number() over (partition by case when m = 'all' and mt.platform <> 'playstation' and mt.title_key <> '' then mt.title_key else mt.id end
                                                  order by mt.price_try asc nulls last, mt.id) as store_rank
                  from matched mt where mt.token_match) x
   where store_rank = 1
@@ -192,7 +194,7 @@ begin
  )
  select jsonb_build_object(
   'items', coalesce((select jsonb_agg(
-     case when p.library_row is not null then p.library_row || jsonb_build_object('platform','playstation')
+     case when p.platform = 'playstation' then (select to_jsonb(l) || jsonb_build_object('tags', coalesce(lm.tags,'{}'), 'categories', coalesce(lm.categories,'{}'), 'platform', 'playstation') from library l left join game_meta lm on lm.title_key = l.title_key where l.id = p.id)
      else jsonb_build_object('id',p.id,'platform',p.platform,'store_id',p.store_id,'title_key',p.title_key,'name',p.name,'image',p.image,'price',p.price,
        'original_price',p.original_price,'discount_percent',p.discount_percent,'currency',p.currency,'url',p.url,'edition',p.edition,'checked_at',p.checked_at,
        'first_seen',p.first_seen,'mc_score',p.mc_score,'oc_score',p.oc_score,'opencritic_reviews',p.opencritic_reviews,'best_score',p.best_score,
