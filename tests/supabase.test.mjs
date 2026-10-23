@@ -39,3 +39,11 @@ test('preview video is the first PREVIEW mp4',()=>{
   await sb.upsert('game_meta',[{id:'a',name:'A',news:[]},{id:'b',name:'B'},{id:'c',name:'C',news:[]}],'id');
   assert.equal(bodies.length,2);for(const rows of bodies)for(const row of rows)assert.deepEqual(Object.keys(row).sort(),Object.keys(rows[0]).sort());assert.ok(!('news' in bodies.flat().find(x=>x.id==='b')));
  });
+test('supabase client retries gateway timeouts, not client errors',async()=>{
+ let calls=0;const sb=supabase('https://example.test','key',async()=>{calls++;return new Response(calls<3?'{"message":"Gateway Timeout"}':'',{status:calls<3?504:201});},{retryDelay:0});
+ await sb.upsert('store_offers',[{platform:'steam',store_id:'1'}],'platform,store_id');assert.equal(calls,3);
+ let bad=0;const sb2=supabase('https://example.test','key',async()=>{bad++;return new Response('no',{status:400});},{retryDelay:0});
+ await assert.rejects(sb2.select('t?select=*'),/HTTP 400/);assert.equal(bad,1);
+ let down=0;const sb3=supabase('https://example.test','key',async()=>{down++;return new Response('x',{status:504});},{retryDelay:0});
+ await assert.rejects(sb3.select('t?select=*'),/HTTP 504/);assert.equal(down,3);
+});
