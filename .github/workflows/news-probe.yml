@@ -1,0 +1,31 @@
+name: news probe
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          mkdir -p data
+          cat > probe-news.mjs <<'JSEOF'
+          import {fetchAllNews} from './scripts/news.mjs';import {supabase} from './scripts/supabase.mjs';
+          const out=[];const say=m=>{console.log(m);out.push(m)};
+          const {items,errors}=await fetchAllNews();say('haber: '+items.length+' | hata: '+JSON.stringify(errors));
+          const sb=supabase(process.env.SUPABASE_URL,process.env.SUPABASE_SERVICE_KEY);
+          const st=await sb.select('ps_state?select=value,updated_at&key=eq.news');say('news durum: '+JSON.stringify(st));
+          try{await sb.upsert('news_items',items.slice(0,2).map(i=>({...i,checked_at:new Date().toISOString()})),'url');say('news_items upsert: ok')}catch(e){say('news_items upsert HATA: '+e.message)}
+          const last=st?.[0]?.value?.at;say('last='+last+' fark(saat)='+((Date.now()-Date.parse(last))/3600e3).toFixed(1));
+          const meta=await sb.select('game_meta?select=title_key&limit=1').catch(e=>'game_meta HATA '+e.message);say('hasMeta: '+JSON.stringify(meta).slice(0,60));
+          import {writeFileSync} from 'node:fs';writeFileSync('data/news-probe.txt',out.join('\n'));
+          JSEOF
+          node probe-news.mjs > /tmp/o.txt 2>&1 || cat /tmp/o.txt > data/news-probe.txt
+          git config user.name price-bot; git config user.email price-bot@users.noreply.github.com
+          rm probe-news.mjs; git add data/news-probe.txt; git commit -qm 'probe [skip ci]'; git pull --rebase -q origin main; git push
