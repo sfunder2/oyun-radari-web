@@ -35,7 +35,7 @@ export async function runPsBatch({sb,fetchGrid,fetchConcepts,fetchConceptProduct
    for(const it of found.values()){
     const h=hist.items[it.id],stats=computeStats(h,it,today)||{};
     products.push({id:it.id,name:it.name,name_search:norm(it.name),title_key:titleKey(it.name),preview_url:it.previewUrl,hero_url:it.heroUrl,image:it.image,edition:it.edition,price:it.price,original_price:it.originalPrice,discount_percent:it.discountPercent,discount_ends_at:it.discountEndsAt,currency:'TRY',url:it.url,checked_at:it.checkedAt,lowest_ever:stats.lowestEver??null,lowest_30d:stats.lowest30d??null,history_days:stats.historyDays??0,historical_low:!!stats.historicalLow,low_30d:!!stats.low30d,price_rise:stats.priceRise??null});
-    const last=h.p.at(-1);if(last[0]===today&&JSON.stringify(last)!==before.get(it.id))historyRows.push({product_id:it.id,day:last[0],price:last[1],base_price:last[2],low_price:last[3]??last[1]});
+    const last=h?.p.at(-1);if(last&&last[0]===today&&JSON.stringify(last)!==before.get(it.id))historyRows.push({product_id:it.id,day:last[0],price:last[1],base_price:last[2],low_price:last[3]??last[1]});
    }
    await sb.upsert('ps_products',products,'id');await sb.upsert('ps_price_history',historyRows,'product_id,day');saved=products.length;
   }
