@@ -13,23 +13,53 @@ export function parseReleaseDate(text){
  return new Date(Date.UTC(y,mo,d)).toISOString().slice(0,10);
 }
 const strip=s=>String(s||'').replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').replace(/&#39;/g,"'").replace(/&quot;/g,'"').trim();
+// "$29.99" | "₺1.299,00" | "Free" -> sayı; para birimi işaretten anlaşılır
+export function parseMoney(text){
+ const t=strip(text);if(!t)return null;
+ if(/free|ücretsiz/i.test(t))return{value:0,currency:null};
+ const currency=/\$|USD/.test(t)?'USD':/₺|TL|TRY/.test(t)?'TRY':/€/.test(t)?'EUR':null;
+ let n=t.replace(/[^\d.,]/g,'');if(!n)return null;
+ if(/,\d{2}$/.test(n))n=n.replace(/\./g,'').replace(',','.');else n=n.replace(/,/g,'');
+ const value=Number(n);return Number.isFinite(value)?{value,currency}:null;
+}
+// Arama satırındaki ön sipariş fiyatı. Fiyat yoksa (henüz satışta değil) hepsi null döner.
+export function parsePrice(body){
+ const fin=parseMoney(body.match(/discount_final_price[^>]*>([\s\S]*?)<\/div>/)?.[1]);
+ const cents=body.match(/data-price-final="(\d+)"/)?.[1];
+ if(!fin&&cents===undefined)return{price:null,original_price:null,discount_percent:0,currency:null};
+ const price=cents!==undefined?Number(cents)/100:fin.value,currency=fin?.currency||null;
+ if(price>0&&!currency)return{price:null,original_price:null,discount_percent:0,currency:null};
+ const orig=parseMoney(body.match(/discount_original_price[^>]*>([\s\S]*?)<\/div>/)?.[1]);
+ const pct=Number(body.match(/data-discount="(\d+)"/)?.[1]||0);
+ return{price,original_price:orig&&orig.value>price?orig.value:null,discount_percent:pct,currency:currency||'USD'};
+}
 export function parseUpcoming(html,now=new Date().toISOString()){
  const out=[];
  for(const m of String(html).matchAll(/<a\b[^>]*data-ds-appid="(\d+)"[^>]*>([\s\S]*?)<\/a>/g)){
   const body=m[2],name=strip(body.match(/class="title"[^>]*>([\s\S]*?)<\/span>/)?.[1]);if(!name)continue;
   const rel=strip(body.match(/search_released[^>]*>([\s\S]*?)<\/div>/)?.[1]);
   const img=body.match(/<img[^>]*src="([^"]+)"/)?.[1];
-  out.push({id:m[1],name,image:img||null,release_text:rel||null,release_date:parseReleaseDate(rel),url:`https://store.steampowered.com/app/${m[1]}/`,checked_at:now});
+  out.push({id:m[1],name,image:img||null,release_text:rel||null,release_date:parseReleaseDate(rel),url:`https://store.steampowered.com/app/${m[1]}/`,checked_at:now,...parsePrice(body),wishlist_rank:null});
  }
  return out;
 }
-export async function fetchUpcoming(pages=3,f=fetch){
+// İki liste birleşir: yakın tarihli popüler çıkışlar + en çok istek listesine eklenen (aylar sonrası dahil) oyunlar.
+// wishlist_rank yalnız ikinci listede sıra numarasıdır; takvimde "çok beklenen" olarak gösterilir.
+export async function fetchUpcoming(pages=6,wishPages=3,f=fetch){
  const all=new Map();
- for(let i=0;i<pages;i++){
-  const r=await f(`https://store.steampowered.com/search/results/?query&start=${i*50}&count=50&filter=popularcomingsoon&cc=tr&l=english&infinite=1`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(25000)});
+ const page=async(filter,i)=>{
+  const r=await f(`https://store.steampowered.com/search/results/?query&start=${i*50}&count=50&filter=${filter}&cc=tr&l=english&infinite=1`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(25000)});
   if(!r.ok)throw new Error('Steam yaklaşan oyunlar HTTP '+r.status);
-  for(const g of parseUpcoming((await r.json()).results_html))all.set(g.id,g);
-  await new Promise(x=>setTimeout(x,800));
+  const rows=parseUpcoming((await r.json()).results_html);await new Promise(x=>setTimeout(x,800));return rows;
+ };
+ for(let i=0;i<pages;i++){const rows=await page('popularcomingsoon',i);for(const g of rows)all.set(g.id,g);if(rows.length<50)break;}
+ let rank=0;
+ for(let i=0;i<wishPages;i++){
+  let rows;try{rows=await page('popularwishlist',i);}catch{break;}
+  // Bu liste çıkmış oyunları da içerebilir; yalnız tarihi gelecekte veya belirsiz olanlar alınır
+  const today=new Date(Date.now()+3*3600e3).toISOString().slice(0,10);
+  for(const g of rows){rank++;if(g.release_date&&g.release_date<today)continue;all.set(g.id,{...g,wishlist_rank:rank});}
+  if(rows.length<50)break;
  }
  return[...all.values()];
 }
