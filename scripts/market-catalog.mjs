@@ -1,4 +1,4 @@
-// Steam, Xbox ve Nintendo Switch mağaza kataloglarını sayfa sayfa okur -> store_offers satırları.
+// Steam, Xbox, Nintendo Switch, Epic Games Store ve GOG mağaza kataloglarını sayfa sayfa okur -> store_offers satırları.
 import {titleKey} from './titles.mjs';
 import {norm} from './ps-store.mjs';
 const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
@@ -52,4 +52,41 @@ export async function fetchSwitchPage(page,f=fetch){
  const p=new URLSearchParams({'x-algolia-application-id':NA,'x-algolia-api-key':NK,hitsPerPage:'100',page:String(page),query:'',filters:'platform:"Nintendo Switch"'});
  const r=await f(`https://${NA.toLowerCase()}-dsn.algolia.net/1/indexes/store_game_en_us?${p}`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(25000)});
  if(!r.ok)throw new Error('Nintendo katalog HTTP '+r.status);const out=parseSwitch(await r.json());return{...out,hasMore:out.page+1<out.pages};
+}
+// Epic Games Store TR: mağaza sitesinin GraphQL arama sorgusu (ana oyunlar). Fiyatlar kuruş cinsinden gelir, ondalık sayısı yanıttadır.
+const EPIC_QUERY=`query searchStoreQuery($country:String!,$locale:String,$count:Int,$start:Int,$category:String,$sortBy:String,$sortDir:String){Catalog{searchStore(country:$country,locale:$locale,count:$count,start:$start,category:$category,sortBy:$sortBy,sortDir:$sortDir,allowCountries:$country){elements{title id namespace productSlug urlSlug offerType keyImages{type url} catalogNs{mappings(pageType:"productHome"){pageSlug pageType}} offerMappings{pageSlug pageType} price(country:$country){totalPrice{discountPrice originalPrice currencyCode currencyInfo{decimals}}}} paging{count total}}}}`;
+const epicSlug=e=>[e.catalogNs?.mappings?.[0]?.pageSlug,e.offerMappings?.[0]?.pageSlug,e.productSlug?.replace(/\/home$/,''),e.urlSlug].find(s=>/^[a-zA-Z0-9/_-]+$/.test(s||''));
+const epicImage=e=>['OfferImageWide','DieselStoreFrontWide','Thumbnail','OfferImageTall'].map(t=>e.keyImages?.find(x=>x.type===t)?.url).find(Boolean)||null;
+export function parseEpic(j,now=new Date().toISOString()){
+ const s=j?.data?.Catalog?.searchStore;if(!s)throw new Error('Epic kataloğu okunamadı'+(j?.errors?.[0]?.message?': '+String(j.errors[0].message).slice(0,80):''));
+ const rows=[];
+ for(const e of s.elements||[]){
+  const t=e.price?.totalPrice,slug=epicSlug(e);if(!t||!e.title||!e.id||!slug||!['TRY','USD'].includes(t.currencyCode))continue;
+  const d=10**(t.currencyInfo?.decimals??2),fin=Number(t.discountPrice)/d,base=Number(t.originalPrice)/d;if(!Number.isFinite(fin)||fin<0)continue;
+  const orig=base>fin?base:null;
+  rows.push(toRow({platform:'epic',store_id:e.id,name:e.title,image:epicImage(e),price:fin,original_price:orig,discount_percent:orig?Math.round((1-fin/orig)*100):0,currency:t.currencyCode,url:'https://store.epicgames.com/tr/p/'+slug,edition:'Ana oyun',checked_at:now}));
+ }
+ return{rows,total:Number(s.paging?.total)||0};
+}
+export async function fetchEpicPage(page,size=40,f=fetch){
+ const variables={country:'TR',locale:'tr',count:size,start:page*size,category:'games/edition/base',sortBy:'title',sortDir:'ASC'};
+ const r=await f('https://store.epicgames.com/graphql',{method:'POST',headers:{'Content-Type':'application/json;charset=UTF-8','User-Agent':UA,Origin:'https://store.epicgames.com',Referer:'https://store.epicgames.com/tr/browse'},body:JSON.stringify({query:EPIC_QUERY,variables}),signal:AbortSignal.timeout(25000)});
+ if(!r.ok)throw new Error('Epic katalog HTTP '+r.status);const out=parseEpic(await r.json());return{...out,hasMore:(page+1)*size<out.total};
+}
+// GOG TR: herkese açık katalog servisi, TL fiyatlar. Yalnız oyunlar (paket ve DLC hariç), ada göre sabit sıralama.
+export function parseGog(j,now=new Date().toISOString()){
+ if(!Array.isArray(j?.products))throw new Error('GOG kataloğu okunamadı');
+ const rows=[];
+ for(const p of j.products){
+  const fm=p.price?.finalMoney,bm=p.price?.baseMoney,fin=Number(fm?.amount),base=Number(bm?.amount);
+  if(!p.id||!p.title||!fm||!Number.isFinite(fin)||fin<0||!['TRY','USD'].includes(fm.currency))continue;
+  const orig=base>fin?base:null;
+  rows.push(toRow({platform:'gog',store_id:p.id,name:p.title,image:p.coverHorizontal||p.coverVertical||null,price:fin,original_price:orig,discount_percent:orig?Math.round((1-fin/orig)*100):0,currency:fm.currency,url:/^https:\/\/www\.gog\.com\//.test(p.storeLink||'')?p.storeLink:'https://www.gog.com/en/game/'+encodeURIComponent(p.slug||p.id),edition:'Ana oyun',checked_at:now}));
+ }
+ return{rows,page:Number(j.currentPage)||null,pages:Number(j.pages)||0,total:Number(j.productCount)||0};
+}
+export async function fetchGogPage(page,f=fetch){
+ const p=new URLSearchParams({limit:'48',order:'asc:title',productType:'in:game',page:String(page+1),countryCode:'TR',locale:'en-US',currencyCode:'TRY'});
+ const r=await f('https://catalog.gog.com/v1/catalog?'+p,{headers:{'User-Agent':UA,Accept:'application/json'},signal:AbortSignal.timeout(25000)});
+ if(!r.ok)throw new Error('GOG katalog HTTP '+r.status);const out=parseGog(await r.json());return{...out,hasMore:page+1<out.pages};
 }

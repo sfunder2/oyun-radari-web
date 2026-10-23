@@ -1,16 +1,19 @@
-import {fetchSteamPage,fetchXboxPage,fetchSwitchPage} from './market-catalog.mjs';
-// Her turda üç mağazanın katalogundan birkaç sayfa okunur; imleçler ps_state.market içinde saklanır, tur bitince başa dönülür.
+import {fetchSteamPage,fetchXboxPage,fetchSwitchPage,fetchEpicPage,fetchGogPage} from './market-catalog.mjs';
+// Her turda mağazaların (Steam, Xbox, Switch, Epic, GOG) katalogundan birkaç sayfa okunur; imleçler ps_state.market içinde saklanır, tur bitince başa dönülür.
 // GitHub Actions (CLI) ve Supabase Edge Function aynı çekirdeği çalıştırır.
-export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,fetchers={steam:fetchSteamPage,xbox:fetchXboxPage,switch:fetchSwitchPage}}){
+export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,fetchers={steam:fetchSteamPage,xbox:fetchXboxPage,switch:fetchSwitchPage,epic:fetchEpicPage,gog:fetchGogPage}}){
  const sleep=ms=>new Promise(r=>setTimeout(r,ms)),deadline=deadlineMs?Date.now()+deadlineMs:Infinity;
  const saved=(await sb.select('ps_state?select=value&key=eq.market'))?.[0]?.value||{};
- const cur={steam:0,xbox:'',switch:0,...saved.cursors},stats={},errors=[];
+ const cur={steam:0,xbox:'',switch:0,epic:0,gog:0,...saved.cursors},stats={},errors=[];
  const jobs={ // wrapped: katalog bitti, imleç başa döndü; bu tur o mağaza için tamam
   steam:async()=>{const r=await fetchers.steam(cur.steam),wrapped=!(r.hasMore&&r.rows.length);cur.steam=wrapped?0:cur.steam+1;return{rows:r.rows,wrapped}},
   xbox:async()=>{const r=await fetchers.xbox(cur.xbox),wrapped=!r.hasMore;cur.xbox=wrapped?'':r.next;return{rows:r.rows,wrapped}},
   switch:async()=>{const r=await fetchers.switch(cur.switch),wrapped=!(r.hasMore&&r.rows.length);cur.switch=wrapped?0:cur.switch+1;return{rows:r.rows,wrapped}},
+  epic:async()=>{const r=await fetchers.epic(cur.epic),wrapped=!(r.hasMore&&r.rows.length);cur.epic=wrapped?0:cur.epic+1;return{rows:r.rows,wrapped}},
+  gog:async()=>{const r=await fetchers.gog(cur.gog),wrapped=!(r.hasMore&&r.rows.length);cur.gog=wrapped?0:cur.gog+1;return{rows:r.rows,wrapped}},
  };
- // Üç mağaza aynı anda okunur (farklı sunucular); her mağazanın tur başına sayfa sınırı ayrı verilebilir: {steam:10,xbox:20,switch:8}.
+ for(const market of Object.keys(jobs))if(!fetchers[market])delete jobs[market]; // verilmeyen mağaza bu turda atlanır
+ // Mağazalar aynı anda okunur (farklı sunucular); her mağazanın tur başına sayfa sınırı ayrı verilebilir: {steam:10,xbox:20,switch:8}.
  const limit=market=>typeof pages==='object'?Number(pages[market]||0):pages;
  await Promise.all(Object.entries(jobs).map(async([market,job])=>{
   stats[market]=0;
