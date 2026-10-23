@@ -55,9 +55,9 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | XP / seviye | Tekrarlı tıklamalarla XP çoğaltılamaz; kişisel, 1–99 seviye. |
 | Rozetler | Gerçek kişisel ziyaret, tür, tamamlanan oyun, seri ve Top 10 eşikleri. |
 | Hype | Hesap başına oyun başına en fazla 5 ortak puan; girişsiz heyecan yalnız cihazda. Tek ortak istekle yüklenir. |
-| Ne oynasam testi | Dört soru; ruh hali, konsol, puan ve varsa kişisel süre kayıtları. |
+| Ne oynasam testi | Dört soru; ruh hali, mağaza (PlayStation, Steam, Xbox, Switch, Epic, GOG ya da hepsi), puan ve varsa kişisel süre kayıtları. |
 | Sürpriz slot | Gerçek katalog kapaklarından rastgele seçim; bahis/ödül yok. |
-| Günün oyunu | Yüksek puanlı katalog içinden tarihe bağlı günlük seçim. |
+| Günün oyunu | Her mağazadan sırayla seçilen yüksek puanlı oyunlar; oyuncu tarzı seçildiyse tarza uyanlar. Tarihe bağlı günlük seçim. |
 | Versus | Ortak oy, kullanıcı başına tek seçim; yüzdeler oy verdikten sonra açılır. |
 | Easter egg | “do a barrel roll” komutu; azaltılmış hareket tercihi uygulanır. |
 | Backlog görevi | Gerçek kişisel bitirme oranı, oynadım işaretinde konfeti. |
