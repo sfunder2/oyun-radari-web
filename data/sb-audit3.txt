@@ -1,0 +1,20 @@
+AUDIT collector_leases   oku: 401 | anon ekleme: 401 REDDEDİLDİ | sütunlar: -
+AUDIT game_meta          oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: ['title_key', 'steam_appid', 'genres', 'release_date', 'release_text', 'developers', 'publishers', 'turkish', 'turkish_audio']
+AUDIT game_scores        oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: ['title_key', 'metacritic', 'metacritic_platform', 'metacritic_url', 'opencritic', 'opencritic_reviews', 'opencritic_url', 'checked_at', 'metacritic_checked_at']
+AUDIT library            oku: 200 | anon ekleme: 500 !!! {"code":"55000","details":"Views that do not select from a s | sütunlar: ['id', 'name', 'name_search', 'image', 'edition', 'price', 'original_price', 'discount_percent', 'discount_ends_at']
+AUDIT news_items         oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: ['url', 'source', 'title', 'published_at', 'checked_at']
+AUDIT oc_index           oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: ['id', 'slug', 'title_key']
+AUDIT ps_price_history   oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: ['product_id', 'day', 'price', 'base_price', 'low_price']
+AUDIT ps_products        oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: ['id', 'name', 'name_search', 'image', 'edition', 'price', 'original_price', 'discount_percent', 'discount_ends_at']
+AUDIT ps_state           oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: ['key', 'value', 'updated_at']
+AUDIT radar_follows      oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: (boş)
+AUDIT radar_lists        oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: (boş)
+AUDIT radar_posts        oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: (boş)
+AUDIT radar_profiles     oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: (boş)
+AUDIT radar_tags         oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: (boş)
+AUDIT radar_votes        oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: (boş)
+AUDIT store_offers       oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: ['platform', 'store_id', 'title_key', 'name', 'image', 'price', 'original_price', 'discount_percent', 'currency']
+AUDIT upcoming_games     oku: 200 | anon ekleme: 401 REDDEDİLDİ | sütunlar: ['id', 'name', 'image', 'release_text', 'release_date', 'url', 'checked_at']
+AUDIT rpc claim_ps_batch   anon çağrı: 401 {"code":"42501","details":null,"hint":null,"message":"permission denied for function claim
+AUDIT rpc release_ps_batch anon çağrı: 401 {"code":"42501","details":null,"hint":null,"message":"permission denied for function relea
+AUDIT rpc search_games   anon çağrı: 200 {"fuzzy": false, "items": [], "query": "zzzz", "total": 0}
