@@ -1,0 +1,24 @@
+name: Market catalogs (Steam, Xbox, Switch)
+on:
+  schedule:
+    - cron: '3,18,33,48 * * * *'
+  workflow_dispatch:
+concurrency:
+  group: market-catalogs
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  catalogs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read Steam, Xbox and Switch catalogs into Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node scripts/market-run.mjs
