@@ -1,6 +1,6 @@
 # Oyun Radarı 2.0 — İstenen geliştirmelerin durumu
 
-Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış bağımlılıkları açıklar. Kişisel kayıtlar cihazda, açık topluluk paylaşımları Supabase'de tutulur. Eksik veri üretilmez.
+Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış bağımlılıkları açıklar. Kişisel kayıtlar cihazda tutulur; giriş yapan oyuncunun kayıtları ayrıca yalnız kendisinin okuyabildiği hesap satırına senkronlanır. Açık topluluk paylaşımları Supabase'de tutulur. Eksik veri üretilmez.
 
 ## Görsel deneyim
 
@@ -13,6 +13,8 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | 90+ Metacritic parlaması | Sadece gerçek Metacritic puanı 90+ olduğunda altın çerçeve/parlama. |
 | Retro yükleme sanatı | Kodla çizilmiş özgün piksel yolcu ve yürüyüş animasyonu; oyun ipuçları. |
 | Zen | Kapak odaklı gezinme; kalıcı çıkış düğmesi ve Escape. |
+| Kapak fragmanı | Fareyle kapakta kısa bir an durunca sessiz PlayStation fragmanı yumuşakça açılır; fragmanı olmayan kapaklarda yavaş yakınlaşma ve ışık geçişi. Dokunmatik ve azaltılmış harekette kapalı. |
+| Platform rozetleri | Kapakta oyunun eşleşmiş teklifi olan mağazalar (PS, Xbox, Steam, Switch) renkli cam rozetlerle gösterilir. |
 | Sinema bantları | Fragman üzerinde sinematik bantlar ve okurken küçük oynatıcı. |
 | Negatif boşluk | Uyumlu geniş aralıklar, rahat filtreler ve okuma sütunu. |
 | Glitch | Cyberpunk/Sci-Fi başlıklarda kısa, hafif hover efekti. |
@@ -117,11 +119,21 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Bırakma noktası empatisi | Özel checkpoint / motivasyon notu; isteğe bağlı açık cesaret notları. Genel bırakma istatistiği uydurulmaz. |
 | Changelog | Kullanıcı fikirlerinden sürüm notları ve ayrı gezinme hedefi. |
 
+## Hesap ve senkron
+
+| İstek | Uygulama |
+|---|---|
+| Her yerden giriş | Üst menüde Giriş yap / avatar düğmesi; hesap penceresi her sekmeden açılır. |
+| Beni hatırla | Açıkken oturum tarayıcı kapansa da sürer, kapalıyken yalnız o sekmede kalır. Jeton süresi dolmadan otomatik yenilenir. |
+| Parola sıfırlama | E-postaya sıfırlama bağlantısı; dönüşte yeni parola formu açılır. Doğrulama bağlantısı da doğrudan giriş yapar. |
+| Hesaba senkron | Favoriler, oyuncu alanı, günlük ve XP `radar_user_data` satırına yazılır (RLS: yalnız sahibi). İlk eşleşmede cihaz ve hesap kayıpsız birleşir; sonra hesaptaki daha yeni kayıt esas alınır. Zen, ses, renk modu gibi cihaz tercihleri senkronlanmaz. |
+
 ## Dağıtım ve doğrulama
 
 - Kaynak: `sfunder2/oyun-radari`, yayın ve toplayıcılar: `sfunder2/oyun-radari-web`.
 - PS fiyat zamanlayıcısı ve dağıtılmış kilidi korunur. Tüm katalog aynı 5 dakikalık turda yenilenmez.
 - Topluluk yazıları Supabase Auth oturumu ve sahiplik RLS politikalarıyla korunur. E-posta sağlayıcısının doğrulama ve gönderim koşulları geçerlidir.
 - Yorum ve oy için gerçek kullanıcı girişi gerekir. Test hesabı, sahte inceleme, sahte oy veya sahte takipçi üretim verisine eklenmez.
+- `supabase/account-sync-v1.sql` hesap senkron tablosunu kurar; `tests/account-sync-rls.sql` başka kullanıcının ve anonim erişimin engellendiğini doğrular.
 - `tests/experience-rls.sql` iki kullanıcılı yetki testini tek işlemde çalıştırır ve bütün kayıtları geri alır.
 - `tests/experience.test.mjs` seri, XP tekrarları, kur doğruluğu, swipe eşikleri, yedek doğrulama, yıl dönümü ve güvenli medya bağlantılarını kontrol eder.
