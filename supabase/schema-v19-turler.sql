@@ -47,6 +47,7 @@ from ps_products p
 left join game_scores gs on gs.title_key = p.title_key
 left join game_meta   gm on gm.title_key = p.title_key;
 
+-- search_games: tam library kaydı (mağaza teklifleri dahil) yalnız sayfadaki 25 sonuç için kurulur; tüm katalog için kurmak süreyi ikiye katlıyordu.
 create or replace function public.search_games(
  query_text text default '', page_number integer default 0, page_size integer default 25,
  filter_options jsonb default '{}'::jsonb, sort_order text default 'default', deals_only boolean default false
@@ -60,7 +61,7 @@ declare
 begin
  q:=trim(regexp_replace(q,'\s+',' ','g'));
  with base as (
-  select l.*,p.store_status,p.hero_url,p.accent_color,gm.tags,gm.categories,
+  select l.id,l.name,l.name_search,l.title_key,l.genres,l.developers,l.release_date,l.turkish,l.best_score,l.price,l.original_price,l.discount_percent,l.edition,l.first_seen,l.scores,gm.tags,gm.categories,
    (select count(*) from public.radar_posts rp where rp.game_id=l.id and rp.kind='review') as discussion_count,
    regexp_replace(p.name_search,'[^a-z0-9 ]','','g') as searchable,
    public.taste_score(l.genres,coalesce(gm.tags,'{}')||coalesce(gm.categories,'{}')||coalesce(l.ps_tags,'{}'),l.best_score,l.discount_percent,pref_g,pref_t) as taste_score
@@ -101,7 +102,7 @@ begin
   select * from sorted where result_number>greatest(0,least(page_number,10000))*greatest(1,least(page_size,50))
    and result_number<=(greatest(0,least(page_number,10000))+1)*greatest(1,least(page_size,50))
  ) select jsonb_build_object(
-  'items',coalesce((select jsonb_agg(to_jsonb(p)-'searchable'-'relevance'-'token_match'-'similarity_score'-'result_number'-'taste_score' order by result_number) from paged p),'[]'::jsonb),
+  'items',coalesce((select jsonb_agg((select to_jsonb(r) from (select l2.*,p2.store_status,p2.hero_url,p2.accent_color,gm2.tags,gm2.categories,p.discussion_count from public.library l2 join public.ps_products p2 using(id) left join public.game_meta gm2 on gm2.title_key=l2.title_key where l2.id=p.id) r) order by result_number) from paged p),'[]'::jsonb),
   'total',(select count(*) from eligible),
   'fuzzy',q<>'' and not exists(select 1 from matched where token_match) and exists(select 1 from eligible),
   'query',q,
