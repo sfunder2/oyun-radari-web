@@ -26,6 +26,15 @@ test('PS: walks newest-first grid until releases are in the past',async()=>{
  const rows=await fetchPsUpcoming(f,{grid});
  assert.deepEqual(rows.map(r=>r.id),['ps:A','ps:B']);assert.equal(rows[0].platform,'playstation');assert.equal(rows[0].price,1999);assert.ok(!seen.includes('I'));
 });
+test('PS: known release dates skip the product page so the walk reaches later pages',async()=>{
+ const item=(id)=>({id,name:'PS '+id,image:'i',price:3999,originalPrice:null,discountPercent:0,url:'https://store.playstation.com/tr-tr/product/'+id});
+ const pages={1:['A','B','C'],2:['GTA','X','Y','Z']},dates={GTA:'2030-11-19',X:'2001-01-01',Y:'2001-01-01',Z:'2001-01-01'};
+ const grid=async(kind,page)=>({items:kind==='ps5'?(pages[page]||[]).map(item):[]});
+ const seen=[];const f=async(url)=>{const id=url.split('/').pop();seen.push(id);return{ok:true,text:async()=>`"releaseDate":{"value":"${dates[id]}T00:00:00Z"}`}};
+ const known=new Map([['A','2031-01-01'],['B','2031-01-01'],['C','2030-12-01']]);
+ const rows=await fetchPsUpcoming(f,{grid,known,maxPages:4});
+ assert.deepEqual(rows.map(r=>r.id),['ps:A','ps:B','ps:C','ps:GTA']);assert.ok(!seen.includes('A'));assert.ok(seen.includes('GTA'));
+});
 test('one failing source does not stop the others; stale rows are cleaned up',async()=>{
  const calls=[];const sb={upsert:async(t,rows)=>calls.push(['upsert',t,rows.length]),del:async p=>calls.push(['del',p])};
  const v=await refreshUpcoming(sb,{say:()=>{},sources:{steam:async()=>[{id:'1',name:'A'},{id:'1',name:'A'}],xbox:async()=>{throw new Error('HTTP 403')}}});

@@ -66,19 +66,27 @@ export function psReleaseDate(html){
  const s=String(html||'');
  return isoDay(s.match(/"releaseDate"\s*:\s*\{[^{}]*?"value"\s*:\s*"([^"]+)"/)?.[1])||isoDay(s.match(/"releaseDate"\s*:\s*"([^"]+)"/)?.[1])||null;
 }
-export async function fetchPsUpcoming(f=fetch,{maxPages=40,grid=fetchGrid}={}){
+// known: daha önce bulunan çıkış tarihleri (ürün kimliği -> tarih); bunlar için ürün sayfası yeniden açılmaz, böylece
+// her turda liste biraz daha derine (ör. birkaç hafta sonraki büyük çıkışlara) iner. maxPages yalnız yeni sayfa isteklerini sınırlar.
+export async function fetchPsUpcoming(f=fetch,{maxPages=100,gridPages=3,grid=fetchGrid,known=new Map()}={}){
  const today=trToday(),now=new Date().toISOString(),out=new Map();let fetched=0,dated=0;
+ const add=(p,d)=>out.set(p.id,row({id:'ps:'+p.id,platform:'playstation',name:p.name,image:p.image,release_date:d,url:p.url,checked_at:now,price:p.price,original_price:p.originalPrice,discount_percent:p.discountPercent,currency:'TRY'}));
  for(const kind of ['ps5','newest']){
-  const {items}=await grid(kind,1,f);let past=0;
-  for(let i=0;i<items.length&&fetched<maxPages&&past<3;i+=4){
-   const chunk=items.slice(i,i+4).filter(p=>!out.has(p.id));
-   const dates=await Promise.all(chunk.map(async p=>{try{const r=await f(p.url,{headers:{'User-Agent':UA,'Accept-Language':'tr-TR'},signal:t(15000)});return r.ok?psReleaseDate(await r.text()):null}catch{return null}}));
-   fetched+=chunk.length;
-   chunk.forEach((p,k)=>{const d=dates[k];if(d)dated++;if(d&&d<today){past++;return;}if(!d)return;past=0;
-    out.set(p.id,row({id:'ps:'+p.id,platform:'playstation',name:p.name,image:p.image,release_date:d,url:p.url,checked_at:now,price:p.price,original_price:p.originalPrice,discount_percent:p.discountPercent,currency:'TRY'}));});
-   // Ürün sayfaları tarih vermiyorsa (sayfa yapısı değişmiş) boşa istek atılmaz
-   if(fetched>=8&&!dated)throw new Error('PS Store ürün sayfasında çıkış tarihi bulunamadı');
-   await sleep(400);
+  let past=0;
+  for(let page=1;page<=gridPages&&past<3;page++){
+   const {items}=await grid(kind,page,f);if(!items.length)break;
+   for(let i=0;i<items.length&&past<3;){
+    const fresh=[];
+    for(;i<items.length&&fresh.length<4&&past<3;i++){const p=items[i];if(out.has(p.id))continue;const d=known.get(p.id);
+     if(d){if(d<today)past++;else{past=0;add(p,d);}}else if(fetched+fresh.length<maxPages)fresh.push(p);}
+    if(!fresh.length){if(fetched>=maxPages)break;continue;}
+    const dates=await Promise.all(fresh.map(async p=>{try{const r=await f(p.url,{headers:{'User-Agent':UA,'Accept-Language':'tr-TR'},signal:t(15000)});return r.ok?psReleaseDate(await r.text()):null}catch{return null}}));
+    fetched+=fresh.length;
+    fresh.forEach((p,k)=>{const d=dates[k];if(!d)return;dated++;if(d<today){past++;return;}past=0;add(p,d);});
+    // Ürün sayfaları tarih vermiyorsa (sayfa yapısı değişmiş) boşa istek atılmaz
+    if(fetched>=8&&!dated)throw new Error('PS Store ürün sayfasında çıkış tarihi bulunamadı');
+    await sleep(400);
+   }
   }
  }
  return[...out.values()];
@@ -86,7 +94,7 @@ export async function fetchPsUpcoming(f=fetch,{maxPages=40,grid=fetchGrid}={}){
 
 // --- Tüm kaynaklar ---
 export async function refreshUpcoming(sb,{say=console.log,f=fetch,sources}={}){
- const src=sources||{steam:()=>fetchSteamUpcoming().then(rows=>rows.map(g=>row({...g,platform:'steam'}))),xbox:()=>fetchXboxUpcoming(f),switch:()=>fetchSwitchUpcoming(f),playstation:()=>fetchPsUpcoming(f)};
+ const src=sources||{steam:()=>fetchSteamUpcoming().then(rows=>rows.map(g=>row({...g,platform:'steam'}))),xbox:()=>fetchXboxUpcoming(f),switch:()=>fetchSwitchUpcoming(f),playstation:async()=>{const known=new Map(((await sb.select('upcoming_games?select=id,release_date&platform=eq.playstation&release_date=not.is.null').catch(()=>[]))||[]).map(r=>[String(r.id).replace(/^ps:/,''),r.release_date]));return fetchPsUpcoming(f,{known});}};
  const stats={},errors={};
  for(const [name,run] of Object.entries(src)){
   try{const rows=[...new Map((await run()).map(r=>[r.id,r])).values()];await sb.upsert('upcoming_games',rows,'id');stats[name]=rows.length;say(`Yaklaşan (${name}): ${rows.length}`);}
