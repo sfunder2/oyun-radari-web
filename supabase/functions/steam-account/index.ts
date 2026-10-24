@@ -10,7 +10,7 @@ const sb=supabase(env('SUPABASE_URL'),env('SUPABASE_SERVICE_ROLE_KEY'));
 const cache=new Map<string,{at:number,data:unknown}>();
 const callbackUrl=(state:string)=>BASE+'?'+new URLSearchParams({action:'callback',state});
 async function cached(key:string,load:()=>Promise<unknown>){const old=cache.get(key);if(old&&Date.now()-old.at<10*60000)return old.data;const data=await load();if(cache.size>300)cache.clear();cache.set(key,{at:Date.now(),data});return data;}
-async function userOf(req:Request){const token=(req.headers.get('authorization')||'').replace(/^Bearer\s+/i,'');if(!token)return null;const r=await fetch(env('SUPABASE_URL')+'/auth/v1/user',{headers:{apikey:env('SUPABASE_ANON_KEY'),Authorization:'Bearer '+token},signal:AbortSignal.timeout(10000)});if(!r.ok)return null;const u=await r.json();return u?.id?String(u.id):null;}
+async function userOf(req:Request){const token=(req.headers.get('authorization')||'').replace(/^Bearer\s+/i,'');if(!token)return null;const r=await fetch(env('SUPABASE_URL')+'/auth/v1/user',{headers:{apikey:req.headers.get('apikey')||env('SUPABASE_ANON_KEY'),Authorization:'Bearer '+token},signal:AbortSignal.timeout(10000)});if(!r.ok)return null;const u=await r.json();return u?.id?String(u.id):null;}
 async function linkedSteam(userId:string){const rows=await sb.select('linked_accounts?select=external_id,display_name,avatar_url,linked_at&platform=eq.steam&user_id=eq.'+encodeURIComponent(userId)+'&limit=1');return rows?.[0]||null;}
 function back(returnTo:string,hash:Record<string,string>){return new Response(null,{status:302,headers:{Location:returnTo+'#'+new URLSearchParams(hash)}});}
 
@@ -29,6 +29,7 @@ async function callback(u:URL){
 
 async function handle(req:Request,u:URL,action:string){
  if(action==='callback'&&req.method==='GET')return callback(u);
+ if(action==='status')return Response.json({ready:!!env('STEAM_API_KEY')});
  const userId=await userOf(req);if(!userId)return Response.json({error:'Steam hesabını bağlamak için giriş yap.'},{status:401});
  if(action==='start'&&req.method==='POST'){
   const body=await req.json().catch(()=>({}));const returnTo=safeReturn(body.returnTo,ALLOWED);if(!returnTo)return Response.json({error:'Geçersiz dönüş adresi'},{status:400});
@@ -36,6 +37,7 @@ async function handle(req:Request,u:URL,action:string){
  }
  if(action==='unlink'&&req.method==='POST'){await sb.del('linked_accounts?platform=eq.steam&user_id=eq.'+encodeURIComponent(userId));return Response.json({linked:false});}
  const link=await linkedSteam(userId);if(!link)return Response.json({linked:false});
+ if(!env('STEAM_API_KEY'))return Response.json({error:'Steam bağlantısı henüz hazır değil. Biraz sonra tekrar dene.'},{status:503});
  const steamid=String(link.external_id);
  if(action==='library')return Response.json({linked:true,linkedAt:link.linked_at,...(await cached(steamid+':library',()=>fetchLibrary(steamid,env('STEAM_API_KEY'))) as object)});
  if(action==='achievements'){
