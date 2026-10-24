@@ -14,8 +14,8 @@ export async function readState(state,secret,now=Date.now()){
  try{const s=JSON.parse(new TextDecoder().decode(fromB64url(body)));return s.e>now&&s.u&&s.r?{userId:s.u,returnTo:s.r}:null;}catch{return null;}
 }
 
-// Yalnız izinli site adreslerine geri dönülür
-export function safeReturn(url,allowed){try{const u=new URL(url);return allowed.has(u.origin)?u.origin+u.pathname:null;}catch{return null;}}
+// Yalnız izinli site adreslerine geri dönülür; sayfa bölümü (?section=) korunur, # atılır
+export function safeReturn(url,allowed){try{const u=new URL(url);return allowed.has(u.origin)?u.origin+u.pathname+u.search:null;}catch{return null;}}
 
 export function loginUrl(returnTo){const realm=new URL(returnTo).origin;return STEAM_OPENID+'?'+new URLSearchParams({'openid.ns':'http://specs.openid.net/auth/2.0','openid.mode':'checkid_setup','openid.return_to':returnTo,'openid.realm':realm,'openid.identity':'http://specs.openid.net/auth/2.0/identifier_select','openid.claimed_id':'http://specs.openid.net/auth/2.0/identifier_select'});}
 

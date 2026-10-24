@@ -9,9 +9,9 @@ test('state is signed, expires and rejects tampering',async()=>{
  const [body,sig]=s.split('.'),forged=Buffer.from(JSON.stringify({u:'u2',r:'https://sfunder2.github.io/',e:9e15})).toString('base64url');
  assert.equal(await readState(forged+'.'+sig,'k',2000),null);assert.equal(await readState(body,'k',2000),null);assert.equal(await readState(null,'k'),null);
 });
-test('return address must be an allowed origin and drops query and hash',()=>{
+test('return address must be an allowed origin and drops the hash',()=>{
  const allowed=new Set(['https://sfunder2.github.io']);
- assert.equal(safeReturn('https://sfunder2.github.io/oyun-radari/?a=1#x',allowed),'https://sfunder2.github.io/oyun-radari/');
+ assert.equal(safeReturn('https://sfunder2.github.io/oyun-radari/?section=profile#x',allowed),'https://sfunder2.github.io/oyun-radari/?section=profile');
  assert.equal(safeReturn('https://evil.example/',allowed),null);assert.equal(safeReturn('javascript:alert(1)',allowed),null);assert.equal(safeReturn(undefined,allowed),null);
 });
 test('login url asks Steam for identifier select with our return address',()=>{
