@@ -1,5 +1,5 @@
 import {supabase} from '../../../scripts/supabase.mjs';
-import {signState,readState,safeReturn,loginUrl,verifyOpenId,fetchLibrary,fetchAchievements} from '../../../scripts/steam-account.mjs';
+import {signState,readState,safeReturn,loginUrl,verifyOpenId,fetchLibrary,fetchAchievements,fetchProgress,parseAppids} from '../../../scripts/steam-account.mjs';
 // Steam hesabı bağlama ve kütüphane okuma. Steam OpenID dönüşü JWT taşımadığı için --no-verify-jwt ile yayımlanır;
 // diğer işlemler kullanıcının Supabase oturum jetonunu kendisi doğrular. Kütüphane veritabanına yazılmaz, yalnız bellekte önbelleklenir.
 const ALLOWED=new Set(['https://sfunder2.github.io','https://oyun-radari-tr.gokhangozcu.chatgpt.site','http://terminal.local:4173']);
@@ -42,7 +42,12 @@ async function handle(req:Request,u:URL,action:string){
  if(action==='library')return Response.json({linked:true,linkedAt:link.linked_at,...(await cached(steamid+':library',()=>fetchLibrary(steamid,env('STEAM_API_KEY'))) as object)});
  if(action==='achievements'){
   const appid=Number(u.searchParams.get('appid'));if(!Number.isInteger(appid)||appid<=0)return Response.json({error:'Geçersiz oyun'},{status:400});
-  return Response.json({linked:true,appid,achievements:await cached(steamid+':ach:'+appid,()=>fetchAchievements(steamid,appid,env('STEAM_API_KEY')))});
+  return Response.json({linked:true,appid,achievements:await cached(steamid+':ach2:'+appid,()=>fetchAchievements(steamid,appid,env('STEAM_API_KEY')))});
+ }
+ if(action==='progress'){
+  const ids=parseAppids(u.searchParams.get('appids')),key=env('STEAM_API_KEY');
+  const rows=await Promise.all(ids.map(id=>cached(steamid+':prog:'+id,()=>fetchProgress(steamid,id,key)).catch(()=>null)));
+  return Response.json({linked:true,progress:Object.fromEntries(ids.map((id,i)=>[id,rows[i]]))});
  }
  return Response.json({error:'Bilinmeyen işlem'},{status:400});
 }
