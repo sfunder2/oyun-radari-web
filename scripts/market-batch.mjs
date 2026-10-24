@@ -1,10 +1,11 @@
 import {fetchSteamPage,fetchXboxPage,fetchSwitchPage,fetchEpicPage,fetchGogPage} from './market-catalog.mjs';
+import {changedOffers,existingQuery} from './offer-diff.mjs';
 // Her turda mağazaların (Steam, Xbox, Switch, Epic, GOG) katalogundan birkaç sayfa okunur; imleçler ps_state.market içinde saklanır, tur bitince başa dönülür.
 // GitHub Actions (CLI) ve Supabase Edge Function aynı çekirdeği çalıştırır.
 export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,fetchers={steam:fetchSteamPage,xbox:fetchXboxPage,switch:fetchSwitchPage,epic:fetchEpicPage,gog:fetchGogPage}}){
  const sleep=ms=>new Promise(r=>setTimeout(r,ms)),deadline=deadlineMs?Date.now()+deadlineMs:Infinity;
  const saved=(await sb.select('ps_state?select=value&key=eq.market'))?.[0]?.value||{};
- const cur={steam:0,xbox:'',switch:0,epic:0,gog:0,...saved.cursors},stats={},errors=[];
+ const cur={steam:0,xbox:'',switch:0,epic:0,gog:0,...saved.cursors},stats={},written={},errors=[];
  const jobs={ // wrapped: katalog bitti, imleç başa döndü; bu tur o mağaza için tamam
   steam:async()=>{const r=await fetchers.steam(cur.steam),wrapped=!(r.hasMore&&r.rows.length);cur.steam=wrapped?0:cur.steam+1;return{rows:r.rows,wrapped}},
   xbox:async()=>{const r=await fetchers.xbox(cur.xbox),wrapped=!r.hasMore;cur.xbox=wrapped?'':r.next;return{rows:r.rows,wrapped}},
@@ -23,8 +24,10 @@ export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,fe
    try{
     const r=await job();wrapped=r.wrapped;const rows=r.rows;
     const uniq=[...new Map(rows.map(r=>[r.platform+':'+r.store_id,r])).values()];
-    await sb.upsert('store_offers',uniq,'platform,store_id');stats[market]+=uniq.length;
-    say(`${market} sayfa ${i+1}: ${uniq.length} kayıt`);
+    // Değişmeyen ve yakın zamanda kontrol edilmiş teklifler yeniden yazılmaz; kayıtlı hâl okunamazsa hepsi yazılır.
+    let fresh=uniq;if(uniq.length){try{fresh=changedOffers(uniq,await sb.select(existingQuery(uniq)))}catch{fresh=uniq}}
+    if(fresh.length)await sb.upsert('store_offers',fresh,'platform,store_id');stats[market]+=uniq.length;written[market]=(written[market]||0)+fresh.length;
+    say(`${market} sayfa ${i+1}: ${uniq.length} kayıt, ${fresh.length} yazıldı`);
    }catch(e){errors.push({source:market,error:e.message});say(`${market} hata: ${e.message}`);break;}
    if(wrapped)break;
    await sleep(market==='xbox'?800:1200);
@@ -32,6 +35,6 @@ export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,fe
  }));
  const finishedAt=new Date().toISOString(),total=Object.values(stats).reduce((a,b)=>a+b,0);
  const status=total===0&&errors.length?'failed':errors.length?'partial':'ok';
- await sb.upsert('ps_state',[{key:'market',value:{cursors:cur,finishedAt,stats,errors,status}}],'key');
- return{status,stats,errors,finishedAt};
+ await sb.upsert('ps_state',[{key:'market',value:{cursors:cur,finishedAt,stats,written,errors,status}}],'key');
+ return{status,stats,written,errors,finishedAt};
 }
