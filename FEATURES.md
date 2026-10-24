@@ -129,6 +129,7 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Beni hatırla | Açıkken oturum tarayıcı kapansa da sürer, kapalıyken yalnız o sekmede kalır. Jeton süresi dolmadan otomatik yenilenir. |
 | Parola sıfırlama | E-postaya sıfırlama bağlantısı; dönüşte yeni parola formu açılır. Doğrulama bağlantısı da doğrudan giriş yapar. |
 | Hesaba senkron | Favoriler, oyuncu alanı, günlük ve XP `radar_user_data` satırına yazılır (RLS: yalnız sahibi). İlk eşleşmede cihaz ve hesap kayıpsız birleşir; sonra hesaptaki daha yeni kayıt esas alınır. Zen, ses, renk modu gibi cihaz tercihleri senkronlanmaz. |
+| Steam hesabı bağlama | Oyuncu alanı · Steam kütüphanem. Steam'in kendi giriş sayfasıyla (OpenID) bağlanır, şifre alınmaz; `steam-account` fonksiyonu dönüşü Steam'e doğrulatır ve yalnız SteamID'yi `linked_accounts` satırına yazar (RLS: yalnız sahibi okur ve siler). Oyunlar, süreler ve oyun başına açılan başarımlar Steam Web API'den okunur, veritabanına yazılmaz. Steam'de "Oyun ayrıntıları" gizliyse uyarı gösterilir. Xbox ve PlayStation resmî kütüphane API'si sunmadığı için yok. |
 
 ## Dağıtım ve doğrulama
 
