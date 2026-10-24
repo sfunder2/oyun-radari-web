@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {signState,readState,safeReturn,loginUrl,verifyOpenId,parseOwned,parseProfile,parseAchievements,fetchLibrary,fetchAchievements,STEAM_OPENID} from '../scripts/steam-account.mjs';
+import {signState,readState,safeReturn,loginUrl,verifyOpenId,parseOwned,parseProfile,parseAchievements,mergeAchievements,parseAppids,fetchLibrary,fetchAchievements,fetchProgress,STEAM_OPENID} from '../scripts/steam-account.mjs';
 const ID='76561197960287930',RET='https://x.supabase.co/functions/v1/steam-account?action=callback&state=s.t';
 const steamReply=(over={})=>new URLSearchParams({'openid.ns':'http://specs.openid.net/auth/2.0','openid.mode':'id_res','openid.op_endpoint':STEAM_OPENID,'openid.claimed_id':'https://steamcommunity.com/openid/id/'+ID,'openid.identity':'https://steamcommunity.com/openid/id/'+ID,'openid.return_to':RET,'openid.response_nonce':'2026-10-24T07:00:00Zabc','openid.assoc_handle':'1234567890','openid.signed':'signed,op_endpoint,claimed_id,identity,return_to,response_nonce,assoc_handle','openid.sig':'sig=',action:'callback',state:'s.t',...over});
 test('state is signed, expires and rejects tampering',async()=>{
@@ -53,4 +53,26 @@ test('library and achievements call Steam with the key and handle 400/403 as emp
  assert.ok(urls.every(u=>u.startsWith('https://api.steampowered.com/')&&new URL(u).searchParams.get('key')==='KEY'));
  assert.equal(await fetchAchievements(ID,620,'KEY',f),null);
  await assert.rejects(fetchLibrary(ID,'KEY',async()=>new Response('x',{status:500})),/Steam HTTP 500/);
+});
+test('achievement detail merges schema names and icons, unlocked newest first',()=>{
+ const player={playerstats:{success:true,achievements:[{apiname:'A',achieved:1,unlocktime:1600000000,name:'İlk kan',description:'Bir düşman yen'},{apiname:'B',achieved:0,unlocktime:0},{apiname:'C',achieved:1,unlocktime:1700000000}]}};
+ const schema={game:{availableGameStats:{achievements:[{name:'A',displayName:'First',icon:'https://cdn/a.jpg',icongray:'https://cdn/a_g.jpg'},{name:'B',displayName:'Gizli son',hidden:1,icon:'https://cdn/b.jpg',icongray:'https://cdn/b_g.jpg'},{name:'C',displayName:'Kahraman',icon:'http://insecure/c.jpg'}]}}};
+ const r=mergeAchievements(player,schema);
+ assert.equal(r.total,3);assert.equal(r.unlocked,2);assert.deepEqual(r.list.map(a=>a.id),['C','A','B']);
+ assert.equal(r.list[1].name,'İlk kan');assert.equal(r.list[1].desc,'Bir düşman yen');assert.equal(r.list[1].icon,'https://cdn/a.jpg');
+ assert.equal(r.list[2].icon,'https://cdn/b_g.jpg');assert.equal(r.list[2].hidden,true);assert.equal(r.list[2].done,false);assert.equal(r.list[2].name,'Gizli son');
+ assert.equal(r.list[0].icon,null);assert.equal(r.list[0].name,'Kahraman');
+ assert.equal(mergeAchievements({playerstats:{success:false}},schema),null);assert.equal(mergeAchievements(player,null).list[1].name,'İlk kan');
+});
+test('progress needs one call per game; detail asks for Turkish schema too',async()=>{
+ const urls=[];const f=async url=>{url=String(url);urls.push(url);
+  if(url.includes('GetPlayerAchievements'))return new Response(JSON.stringify({playerstats:{success:true,achievements:[{apiname:'A',achieved:1,unlocktime:1},{apiname:'B',achieved:0}]}}));
+  if(url.includes('GetSchemaForGame'))return new Response('{}',{status:500});return new Response('x',{status:404});};
+ assert.deepEqual(await fetchProgress(ID,620,'K',f),{total:2,unlocked:1});assert.equal(urls.length,1);
+ const d=await fetchAchievements(ID,620,'K',f);assert.equal(d.unlocked,1);assert.equal(d.list[0].name,'A');
+ assert.ok(urls.some(u=>u.includes('GetSchemaForGame')&&new URL(u).searchParams.get('l')==='turkish'));
+ assert.equal(await fetchProgress(ID,620,'K',async()=>new Response('{}',{status:400})),null);
+});
+test('appid lists are deduplicated, validated and capped',()=>{
+ assert.deepEqual(parseAppids('620,620,abc,-1,1145360,0'),[620,1145360]);assert.equal(parseAppids(Array.from({length:30},(_,i)=>i+1).join(',')).length,12);assert.deepEqual(parseAppids(null),[]);
 });

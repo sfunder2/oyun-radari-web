@@ -36,11 +36,27 @@ export function parseProfile(j){const p=j?.response?.players?.[0];return p?{stea
 // Gizli profilde ya da "Oyun ayrıntıları" kapalıyken Steam boş response döner
 export function parseOwned(j){const games=j?.response?.games;if(!Array.isArray(games))return null;return games.map(g=>({appid:Number(g.appid),name:String(g.name||'').slice(0,160),minutes:Number(g.playtime_forever)||0,minutes2w:Number(g.playtime_2weeks)||0,lastPlayed:g.rtime_last_played?new Date(g.rtime_last_played*1000).toISOString():null,icon:icon(g.appid,g.img_icon_url)})).filter(g=>g.appid&&g.name).sort((a,b)=>b.minutes-a.minutes);}
 export function parseAchievements(j){const s=j?.playerstats;if(!s?.success||!Array.isArray(s.achievements))return null;const list=s.achievements.map(a=>({id:String(a.apiname),at:a.achieved&&a.unlocktime?new Date(a.unlocktime*1000).toISOString():null,done:!!a.achieved}));return{total:list.length,unlocked:list.filter(a=>a.done).length,list:list.filter(a=>a.done).map(({id,at})=>({id,at}))};}
+const https=u=>/^https:\/\//.test(u||'')?u:null;
+// Oyunun başarım şeması (ad, açıklama, simge) ile oyuncunun açtıkları birleştirilir; açılanlar en yeniden eskiye, sonra kilitliler
+export function mergeAchievements(player,schema){
+ const s=player?.playerstats;if(!s?.success||!Array.isArray(s.achievements))return null;
+ const meta=new Map((schema?.game?.availableGameStats?.achievements||[]).map(a=>[String(a.name),a]));
+ const list=s.achievements.map(a=>{const m=meta.get(String(a.apiname))||{},done=!!a.achieved;return{id:String(a.apiname),name:String(a.name||m.displayName||a.apiname).slice(0,120),desc:String(a.description||m.description||'').slice(0,300)||null,icon:https(done?m.icon:m.icongray||m.icon),hidden:!!m.hidden,done,at:done&&a.unlocktime?new Date(a.unlocktime*1000).toISOString():null};});
+ list.sort((a,b)=>Number(b.done)-Number(a.done)||String(b.at||'').localeCompare(String(a.at||'')));
+ return{total:list.length,unlocked:list.filter(a=>a.done).length,list};
+}
 
 export async function fetchLibrary(steamid,key,f=fetch){
  const [p,o]=await Promise.all([api('/ISteamUser/GetPlayerSummaries/v0002/',{steamids:steamid},key,f),api('/IPlayerService/GetOwnedGames/v0001/',{steamid,include_appinfo:'1',include_played_free_games:'1'},key,f)]);
  const profile=parseProfile(p),games=parseOwned(o);
  return{profile,visible:!!games,games:games||[],totalMinutes:(games||[]).reduce((n,g)=>n+g.minutes,0)};
 }
-// Başarımı olmayan ya da gizli oyunlarda null döner
-export async function fetchAchievements(steamid,appid,key,f=fetch){return parseAchievements(await api('/ISteamUserStats/GetPlayerAchievements/v0001/',{steamid,appid:String(appid)},key,f));}
+// Başarımı olmayan ya da gizli oyunlarda null döner. Yalnız sayı: listede gösterilen ilerleme için tek istek
+export async function fetchProgress(steamid,appid,key,f=fetch){const a=parseAchievements(await api('/ISteamUserStats/GetPlayerAchievements/v0001/',{steamid,appid:String(appid)},key,f));return a?{total:a.total,unlocked:a.unlocked}:null;}
+// Ayrıntı: Türkçe ad ve açıklama, simgeler, açılma tarihleri
+export async function fetchAchievements(steamid,appid,key,f=fetch){
+ const [player,schema]=await Promise.all([api('/ISteamUserStats/GetPlayerAchievements/v0001/',{steamid,appid:String(appid),l:'turkish'},key,f),api('/ISteamUserStats/GetSchemaForGame/v2/',{appid:String(appid),l:'turkish'},key,f).catch(()=>null)]);
+ return mergeAchievements(player,schema);
+}
+// "1,2,3" biçimindeki listeyi en çok 12 geçerli appid'ye indirir
+export function parseAppids(raw,max=12){return [...new Set(String(raw||'').split(',').map(Number).filter(n=>Number.isInteger(n)&&n>0))].slice(0,max);}
