@@ -67,3 +67,20 @@ test('regionalPrices: ülke hatası diğerlerini durdurmaz, TL karşılığı ve
  assert.deepEqual(Object.keys(r.fx).sort(),['GBP','USD']);assert.equal(r.checkedAt,'T');
  await assert.rejects(regionalPrices({platform:'switch',id:'1',f}),/bölge fiyatı yok/);
 });
+
+test('sprint 02: Steam explicitly free game is represented as zero, missing game remains null',()=>{
+ const free=parseSteamPrice({10:{success:true,data:{is_free:true}}},'10',C.US);
+ assert.equal(free.price,0);assert.equal(free.currency,'USD');
+ assert.equal(parseSteamPrice({10:{success:true,data:{}}},'10',C.US),null);
+});
+test('sprint 02: PlayStation cross generation and ambiguous edition are rejected',()=>{
+ const t={id:'EP4497-PPSA04027_00-00000000000000N1',name:'Cyberpunk 2077'};
+ assert.equal(matchPsProduct([{id:'UP4497-CUSA16596_00-0000000000000004',name:t.name}],t),null);
+ assert.equal(matchPsProduct([{id:'UP4497-PPSA03974_00-A',name:t.name},{id:'UP4497-PPSA03974_00-B',name:t.name}],t),null);
+});
+test('sprint 02: GOG malformed formatted amounts cannot be shown as prices',()=>{
+ const price=value=>({_embedded:{prices:[{currency:{code:'USD'},finalPrice:value,basePrice:'1299 USD'}]}});
+ assert.equal(parseGogPrice(price('12,99 USD'),'id',C.US),null);
+ assert.equal(parseGogPrice(price('abc USD'),'id',C.US),null);
+ assert.equal(parseGogPrice(price('-100 USD'),'id',C.US),null);
+});

@@ -21,11 +21,14 @@ const offer=(price,base,currency,url)=>{const orig=Number.isFinite(base)&&base>p
 // Steam: appid her ülkede aynı. Fiyatlar kuruş cinsinden; ücretsiz ya da satılmayan oyunda price_overview gelmez.
 export function parseSteamPrice(j,appid,c){
  const d=j?.[appid];if(!d)throw new Error('Steam yanıtı okunamadı');
- const p=d.success?d.data?.price_overview:null;if(!p||!Number.isFinite(p.final))return null;
+ const p=d.success?d.data?.price_overview:null;if(!p||!Number.isFinite(p.final)){
+  if(d.success&&d.data?.is_free===true)return offer(0,null,d.data?.price_overview?.currency||c.currency,`https://store.steampowered.com/app/${appid}/?cc=${c.cc.toLowerCase()}`);
+  return null;
+ }
  return offer(p.final/100,p.initial/100,p.currency,`https://store.steampowered.com/app/${appid}/?cc=${c.cc.toLowerCase()}`);
 }
 export async function steamPrice(appid,c,f=fetch){
- const r=await f('https://store.steampowered.com/api/appdetails?'+new URLSearchParams({appids:appid,cc:c.cc.toLowerCase(),filters:'price_overview'}),{headers:{'User-Agent':UA},signal:t(15000)});
+ const r=await f('https://store.steampowered.com/api/appdetails?'+new URLSearchParams({appids:appid,cc:c.cc.toLowerCase(),filters:'basic,price_overview'}),{headers:{'User-Agent':UA},signal:t(15000)});
  if(!r.ok)throw new Error('Steam HTTP '+r.status);return parseSteamPrice(await r.json(),appid,c);
 }
 
@@ -47,7 +50,9 @@ export async function xboxPrice(id,c,f=fetch){
 export function parseGogPrice(j,id,c){
  const list=j?._embedded?.prices;if(!Array.isArray(list))return null;
  const pick=list.find(x=>x.currency?.code===c.currency)||list[0];if(!pick)return null;
- const amount=s=>Number(String(s||'').split(' ')[0])/100,fin=amount(pick.finalPrice),base=amount(pick.basePrice);if(!Number.isFinite(fin))return null;
+ const amount=s=>{if(typeof s==='number')return Number.isFinite(s)&&s>=0?s/100:NaN;
+  const raw=String(s??'').trim().split(/\s+/)[0];return /^\d+$/.test(raw)?Number(raw)/100:NaN;};
+ const fin=amount(pick.finalPrice),base=amount(pick.basePrice);if(!Number.isFinite(fin)||fin<0||!pick.currency?.code)return null;
  return offer(fin,base,pick.currency.code,`https://www.gog.com/game/${encodeURIComponent(id)}`);
 }
 export async function gogPrice(id,c,f=fetch){
@@ -83,9 +88,13 @@ export function psPrice(p){
  return{price:fin,base,currency:x.currencyCode};
 }
 const gen=id=>String(id||'').split('-')[1]?.slice(0,4)||'';
+const generation=id=>{const g=gen(id);return g==='PPSA'?'PS5':g==='CUSA'?'PS4':null;};
 export function matchPsProduct(products,target){
  const same=products.filter(p=>norm(p.name)===norm(target.name));
- return products.find(p=>p.id===target.id)||same.filter(p=>gen(p.id)===gen(target.id))[0]||(same.length===1?same[0]:null);
+ const exact=products.find(p=>p.id===target.id);if(exact)return exact;
+ const targetGen=generation(target.id);if(!targetGen)return null;
+ const matches=same.filter(p=>generation(p.id)===targetGen);
+ return matches.length===1?matches[0]:null;
 }
 async function psGql(productId,locale,f){
  const q=new URLSearchParams({operationName:'metGetConceptByProductIdQuery',variables:JSON.stringify({productId}),extensions:JSON.stringify({persistedQuery:{version:1,sha256Hash:CONCEPT_PRODUCTS_HASH}})});
