@@ -11,7 +11,8 @@ Deno.serve(async(req:Request)=>{
  if(req.method!=='GET')return Response.json({error:'Yalnız GET desteklenir'},{status:405,headers});
  const u=new URL(req.url),platform=u.searchParams.get('platform')||'',id=u.searchParams.get('id')||'',name=(u.searchParams.get('name')||'').slice(0,120);
  if(!PLATFORMS.has(platform)||!ID.test(id))return Response.json({error:'Geçersiz oyun'},{status:400,headers});
- const key=platform+':'+id,old=cache.get(key);
+ const key=platform+':'+id+(platform==='epic'?':'+name.normalize('NFKC').trim().toLocaleLowerCase('tr'):'');
+ const old=cache.get(key);
  if(old&&Date.now()-old.at<HOUR)return Response.json(old.data,{headers});
  try{
   if(!fx||Date.now()-fx.at>HOUR)fx={at:Date.now(),data:await fxRates()};
