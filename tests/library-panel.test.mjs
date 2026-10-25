@@ -18,3 +18,12 @@ test('library pages are merged without duplicate platform-game identities',()=>{
  assert.equal(out[0].game_title,'A');
  assert.equal(out[1].platform,'xbox');
 });
+
+test('deduplicates games repeated inside the same incoming page',()=>{
+ const page=[{platform:'steam',game_id:'620',game_title:'Portal 2'},
+ {platform:'steam',game_id:'620',game_title:'Duplicate'},
+ {platform:'xbox',game_id:'620',game_title:'Different platform'}];
+ const out=mergeLibraryPage([],page);
+ assert.equal(out.length,2);
+ assert.deepEqual(out.map(x=>x.game_title),['Portal 2','Different platform']);
+});

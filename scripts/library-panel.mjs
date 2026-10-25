@@ -10,7 +10,7 @@ export function filterLibrary(rows,{text='',status='all'}={}){
 }
 export function mergeLibraryPage(current,page){
  const keys=new Set(current.map(x=>JSON.stringify([x.platform,x.game_id])));
- return [...current,...page.filter(x=>!keys.has(JSON.stringify([x.platform,x.game_id])))];
+ return [...current,...page.filter(x=>{const key=JSON.stringify([x.platform,x.game_id]);if(keys.has(key))return false;keys.add(key);return true;})];
 }
 export function downloadLibraryCsv(rows,doc=document){
  const content=exportLibraryCsv(rows);
