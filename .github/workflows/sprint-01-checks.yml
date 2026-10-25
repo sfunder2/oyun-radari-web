@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, sprint-01-security-ci-20261025]
+    branches: [main]
 permissions:
   contents: read
 jobs:
@@ -16,5 +16,9 @@ jobs:
           node-version: '22'
       - name: Run repository tests
         run: node --test tests/*.test.mjs
+      - name: Dependency audit
+        run: |
+          if [ -f package-lock.json ]; then npm ci --ignore-scripts && npm audit --audit-level=high; else echo 'No lockfile; dependency audit requires lockfile'; fi
       - name: Check syntax
-        run: node --check scripts/steam-account.mjs
+        run: |
+          for file in scripts/*.mjs tests/*.test.mjs; do node --check "$file"; done
