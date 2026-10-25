@@ -16,7 +16,11 @@ export const COUNTRIES=[
  {cc:'BR',name:'Brezilya',locale:'pt-BR',currency:'BRL'},
 ];
 export const PLATFORMS=new Set(['playstation','xbox','steam','gog','epic']);
-const offer=(price,base,currency,url)=>{const orig=Number.isFinite(base)&&base>price?base:null;return{price,original_price:orig,discount_percent:orig?Math.round((1-price/orig)*100):0,currency,url};};
+const offer=(price,base,currency,url)=>{
+ if(!Number.isFinite(price)||price<0||!currency)throw new Error('Geçersiz mağaza fiyatı');
+ const orig=Number.isFinite(base)&&base>price&&base>0?base:null;
+ return{price,original_price:orig,discount_percent:orig?Math.round((1-price/orig)*100):0,currency,url};
+};
 
 // Steam: appid her ülkede aynı. Fiyatlar kuruş cinsinden; ücretsiz ya da satılmayan oyunda price_overview gelmez.
 export function parseSteamPrice(j,appid,c){
@@ -36,8 +40,8 @@ export async function steamPrice(appid,c,f=fetch){
 export function parseXboxPrice(j,id,c){
  const p=(j?.Products||[]).find(x=>x.ProductId===id);if(!p)return null;
  const pool=(p.DisplaySkuAvailabilities||[]).filter(s=>s.Sku?.Properties?.IsTrial!==true).flatMap(s=>s.Availabilities||[])
-  .filter(a=>a.Actions?.includes('Purchase')&&!a.RemediationRequired&&!a.AffirmationId&&Number.isFinite(a.OrderManagementData?.Price?.ListPrice))
-  .map(a=>a.OrderManagementData.Price).filter(x=>x.CurrencyCode);
+  .filter(a=>a.Actions?.includes('Purchase')&&!a.RemediationRequired&&!a.AffirmationId&&Number.isFinite(a.OrderManagementData?.Price?.ListPrice)&&a.OrderManagementData.Price.ListPrice>=0)
+  .map(a=>a.OrderManagementData.Price).filter(x=>x.CurrencyCode&&x.CurrencyCode===c.currency);
  const paid=pool.filter(x=>x.ListPrice>0),list=(paid.length?paid:pool).sort((a,b)=>a.ListPrice-b.ListPrice),o=list[0];if(!o)return null;
  return offer(o.ListPrice,o.MSRP,o.CurrencyCode,`https://www.xbox.com/${c.locale}/games/store/x/${id}`);
 }
@@ -78,12 +82,17 @@ export async function epicPrice(id,c,f=fetch,ctx={}){
 // PlayStation: Avrupa kimliği (EP...) Türkiye, İngiltere, Polonya, Ukrayna ve Hindistan'da da geçerli. Geçerli olmadığı ülkede (ABD, Brezilya,
 // bazen Almanya) oyunun concept sayfasından o ülkenin ürün kimliği bulunur ve aynı ad + aynı konsol kuşağıyla (PPSA/CUSA) eşleştirilir.
 // Fiyat değerinin ondalık sayısı para birimine göre değişir (ör. INR "Rs 2,999" = 2999); biçimli metinden çıkarılır.
-const decimals=(...s)=>{for(const x of s)if(/\d/.test(String(x||'')))return /[.,]\d{2}(?!\d)/.test(String(x))?2:0;return 2;};
+const decimals=(...s)=>{for(const x of s){const t=String(x||'');if(!/\d/.test(t))continue;
+ const matches=[...t.matchAll(/[.,](\d{1,2})(?!\d)/g)];
+ if(matches.length)return 2;
+ if(/\d[.,]\d{3}(?:\D|$)/.test(t)||/\d/.test(t))return 0;
+ }return 2;};
 export function psPrice(p){
  const x=p?.price;if(!x||!x.currencyCode||!Number.isFinite(x.basePriceValue))return null;
  const d=10**decimals(x.basePrice,x.discountedPrice),base=x.basePriceValue/d;
  const plus=x.isTiedToSubscription===true||(x.serviceBranding||[]).some(b=>b&&b!=='NONE');
  const fin=!plus&&Number.isFinite(x.discountedValue)?x.discountedValue/d:base; // abonelik fiyatı karşılaştırmaya alınmaz
+ if(!Number.isFinite(fin)||fin<0||base<0||fin>base&&base>0)return null;
  if(fin===0&&!x.isFree)return null; // "ücretsiz" işareti olmadan görünen 0 doğrulanmamış sayılır
  return{price:fin,base,currency:x.currencyCode};
 }
@@ -138,13 +147,23 @@ export async function fxRates(f=fetch){
  return rates;
 }
 
+// Prevent known stale exchange-rate sources from displaying a misleading TRY conversion.
+export function isFreshRate(date,now=new Date(),maxAgeDays=7){
+ if(!date)return false;
+ const m=String(date).match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+ const parsed=m?new Date(Date.UTC(+m[3],+m[2]-1,+m[1])):new Date(date);
+ const age=now.getTime()-parsed.getTime();
+ return Number.isFinite(age)&&age>=-86400000&&age<=maxAgeDays*86400000;
+}
 // Tek oyun, tüm ülkeler. Bir ülkenin hatası diğerlerini durdurmaz; durum: ok | none (o ülkede satılmıyor/fiyatı yok) | error.
 export async function regionalPrices({platform,id,name='',f=fetch,countries=COUNTRIES,rates=null,now=()=>new Date().toISOString()}){
  const read=READERS[platform];if(!read)throw new Error('Bu mağaza için bölge fiyatı yok');
  const ctx={name},fx=rates||await fxRates(f).catch(()=>({TRY:{rate:1}}));
  const rows=await Promise.all(countries.map(async c=>{
   try{const o=await read(id,c,f,ctx);if(!o)return{cc:c.cc,name:c.name,status:'none'};
-   const r=fx[o.currency]?.rate;return{cc:c.cc,name:c.name,status:'ok',...o,price_try:Number.isFinite(r)?Math.round(o.price*r*100)/100:null};}
+   const rate=fx[o.currency],r=rate?.rate;
+   const fresh=!rate?.date||isFreshRate(rate.date,new Date(now()));
+   return{cc:c.cc,name:c.name,status:'ok',...o,price_try:fresh&&Number.isFinite(r)&&r>0?Math.round(o.price*r*100)/100:null,fx_stale:!fresh};}
   catch(e){return{cc:c.cc,name:c.name,status:'error',error:String(e.message||e).slice(0,120)};}
  }));
  const used=[...new Set(rows.filter(r=>r.status==='ok'&&r.currency!=='TRY').map(r=>r.currency))];
