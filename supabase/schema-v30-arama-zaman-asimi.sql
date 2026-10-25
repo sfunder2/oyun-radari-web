@@ -1,4 +1,4 @@
--- v30: Arama zaman aşımlarını azalt (anon 3 sn sınırı).
+-- v30 (2026-10-25'te uygulandı): Arama zaman aşımlarını azalt (anon 3 sn sınırı).
 -- Neden (2026-10-25 ölçümü): bugün 200'den fazla search_market/search_games isteği 3 sn sınırında iptal edilip 500 döndü.
 -- rebuild_search_keys 15 dakikada bir search_keys tablosunu baştan kurup eskisinin yerine koyuyor; yeni tablo bellekte
 -- olmadığı için ardından gelen ilk hesaplamalar yavaş (aynı sorgu ilk seferde 1,4–3,6 sn, ikincide 50–130 ms).

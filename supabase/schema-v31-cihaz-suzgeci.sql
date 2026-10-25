@@ -1,4 +1,4 @@
--- v31: Cihaz süzgeçli arama (search_market_v2) güncel arama tablosundan okur.
+-- v31 (2026-10-25'te uygulandı): Cihaz süzgeçli arama (search_market_v2) güncel arama tablosundan okur.
 -- Neden (2026-10-25 ölçümü): Keşfet'te cihaz seçilince çağrılan search_market_v2, market_search_rows
 -- görünümünden okuyordu. Bu görünümün yenilenmesi kapatıldığı için son kez 2026-10-24 00:48'de yenilenmişti.
 -- Sonuç: cihaz süzgecinde Steam'in 11.388 oyunundan 6.654'ü, Switch'in 6.033 oyunundan 2.683'ü görünüyor;
@@ -100,7 +100,7 @@ $function$;
 revoke execute on function public.search_market_d(text,text,integer,integer,jsonb,text,boolean) from public, anon, authenticated;
 
 create or replace function public.search_market_v2(market text default 'all'::text, query_text text default ''::text, page_number integer default 0, page_size integer default 25, filter_options jsonb default '{}'::jsonb, sort_order text default 'default'::text, deals_only boolean default false)
- returns jsonb language plpgsql security definer set search_path to 'public', 'extensions' as $function$
+ returns jsonb language plpgsql volatile security definer set search_path to 'public', 'extensions' as $function$
 declare ck text := 'd:'||md5(concat_ws('|',market,query_text,page_number,page_size,coalesce(filter_options,'{}'::jsonb)::text,sort_order,deals_only)); r jsonb; ts timestamptz;
 begin
  -- search_market ile aynı önbellek: 5 dakika taze; hesaplama zaman aşımına uğrarsa son sonuç verilir.
