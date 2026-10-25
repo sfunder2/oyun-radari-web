@@ -76,3 +76,10 @@ test('progress needs one call per game; detail asks for Turkish schema too',asyn
 test('appid lists are deduplicated, validated and capped',()=>{
  assert.deepEqual(parseAppids('620,620,abc,-1,1145360,0'),[620,1145360]);assert.equal(parseAppids(Array.from({length:30},(_,i)=>i+1).join(',')).length,12);assert.deepEqual(parseAppids(null),[]);
 });
+
+test('state rejects malformed signatures and excessive future expiry',async()=>{
+ const signed=await signState({userId:'user',returnTo:'https://sfunder2.github.io/',now:1000},'secret');
+ assert.equal(await readState(signed+'.extra','secret',2000),null);
+ assert.equal(await readState(signed,'secret',-1000000),null);
+ assert.deepEqual(await readState(signed,'secret',2000),{userId:'user',returnTo:'https://sfunder2.github.io/'});
+});
