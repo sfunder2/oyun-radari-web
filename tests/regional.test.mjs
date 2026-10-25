@@ -101,3 +101,9 @@ test('sprint 02 part 2: known stale currency date must block TRY conversion',asy
 test('sprint 02 part 2: discounted price above base cannot show as a valid PS deal',()=>{
  assert.equal(psPrice({price:{basePrice:'$20.00',discountedPrice:'$25.00',basePriceValue:2000,discountedValue:2500,currencyCode:'USD'}}),null);
 });
+
+test('sprint 02: undated real currency feed does not generate TRY equivalent',async()=>{
+ const f=async()=>res({1:{success:true,data:{price_overview:{currency:'USD',initial:2000,final:1500}}}});
+ const row=(await regionalPrices({platform:'steam',id:'1',f,countries:[C.US],rates:{USD:{rate:50,source:'TCMB döviz satış',date:null}},now:()=> '2026-10-25T00:00:00.000Z'})).countries[0];
+ assert.equal(row.status,'ok');assert.equal(row.price,15);assert.equal(row.price_try,null);assert.equal(row.fx_stale,true);
+});
