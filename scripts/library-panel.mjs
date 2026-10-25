@@ -40,9 +40,10 @@ export function mountLibraryPanel(root,client,{doc=root?.ownerDocument}={}){
  for(const [value,label] of [['all','Tümü'],...Object.entries(LIBRARY_STATUS_LABELS)]){const o=el('option',label);o.value=value;filter.append(o);}
  const exportBtn=el('button','Yüklenen oyunları CSV dışa aktar');exportBtn.type='button';const list=el('ul');
  const more=el('button','Daha fazla oyun yükle');more.type='button';more.hidden=true;
- const PAGE_SIZE=100;let rows=[];let busy=false;let hasMore=false;let pageOffset=0;
- const run=async fn=>{if(busy)return;busy=true;feedback.textContent='İşleniyor…';try{await fn();feedback.textContent='İşlem tamamlandı.';}catch(e){feedback.textContent='İşlem tamamlanamadı. Oturumunuzu ve bağlantınızı kontrol edin.';}finally{busy=false;}};
+ const PAGE_SIZE=100;let rows=[];let busy=false;let hasMore=false;let pageOffset=0;let disposed=false;
+ const run=async fn=>{if(busy||disposed)return;busy=true;feedback.textContent='İşleniyor…';try{await fn();if(!disposed)feedback.textContent='İşlem tamamlandı.';}catch(e){if(!disposed)feedback.textContent='İşlem tamamlanamadı. Oturumunuzu ve bağlantınızı kontrol edin.';}finally{busy=false;}};
  const draw=()=>{
+  if(disposed)return;
   list.replaceChildren();
   more.hidden=!hasMore;
   const visible=filterLibrary(rows,{text:search.value,status:filter.value});
@@ -78,18 +79,20 @@ export function mountLibraryPanel(root,client,{doc=root?.ownerDocument}={}){
  };
  const reload=()=>run(async()=>{
   const page=await fetchPage(0);
+  if(disposed)return;
   rows=page;pageOffset=page.length;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;draw();
  });
  more.addEventListener('click',()=>void run(async()=>{
   const page=await fetchPage(pageOffset);
+  if(disposed)return;
   pageOffset=nextLibraryOffset(pageOffset,page);
   rows=mergeLibraryPage(rows,page);
   hasMore=page.length===PAGE_SIZE;draw();
  }));
- const reloadAfterAdd=async()=>{const page=await fetchPage(0);rows=page;pageOffset=page.length;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;};
+ const reloadAfterAdd=async()=>{const page=await fetchPage(0);if(disposed)return;rows=page;pageOffset=page.length;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;};
  form.addEventListener('submit',event=>{event.preventDefault();void run(async()=>{await client.add({platform:platform.value,game_id:id.value,game_title:title.value});await reloadAfterAdd();form.reset();draw();});});
  search.addEventListener('input',draw);filter.addEventListener('change',draw);
  exportBtn.addEventListener('click',()=>downloadLibraryCsv(rows,doc));
  panel.append(heading,feedback,form,search,filter,exportBtn,list,more);root.replaceChildren(panel);void reload();
- return{reload,destroy:()=>{panel.remove();}};
+ return{reload,destroy:()=>{disposed=true;panel.remove();}};
 }
