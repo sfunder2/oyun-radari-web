@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
+<meta name="robots" content="noindex,nofollow"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; connect-src 'none'; img-src 'none'; object-src 'none'; frame-ancestors 'none'">
 <title>Oyun Radarı – Kütüphane Arayüz Önizlemesi</title>
 <style>
 :root{color-scheme:dark;font:16px/1.5 system-ui,sans-serif;background:#111827;color:#f9fafb}
@@ -21,6 +21,7 @@ li span{flex:1;min-width:180px}h1,h2{line-height:1.2}
 <main id="demo"></main>
 <script type="module">
 import {mountLibraryPanel} from './scripts/library-panel.mjs';
+// Demo-only storage: reload resets all records; no network or account access.
 let games=[
  {platform:'steam',game_id:'620',game_title:'Portal 2',play_status:'completed'},
  {platform:'xbox',game_id:'halo-demo',game_title:'Halo Infinite',play_status:'playing'},
