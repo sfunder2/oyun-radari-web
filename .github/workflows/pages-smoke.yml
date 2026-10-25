@@ -1,0 +1,17 @@
+name: GitHub Pages Smoke Check
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 8 * * *'
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify public site HTML and assets
+        run: node scripts/check-publish.mjs
