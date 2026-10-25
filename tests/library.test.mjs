@@ -21,5 +21,5 @@ test('library operations remain scoped to authenticated user and encode ids',asy
  assert.deepEqual(calls[1][2][0].user_id,'u-123');
  assert.match(calls[2][1],/game_id=eq.id%20%26%20%3F/);
  assert.match(calls[3][1],/game_id=eq.id%20%26%20%3F/);
- await assert.rejects(c.setStatus('steam','620','invalid'),TypeError);
+ await assert.rejects(()=>c.setStatus('steam','620','invalid'),TypeError);
 });
