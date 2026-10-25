@@ -9,9 +9,9 @@ test('steam: kuruş → birim, indirim; satılmayan oyun null',()=>{
  assert.throws(()=>parseSteamPrice({},'1',C.US),/okunamadı/);
 });
 test('xbox: satın alınabilir, deneme ve üyelik koşulu olmayan en ucuz teklif',()=>{
- const av=(price,extra={})=>({Actions:['Details','Purchase'],OrderManagementData:{Price:{ListPrice:price,MSRP:59999,CurrencyCode:'ARS'}},...extra});
+ const av=(price,extra={})=>({Actions:['Details','Purchase'],OrderManagementData:{Price:{ListPrice:price,MSRP:59999,CurrencyCode:'BRL'}},...extra});
  const j={Products:[{ProductId:'BX3',DisplaySkuAvailabilities:[{Sku:{Properties:{IsTrial:false}},Availabilities:[av(17999.7),av(9999,{RemediationRequired:true}),{Actions:['License'],OrderManagementData:{Price:{ListPrice:0,MSRP:0,CurrencyCode:'USD'}}}]},{Sku:{Properties:{IsTrial:true}},Availabilities:[av(1)]}]}]};
- const o=parseXboxPrice(j,'BX3',C.BR);assert.deepEqual([o.price,o.original_price,o.discount_percent,o.currency],[17999.7,59999,70,'ARS']);assert.equal(o.url,'https://www.xbox.com/pt-BR/games/store/x/BX3');
+ const o=parseXboxPrice(j,'BX3',C.BR);assert.deepEqual([o.price,o.original_price,o.discount_percent,o.currency],[17999.7,59999,70,'BRL']);assert.equal(o.url,'https://www.xbox.com/pt-BR/games/store/x/BX3');
  assert.equal(parseXboxPrice({Products:[{ProductId:'BX3',DisplaySkuAvailabilities:[{Availabilities:[{Actions:['License']}]}]}]},'BX3',C.UA),null);
  assert.equal(parseXboxPrice({Products:[]},'BX3',C.US),null);
 });
