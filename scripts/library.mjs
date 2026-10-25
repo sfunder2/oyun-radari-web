@@ -33,8 +33,12 @@ export function libraryClient(api,userId){
   },
   add:async input=>{
    const item=normalizeLibraryGame(input);
-   await api.upsert('user_game_library',[{user_id:userId,...item,updated_at:new Date().toISOString()}],'user_id,platform,game_id');
-   return item;
+   // Only add new games. Re-adding must not overwrite an existing play status.
+   const existing=await api.select(query(item.platform,item.game_id)+'&select=game_id&limit=1');
+   if(!Array.isArray(existing))throw new TypeError('Invalid library lookup response');
+   if(existing.length)return {...item,alreadyExists:true};
+   await api.insert('user_game_library',[{user_id:userId,...item,updated_at:new Date().toISOString()}],'ignore-duplicates');
+   return {...item,alreadyExists:false};
   },
   setStatus:async(platform,gameId,status)=>{
    checkKey(platform,gameId);
