@@ -2,6 +2,10 @@ import {userLibraryApi} from './library-api.mjs';
 import {libraryClient} from './library.mjs';
 import {mountLibraryPanel} from './library-panel.mjs';
 
+export function shouldCloseLibrarySession(event,session,userId){
+ return event==='SIGNED_OUT'||Boolean(session?.user?.id&&session.user.id!==userId);
+}
+
 // Integration entrypoint for an existing authenticated Supabase JS application.
 // A server-verified getUser() identity is required; never infer user_id from URL parameters.
 export async function mountAuthenticatedLibrary(root,{supabase,url,publishableKey}={}){
@@ -15,7 +19,7 @@ export async function mountAuthenticatedLibrary(root,{supabase,url,publishableKe
  const getAccessToken=async()=>{
   if(!active)throw new Error('Library session closed');
   const {data,error}=await supabase.auth.getSession();
-  if(error||data?.session?.user?.id!==id)throw new Error('Session changed: sign in again');
+  if(!active||error||data?.session?.user?.id!==id)throw new Error('Session changed: sign in again');
   const token=data.session.access_token;
   if(!token)throw new Error('Sign in required');
   return token;
@@ -34,7 +38,7 @@ export async function mountAuthenticatedLibrary(root,{supabase,url,publishableKe
  };
  const result=supabase.auth.onAuthStateChange?.((event,session)=>{
   if(!active)return;
-  if(event==='SIGNED_OUT'||session?.user?.id&&session.user.id!==id){
+  if(shouldCloseLibrarySession(event,session,id)){
    close();
   }
  });
