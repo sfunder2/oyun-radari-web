@@ -78,7 +78,7 @@ export function mountLibraryPanel(root,client,{doc=root?.ownerDocument}={}){
  };
  const reload=()=>run(async()=>{
   const page=await fetchPage(0);
-  rows=page;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;draw();
+  rows=page;pageOffset=page.length;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;draw();
  });
  more.addEventListener('click',()=>void run(async()=>{
   const page=await fetchPage(pageOffset);
