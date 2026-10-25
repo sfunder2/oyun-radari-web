@@ -8,6 +8,10 @@ export function filterLibrary(rows,{text='',status='all'}={}){
  return rows.filter(row=>(status==='all'||row.play_status===status)&&
   (!q||String(row.game_title).toLocaleLowerCase('tr').includes(q)||String(row.platform).toLocaleLowerCase('tr').includes(q)));
 }
+export function mergeLibraryPage(current,page){
+ const keys=new Set(current.map(x=>JSON.stringify([x.platform,x.game_id])));
+ return [...current,...page.filter(x=>!keys.has(JSON.stringify([x.platform,x.game_id])))];
+}
 export function downloadLibraryCsv(rows,doc=document){
  const content=exportLibraryCsv(rows);
  const blob=new Blob(['\ufeff'+content],{type:'text/csv;charset=utf-8'});
@@ -30,7 +34,7 @@ export function mountLibraryPanel(root,client,{doc=root?.ownerDocument}={}){
  const search=el('input');search.placeholder='Kütüphanede ara';search.setAttribute('aria-label','Kütüphanede ara');
  const filter=el('select');filter.setAttribute('aria-label','Oynama durumuna göre filtrele');
  for(const [value,label] of [['all','Tümü'],...Object.entries(LIBRARY_STATUS_LABELS)]){const o=el('option',label);o.value=value;filter.append(o);}
- const exportBtn=el('button','CSV dışa aktar');exportBtn.type='button';const list=el('ul');
+ const exportBtn=el('button','Yüklenen oyunları CSV dışa aktar');exportBtn.type='button';const list=el('ul');
  const more=el('button','Daha fazla oyun yükle');more.type='button';more.hidden=true;
  const PAGE_SIZE=100;let rows=[];let busy=false;let hasMore=false;
  const run=async fn=>{if(busy)return;busy=true;feedback.textContent='İşleniyor…';try{await fn();feedback.textContent='İşlem tamamlandı.';}catch(e){feedback.textContent='İşlem tamamlanamadı. Oturumunuzu ve bağlantınızı kontrol edin.';}finally{busy=false;}};
@@ -55,7 +59,7 @@ export function mountLibraryPanel(root,client,{doc=root?.ownerDocument}={}){
     if(typeof doc.defaultView?.confirm==='function'&&!doc.defaultView.confirm(game.game_title+' silinsin mi?'))return;
     void run(async()=>{
      await client.remove(game.platform,game.game_id);
-     rows=rows.filter(row=>row.platform!==game.platform||row.game_id!==game.game_id);draw();
+     const page=await fetchPage(0);rows=page;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;draw();
     });
    });
    li.append(state,remove);list.append(li);
@@ -74,8 +78,7 @@ export function mountLibraryPanel(root,client,{doc=root?.ownerDocument}={}){
  });
  more.addEventListener('click',()=>void run(async()=>{
   const page=await fetchPage(rows.length);
-  const keys=new Set(rows.map(x=>x.platform+':'+x.game_id));
-  rows.push(...page.filter(x=>!keys.has(x.platform+':'+x.game_id)));
+  rows=mergeLibraryPage(rows,page);
   hasMore=page.length===PAGE_SIZE;draw();
  }));
  const reloadAfterAdd=async()=>{const page=await fetchPage(0);rows=page;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;};
