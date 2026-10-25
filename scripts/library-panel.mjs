@@ -12,6 +12,10 @@ export function mergeLibraryPage(current,page){
  const keys=new Set(current.map(x=>JSON.stringify([x.platform,x.game_id])));
  return [...current,...page.filter(x=>{const key=JSON.stringify([x.platform,x.game_id]);if(keys.has(key))return false;keys.add(key);return true;})];
 }
+export function nextLibraryOffset(offset,page){
+ if(!Number.isSafeInteger(offset)||offset<0||!Array.isArray(page))throw new TypeError('Invalid pagination state');
+ return offset+page.length;
+}
 export function downloadLibraryCsv(rows,doc=document){
  const content=exportLibraryCsv(rows);
  const blob=new Blob(['\ufeff'+content],{type:'text/csv;charset=utf-8'});
@@ -36,7 +40,7 @@ export function mountLibraryPanel(root,client,{doc=root?.ownerDocument}={}){
  for(const [value,label] of [['all','Tümü'],...Object.entries(LIBRARY_STATUS_LABELS)]){const o=el('option',label);o.value=value;filter.append(o);}
  const exportBtn=el('button','Yüklenen oyunları CSV dışa aktar');exportBtn.type='button';const list=el('ul');
  const more=el('button','Daha fazla oyun yükle');more.type='button';more.hidden=true;
- const PAGE_SIZE=100;let rows=[];let busy=false;let hasMore=false;
+ const PAGE_SIZE=100;let rows=[];let busy=false;let hasMore=false;let pageOffset=0;
  const run=async fn=>{if(busy)return;busy=true;feedback.textContent='İşleniyor…';try{await fn();feedback.textContent='İşlem tamamlandı.';}catch(e){feedback.textContent='İşlem tamamlanamadı. Oturumunuzu ve bağlantınızı kontrol edin.';}finally{busy=false;}};
  const draw=()=>{
   list.replaceChildren();
@@ -59,7 +63,7 @@ export function mountLibraryPanel(root,client,{doc=root?.ownerDocument}={}){
     if(typeof doc.defaultView?.confirm==='function'&&!doc.defaultView.confirm(game.game_title+' silinsin mi?'))return;
     void run(async()=>{
      await client.remove(game.platform,game.game_id);
-     const page=await fetchPage(0);rows=page;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;draw();
+     const page=await fetchPage(0);rows=page;pageOffset=page.length;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;draw();
     });
    });
    li.append(state,remove);list.append(li);
@@ -77,11 +81,12 @@ export function mountLibraryPanel(root,client,{doc=root?.ownerDocument}={}){
   rows=page;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;draw();
  });
  more.addEventListener('click',()=>void run(async()=>{
-  const page=await fetchPage(rows.length);
+  const page=await fetchPage(pageOffset);
+  pageOffset=nextLibraryOffset(pageOffset,page);
   rows=mergeLibraryPage(rows,page);
   hasMore=page.length===PAGE_SIZE;draw();
  }));
- const reloadAfterAdd=async()=>{const page=await fetchPage(0);rows=page;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;};
+ const reloadAfterAdd=async()=>{const page=await fetchPage(0);rows=page;pageOffset=page.length;hasMore=typeof client.listPage==='function'&&page.length===PAGE_SIZE;};
  form.addEventListener('submit',event=>{event.preventDefault();void run(async()=>{await client.add({platform:platform.value,game_id:id.value,game_title:title.value});await reloadAfterAdd();form.reset();draw();});});
  search.addEventListener('input',draw);filter.addEventListener('change',draw);
  exportBtn.addEventListener('click',()=>downloadLibraryCsv(rows,doc));
