@@ -30,3 +30,22 @@ Oyun ayrıntısındaki "Diğer ülkelerde fiyat" paneli, seçilen mağazanın ay
 - PlayStation'da Avrupa ürün kimliği (EP...) TR, İngiltere, Polonya, Ukrayna ve Hindistan'da da geçerlidir; geçmediği ülkede oyunun concept sayfasından o ülkenin ürünü bulunur ve aynı ad + aynı konsol kuşağıyla eşleştirilir.
 - Kur: USD, EUR, GBP TCMB döviz satıştan; PLN, UAH, INR, BRL open.er-api.com'dan.
 - Yayımlama: `supabase functions deploy regional-prices` (JWT doğrulaması açık; site anon anahtarla çağırır).
+
+## Özel domain
+
+Site paketi `/oyun-radari-web/` tabanına göre derlenir; **Publish Oyun Radari** iş akışı yayından önce `scripts/relative-base.mjs` ile yolları göreli yapar. Böylece aynı paket hem `sfunder2.github.io/oyun-radari-web/` altında hem de özel domain'in kökünde çalışır (`tests/relative-base.test.mjs`).
+
+Domain'i bağlamak için (aşağıda `ALANADI` yerine domain yazılır):
+
+1. DNS kayıtları (alan adını aldığın yerde):
+   - `@` (kök) için dört `A` kaydı: `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+   - İstenirse IPv6 için dört `AAAA` kaydı: `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
+   - `www` için `CNAME` → `sfunder2.github.io`
+   - Cloudflare kullanılıyorsa bu kayıtlar "DNS only" (gri bulut) olmalı, yoksa GitHub sertifika çıkaramaz.
+2. GitHub → repo **Settings → Pages → Custom domain**: `ALANADI` yaz, kaydet. Yayın GitHub Actions ile yapıldığı için repoya `CNAME` dosyası gerekmez; ayar buradan tutulur.
+3. Sertifika hazır olunca (birkaç dakika–birkaç saat) aynı sayfada **Enforce HTTPS** işaretlenir. GitHub eski `sfunder2.github.io/oyun-radari-web/...` adreslerini kendiliğinden yeni domain'e yönlendirir.
+4. Supabase → **Authentication → URL Configuration**: Site URL `https://ALANADI/`, Redirect URLs listesine `https://ALANADI/**` eklenir (kayıt ve şifre sıfırlama bağlantıları buraya döner).
+5. `supabase/functions/{radar-services,regional-prices,steam-account}` içindeki `ALLOWED` listesine `https://ALANADI` eklenip fonksiyonlar yeniden yayımlanır.
+6. Android: `MainActivity.java` içindeki `HOME`/`HOST`/`PATH` ve `AndroidManifest.xml` içindeki `android:host` yeni domain'e çevrilir; iş akışı yeni APK'yı yayımlar.
+
+Not: tarayıcıda saklanan veriler (giriş oturumu, hesapsız kaydedilen listeler) adrese bağlıdır; yeni domain'de ilk açılışta yeniden giriş gerekir, hesaba senkronlanmamış yerel veriler yeni adrese taşınmaz.

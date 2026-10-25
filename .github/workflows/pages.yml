@@ -19,6 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Yolları göreli yap (github.io alt yolu ve özel domain kökü)
+        run: node scripts/relative-base.mjs .
       - uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
