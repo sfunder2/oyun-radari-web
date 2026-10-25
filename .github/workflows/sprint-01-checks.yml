@@ -1,0 +1,20 @@
+name: Sprint 01 Checks
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, sprint-01-security-ci-20261025]
+permissions:
+  contents: read
+jobs:
+  node-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run repository tests
+        run: node --test tests/*.test.mjs
+      - name: Check syntax
+        run: node --check scripts/steam-account.mjs

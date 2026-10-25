@@ -10,8 +10,10 @@ async function hmac(secret,text){const key=await crypto.subtle.importKey('raw',e
 // Steam'e gidip dönen istek hangi site kullanıcısına aitti: imzalı ve 10 dakikalık durum değeri
 export async function signState({userId,returnTo,now=Date.now()},secret){const body=b64url(enc.encode(JSON.stringify({u:userId,r:returnTo,e:now+10*60000})));return body+'.'+await hmac(secret,body);}
 export async function readState(state,secret,now=Date.now()){
- const [body,sig]=String(state||'').split('.');if(!body||!sig||sig!==await hmac(secret,body))return null;
- try{const s=JSON.parse(new TextDecoder().decode(fromB64url(body)));return s.e>now&&s.u&&s.r?{userId:s.u,returnTo:s.r}:null;}catch{return null;}
+ const [body,sig]=String(state||'').split('.');if(!body||!sig||state.split('.').length!==2||!secret)return null;
+ const expected=await hmac(secret,body);const a=enc.encode(sig),b=enc.encode(expected);
+ if(a.length!==b.length)return null;let diff=0;for(let i=0;i<a.length;i++)diff|=a[i]^b[i];if(diff!==0)return null;
+ try{const s=JSON.parse(new TextDecoder().decode(fromB64url(body)));return Number.isFinite(s.e)&&s.e>now&&s.e<=now+10*60000&&typeof s.u==='string'&&typeof s.r==='string'?{userId:s.u,returnTo:s.r}:null;}catch{return null;}
 }
 
 // Yalnız izinli site adreslerine geri dönülür; sayfa bölümü (?section=) korunur, # atılır
