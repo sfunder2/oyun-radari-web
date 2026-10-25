@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {COUNTRIES,parseSteamPrice,parseXboxPrice,parseGogPrice,parseEpicPrice,psPrice,matchPsProduct,conceptProductIds,psRegionPrice,parseTcmb,parseErApi,regionalPrices} from '../scripts/regional.mjs';
+import {COUNTRIES,parseSteamPrice,parseXboxPrice,parseGogPrice,parseEpicPrice,psPrice,matchPsProduct,conceptProductIds,psRegionPrice,parseTcmb,parseErApi,regionalPrices,isFreshRate} from '../scripts/regional.mjs';
 const C=Object.fromEntries(COUNTRIES.map(c=>[c.cc,c]));
 const res=(body,status=200)=>({ok:status<400,status,json:async()=>body,text:async()=>typeof body==='string'?body:JSON.stringify(body)});
 test('steam: kuruş → birim, indirim; satılmayan oyun null',()=>{
@@ -9,9 +9,9 @@ test('steam: kuruş → birim, indirim; satılmayan oyun null',()=>{
  assert.throws(()=>parseSteamPrice({},'1',C.US),/okunamadı/);
 });
 test('xbox: satın alınabilir, deneme ve üyelik koşulu olmayan en ucuz teklif',()=>{
- const av=(price,extra={})=>({Actions:['Details','Purchase'],OrderManagementData:{Price:{ListPrice:price,MSRP:59999,CurrencyCode:'ARS'}},...extra});
+ const av=(price,extra={})=>({Actions:['Details','Purchase'],OrderManagementData:{Price:{ListPrice:price,MSRP:59999,CurrencyCode:'BRL'}},...extra});
  const j={Products:[{ProductId:'BX3',DisplaySkuAvailabilities:[{Sku:{Properties:{IsTrial:false}},Availabilities:[av(17999.7),av(9999,{RemediationRequired:true}),{Actions:['License'],OrderManagementData:{Price:{ListPrice:0,MSRP:0,CurrencyCode:'USD'}}}]},{Sku:{Properties:{IsTrial:true}},Availabilities:[av(1)]}]}]};
- const o=parseXboxPrice(j,'BX3',C.BR);assert.deepEqual([o.price,o.original_price,o.discount_percent,o.currency],[17999.7,59999,70,'ARS']);assert.equal(o.url,'https://www.xbox.com/pt-BR/games/store/x/BX3');
+ const o=parseXboxPrice(j,'BX3',C.BR);assert.deepEqual([o.price,o.original_price,o.discount_percent,o.currency],[17999.7,59999,70,'BRL']);assert.equal(o.url,'https://www.xbox.com/pt-BR/games/store/x/BX3');
  assert.equal(parseXboxPrice({Products:[{ProductId:'BX3',DisplaySkuAvailabilities:[{Availabilities:[{Actions:['License']}]}]}]},'BX3',C.UA),null);
  assert.equal(parseXboxPrice({Products:[]},'BX3',C.US),null);
 });
@@ -83,4 +83,21 @@ test('sprint 02: GOG malformed formatted amounts cannot be shown as prices',()=>
  assert.equal(parseGogPrice(price('12,99 USD'),'id',C.US),null);
  assert.equal(parseGogPrice(price('abc USD'),'id',C.US),null);
  assert.equal(parseGogPrice(price('-100 USD'),'id',C.US),null);
+});
+
+test('sprint 02 part 2: invalid Xbox prices and wrong currency are ignored',()=>{
+ const avail=(n,currency='USD')=>({Actions:['Purchase'],OrderManagementData:{Price:{ListPrice:n,MSRP:500,CurrencyCode:currency}}});
+ const j={Products:[{ProductId:'X',DisplaySkuAvailabilities:[{Sku:{Properties:{IsTrial:false}},Availabilities:[avail(-4),avail(0,'EUR'),avail(120)]}]}]};
+ assert.equal(parseXboxPrice(j,'X',C.US).price,120);
+ assert.equal(parseXboxPrice({Products:[{ProductId:'X',DisplaySkuAvailabilities:[{Availabilities:[avail(-10)]}]}]},'X',C.US),null);
+});
+test('sprint 02 part 2: known stale currency date must block TRY conversion',async()=>{
+ assert.equal(isFreshRate('01.01.2020',new Date('2026-10-25T00:00:00Z')),false);
+ assert.equal(isFreshRate('24.10.2026',new Date('2026-10-25T00:00:00Z')),true);
+ const f=async()=>res({1:{success:true,data:{price_overview:{currency:'USD',initial:2000,final:1500}}}});
+ const row=(await regionalPrices({platform:'steam',id:'1',f,countries:[C.US],rates:{USD:{rate:50,date:'01.01.2020'}},now:()=> '2026-10-25T00:00:00.000Z'})).countries[0];
+ assert.equal(row.price_try,null);assert.equal(row.fx_stale,true);
+});
+test('sprint 02 part 2: discounted price above base cannot show as a valid PS deal',()=>{
+ assert.equal(psPrice({price:{basePrice:'$20.00',discountedPrice:'$25.00',basePriceValue:2000,discountedValue:2500,currencyCode:'USD'}}),null);
 });
