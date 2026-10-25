@@ -15,7 +15,7 @@ test('uses current user JWT and public anon key for RLS-scoped library operation
  assert.equal(calls[2].opts.headers.Authorization,'Bearer token2');
  assert.equal(calls[2].opts.headers.apikey,'public-anon');
  assert.equal(calls[2].opts.headers.Prefer,'resolution=ignore-duplicates,return=minimal');
- assert.match(calls[1].url,/\/rest\/v1\/user_game_library\?/);
+ assert.match(calls[2].url,/\/rest\/v1\/user_game_library\?/);
  assert.equal(JSON.parse(calls[2].opts.body)[0].user_id,'user-a');
 });
 test('rejects missing sessions, non-TLS remote endpoints, and cross-table operations',async()=>{
