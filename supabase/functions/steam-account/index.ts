@@ -8,6 +8,8 @@ const BASE=env('SUPABASE_URL')+'/functions/v1/steam-account';
 const SECRET=env('STEAM_LINK_SECRET')||env('SUPABASE_SERVICE_ROLE_KEY');
 const sb=supabase(env('SUPABASE_URL'),env('SUPABASE_SERVICE_ROLE_KEY'));
 const cache=new Map<string,{at:number,data:unknown}>();
+const hashState=async(state:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(state)))).map(x=>x.toString(16).padStart(2,'0')).join('');
+const consumeState=async(state:string)=>sb.rpc('consume_steam_link_state',{p_hash:await hashState(state)});
 const callbackUrl=(state:string)=>BASE+'?'+new URLSearchParams({action:'callback',state});
 async function cached(key:string,load:()=>Promise<unknown>){const old=cache.get(key);if(old&&Date.now()-old.at<10*60000)return old.data;const data=await load();if(cache.size>300)cache.clear();cache.set(key,{at:Date.now(),data});return data;}
 async function userOf(req:Request){const token=(req.headers.get('authorization')||'').replace(/^Bearer\s+/i,'');if(!token)return null;const r=await fetch(env('SUPABASE_URL')+'/auth/v1/user',{headers:{apikey:req.headers.get('apikey')||env('SUPABASE_ANON_KEY'),Authorization:'Bearer '+token},signal:AbortSignal.timeout(10000)});if(!r.ok)return null;const u=await r.json();return u?.id?String(u.id):null;}
@@ -16,10 +18,13 @@ function back(returnTo:string,hash:Record<string,string>){return new Response(nu
 
 async function callback(u:URL){
  const state=await readState(u.searchParams.get('state'),SECRET);
- if(!state)return new Response('Bağlantının süresi doldu. Siteye dönüp yeniden dene.',{status:400});
+ if(!state||!safeReturn(state.returnTo,ALLOWED))return new Response('Bağlantı geçersiz veya süresi dolmuş.',{status:400});
  const fail=(reason:string)=>back(state.returnTo,{steam:'error',reason});
  const steamid=await verifyOpenId(u.searchParams,callbackUrl(u.searchParams.get('state')||'')).catch(()=>null);
  if(!steamid)return fail('verify');
+ // A successful Steam verification must be consumed atomically before linking.
+ // Migration sprint-01-steam-state.sql is mandatory before deploying this function.
+ if(await consumeState(u.searchParams.get('state')||'')!==true)return fail('replay');
  const lib:any=await fetchLibrary(steamid,env('STEAM_API_KEY')).catch(()=>null);
  try{await sb.upsert('linked_accounts',[{user_id:state.userId,platform:'steam',external_id:steamid,display_name:lib?.profile?.name||null,avatar_url:lib?.profile?.avatar||null,linked_at:new Date().toISOString()}],'user_id,platform');}
  catch(e){return fail(/23505|duplicate|409/.test(String((e as Error).message))?'taken':'save');}
@@ -32,10 +37,11 @@ async function handle(req:Request,u:URL,action:string){
  if(action==='status')return Response.json({ready:!!env('STEAM_API_KEY')});
  const userId=await userOf(req);if(!userId)return Response.json({error:'Steam hesabını bağlamak için giriş yap.'},{status:401});
  if(action==='start'&&req.method==='POST'){
+  if(!SECRET||!env('STEAM_API_KEY'))return Response.json({error:'Steam bağlantısı yapılandırılmamış'},{status:503});
   const body=await req.json().catch(()=>({}));const returnTo=safeReturn(body.returnTo,ALLOWED);if(!returnTo)return Response.json({error:'Geçersiz dönüş adresi'},{status:400});
   return Response.json({url:loginUrl(callbackUrl(await signState({userId,returnTo},SECRET)))});
  }
- if(action==='unlink'&&req.method==='POST'){await sb.del('linked_accounts?platform=eq.steam&user_id=eq.'+encodeURIComponent(userId));return Response.json({linked:false});}
+ if(action==='unlink'&&req.method==='POST'){const prior=await linkedSteam(userId);await sb.del('linked_accounts?platform=eq.steam&user_id=eq.'+encodeURIComponent(userId));if(prior?.external_id){const sid=String(prior.external_id);for(const key of cache.keys())if(key.startsWith(sid+':'))cache.delete(key);}return Response.json({linked:false});}
  const link=await linkedSteam(userId);if(!link)return Response.json({linked:false});
  if(!env('STEAM_API_KEY'))return Response.json({error:'Steam bağlantısı henüz hazır değil. Biraz sonra tekrar dene.'},{status:503});
  const steamid=String(link.external_id);
@@ -57,5 +63,5 @@ Deno.serve(async(req:Request)=>{
  const headers={'Access-Control-Allow-Origin':ALLOWED.has(origin)?origin:'https://sfunder2.github.io','Access-Control-Allow-Headers':'authorization,content-type,apikey','Access-Control-Allow-Methods':'GET,POST,OPTIONS','Vary':'Origin'};
  if(req.method==='OPTIONS')return new Response(null,{headers});
  try{const u=new URL(req.url),res=await handle(req,u,u.searchParams.get('action')||'library');for(const [k,v] of Object.entries(headers))res.headers.set(k,v);return res;}
- catch(e){console.error('steam-account:',(e as Error).message);return Response.json({error:'Steam şu anda yanıt vermiyor. Biraz sonra tekrar dene.'},{status:503,headers});}
+ catch(e){console.error('steam-account:',(e as Error).name);return Response.json({error:'Steam şu anda yanıt vermiyor. Biraz sonra tekrar dene.'},{status:503,headers});}
 });
