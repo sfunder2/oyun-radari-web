@@ -13,7 +13,7 @@ create table if not exists public.user_game_library (
 create index if not exists user_game_library_user_status_idx
   on public.user_game_library (user_id, play_status, updated_at desc);
 alter table public.user_game_library enable row level security;
-revoke all on public.user_game_library from anon;
+revoke all privileges on public.user_game_library from public, anon, authenticated;
 grant select,insert,update,delete on public.user_game_library to authenticated;
 drop policy if exists library_select_own on public.user_game_library;
 create policy library_select_own on public.user_game_library
