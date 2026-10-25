@@ -21,7 +21,16 @@ export function libraryClient(api,userId){
  };
  return {
   list:async()=>api.select('user_game_library?select=platform,game_id,game_title,play_status,added_at,updated_at&user_id=eq.'+
-   encodeURIComponent(userId)+'&order=updated_at.desc&limit=200'),
+   encodeURIComponent(userId)+'&order=updated_at.desc,platform.asc,game_id.asc&limit=200'),
+  listPage:async({offset=0,limit=100,status}={})=>{
+   if(!Number.isSafeInteger(offset)||offset<0||!Number.isSafeInteger(limit)||limit<1||limit>200)
+    throw new RangeError('Invalid pagination');
+   if(status!==undefined&&!PLAY_STATUSES.has(status))throw new TypeError('Invalid play status');
+   const path='user_game_library?select=platform,game_id,game_title,play_status,added_at,updated_at&user_id=eq.'+
+    encodeURIComponent(userId)+(status?'&play_status=eq.'+encodeURIComponent(status):'')+
+    '&order=updated_at.desc,platform.asc,game_id.asc&limit='+limit+'&offset='+offset;
+   return api.select(path);
+  },
   add:async input=>{
    const item=normalizeLibraryGame(input);
    await api.upsert('user_game_library',[{user_id:userId,...item,updated_at:new Date().toISOString()}],'user_id,platform,game_id');
