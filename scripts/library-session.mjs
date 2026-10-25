@@ -25,18 +25,23 @@ export async function mountAuthenticatedLibrary(root,{supabase,url,publishableKe
  let panel;
  try{panel=mountLibraryPanel(root,client);}
  catch(error){active=false;throw error;}
- const {data:subscription}=supabase.auth.onAuthStateChange?.((event,session)=>{
+ let subscription;
+ const close=()=>{
+  if(!active)return;
+  active=false;
+  subscription?.subscription?.unsubscribe?.();
+  panel.destroy();root.replaceChildren();
+ };
+ const result=supabase.auth.onAuthStateChange?.((event,session)=>{
   if(!active)return;
   if(event==='SIGNED_OUT'||session?.user?.id&&session.user.id!==id){
-   active=false;panel.destroy();root.replaceChildren();
+   close();
   }
- })||{};
+ });
+ subscription=result?.data;
+ if(!active)subscription?.subscription?.unsubscribe?.();
  return{
-  destroy(){
-   active=false;
-   subscription?.subscription?.unsubscribe?.();
-   panel.destroy();
-  },
+  destroy(){close();},
   reload:()=>active?panel.reload():Promise.reject(new Error('Library session closed'))
  };
 }
