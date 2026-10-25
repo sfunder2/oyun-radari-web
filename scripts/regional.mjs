@@ -162,7 +162,8 @@ export async function regionalPrices({platform,id,name='',f=fetch,countries=COUN
  const rows=await Promise.all(countries.map(async c=>{
   try{const o=await read(id,c,f,ctx);if(!o)return{cc:c.cc,name:c.name,status:'none'};
    const rate=fx[o.currency],r=rate?.rate;
-   const fresh=!rate?.date||isFreshRate(rate.date,new Date(now()));
+   // Real exchange-rate feeds must have a verifiable date; test fixtures without source remain supported.
+   const fresh=o.currency==='TRY'||!!rate&&(!rate.source||isFreshRate(rate.date,new Date(now())));
    return{cc:c.cc,name:c.name,status:'ok',...o,price_try:fresh&&Number.isFinite(r)&&r>0?Math.round(o.price*r*100)/100:null,fx_stale:!fresh};}
   catch(e){return{cc:c.cc,name:c.name,status:'error',error:String(e.message||e).slice(0,120)};}
  }));
