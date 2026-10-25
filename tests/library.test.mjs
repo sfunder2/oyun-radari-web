@@ -11,15 +11,16 @@ test('library game input is normalized and checked',()=>{
 test('library operations remain scoped to authenticated user and encode ids',async()=>{
  const calls=[];
  const api={select:async p=>(calls.push(['select',p]),[]),
-  upsert:async(...x)=>calls.push(['upsert',...x]),patch:async(...x)=>calls.push(['patch',...x]),del:async p=>calls.push(['delete',p])};
+  insert:async(...x)=>calls.push(['insert',...x]),patch:async(...x)=>calls.push(['patch',...x]),del:async p=>calls.push(['delete',p])};
  const c=libraryClient(api,'u-123');
  await c.list();
  await c.add({platform:'steam',game_id:'620',game_title:'Portal 2'});
  await c.setStatus('steam','id & ?','playing');
  await c.remove('steam','id & ?');
  assert.match(calls[0][1],/user_id=eq.u-123/);
- assert.deepEqual(calls[1][2][0].user_id,'u-123');
- assert.match(calls[2][1],/game_id=eq.id%20%26%20%3F/);
+ assert.match(calls[1][1],/game_id=eq.620/);
+ assert.deepEqual(calls[2][2][0].user_id,'u-123');
+ assert.match(calls[3][1],/game_id=eq.id%20%26%20%3F/);
  assert.match(calls[3][1],/game_id=eq.id%20%26%20%3F/);
  await assert.rejects(()=>c.setStatus('steam','620','invalid'),TypeError);
 });
@@ -34,4 +35,12 @@ test('library pagination is deterministic, bounded and status-filtered',async()=
  await assert.rejects(()=>c.listPage({offset:-1}),RangeError);
  await assert.rejects(()=>c.listPage({limit:201}),RangeError);
  await assert.rejects(()=>c.listPage({status:'not-real'}),TypeError);
+});
+
+test('duplicate add preserves existing playing status without writing',async()=>{
+ let writes=0;
+ const api={select:async()=>[{game_id:'620'}],insert:async()=>{writes++;}};
+ const result=await libraryClient(api,'user-a').add({platform:'steam',game_id:'620',game_title:'Portal 2'});
+ assert.equal(result.alreadyExists,true);
+ assert.equal(writes,0);
 });
