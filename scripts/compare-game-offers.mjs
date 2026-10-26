@@ -8,7 +8,7 @@ export function compareGameOffers(offers,{currency}={}){
  // Never silently pick a currency when a response mixes currencies: feed order is not user preference.
  const currencies=[...new Set(valid.map(o=>o.currency))];
  const selectedCurrency=currency??(currencies.length===1?currencies[0]:null);
- if(selectedCurrency!==null&&!/^[A-Z]{3}$/.test(selectedCurrency))throw new TypeError('Invalid currency');
+ if(selectedCurrency!==null&&(typeof selectedCurrency!=='string'||!/^[A-Z]{3}$/.test(selectedCurrency)))throw new TypeError('Invalid currency');
  const comparable=valid.filter(o=>selectedCurrency!==null&&o.currency===selectedCurrency)
    .map(o=>({store:o.store,price:o.price,currency:o.currency,discountPercent:
      typeof o.discountPercent==='number'&&Number.isFinite(o.discountPercent)&&o.discountPercent>=0&&o.discountPercent<=100?o.discountPercent:null}))
