@@ -10,14 +10,15 @@ export function compareGameOffers(offers,{currency}={}){
  const selectedCurrency=currency??(currencies.length===1?currencies[0]:null);
  if(selectedCurrency!==null&&(typeof selectedCurrency!=='string'||!/^[A-Z]{3}$/.test(selectedCurrency)))throw new TypeError('Invalid currency');
  const comparable=valid.filter(o=>selectedCurrency!==null&&o.currency===selectedCurrency)
-   .map(o=>({store:o.store,price:o.price,currency:o.currency,discountPercent:
-     typeof o.discountPercent==='number'&&Number.isFinite(o.discountPercent)&&o.discountPercent>=0&&o.discountPercent<=100?o.discountPercent:null}))
+   .map(o=>({store:o.store,price:o.price,currency:o.currency,originalPrice:
+     o.originalPriceVerified===true&&typeof o.originalPrice==='number'&&Number.isFinite(o.originalPrice)&&o.originalPrice>o.price?o.originalPrice:null}))
    .sort((a,b)=>a.price-b.price||a.store.localeCompare(b.store,'tr'));
  // Multiple feed rows for one store must not inflate store-to-store savings.
  const seen=new Set();
  const unique=comparable.filter(o=>{const key=o.store.trim().toLocaleLowerCase('tr');if(seen.has(key))return false;seen.add(key);return true;});
  // A discount badge is trustworthy only with a valid reference price.
- const annotated=unique.map(o=>({...o,discountPercent:null}));
+ const annotated=unique.map(o=>({...o,discountPercent:o.originalPrice!==null?
+   Math.round((1-o.price/o.originalPrice)*10000)/100:null}));
  const best=annotated[0]??null;
  const highest=annotated.length>1?annotated[annotated.length-1].price:null;
  const savings=best!==null&&highest!==null?Math.max(0,highest-best.price):null;
