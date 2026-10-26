@@ -43,3 +43,15 @@ test('single store or free-only stores do not invent percentage savings',()=>{
  assert.equal(free.savings,0);
  assert.equal(free.savingsPercent,null);
 });
+
+test('mixed currencies never choose a price winner from feed ordering',()=>{
+ const offers=[{store:'Steam',price:1,currency:'USD'},{store:'Xbox',price:300,currency:'TRY'}];
+ const result=compareGameOffers(offers);
+ assert.equal(result.best,null);
+ assert.equal(result.requiresCurrencySelection,true);
+ assert.equal(result.currency,null);
+ assert.deepEqual(result.availableCurrencies,['TRY','USD']);
+ const selected=compareGameOffers(offers,{currency:'TRY'});
+ assert.equal(selected.best.store,'Xbox');
+ assert.equal(selected.requiresCurrencySelection,false);
+});
