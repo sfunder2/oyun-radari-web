@@ -61,3 +61,25 @@ test('invalid non-string currency values fail with a clear TypeError',()=>{
  assert.throws(()=>compareGameOffers([],{currency:{}}),TypeError);
  assert.throws(()=>compareGameOffers([],{currency:false}),TypeError);
 });
+
+test('repeated rows from the same store do not create fictitious store savings',()=>{
+ const result=compareGameOffers([
+  {store:'Steam',price:100,currency:'TRY'},
+  {store:' steam ',price:150,currency:'TRY'}
+ ]);
+ assert.equal(result.offers.length,1);
+ assert.equal(result.best.price,100);
+ assert.equal(result.savings,null);
+ assert.equal(result.savingsPercent,null);
+});
+test('duplicate store prices retain cheapest offer while comparing other stores',()=>{
+ const result=compareGameOffers([
+  {store:'Steam',price:120,currency:'TRY'},
+  {store:'Steam',price:100,currency:'TRY'},
+  {store:'Xbox',price:200,currency:'TRY'}
+ ]);
+ assert.equal(result.offers.length,2);
+ assert.equal(result.best.price,100);
+ assert.equal(result.savings,100);
+ assert.equal(result.savingsPercent,50);
+});
