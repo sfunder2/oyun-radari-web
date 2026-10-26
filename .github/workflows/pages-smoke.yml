@@ -6,8 +6,10 @@ on:
       - 'assets/**'
       - 'scripts/check-publish.mjs'
       - 'scripts/compare-game-offers.mjs'
+      - 'scripts/price-card-model.mjs'
       - 'tests/check-publish.test.mjs'
       - 'tests/compare-game-offers.test.mjs'
+      - 'tests/price-card-model.test.mjs'
       - '.github/workflows/pages-smoke.yml'
   push:
     branches: [main]
@@ -16,8 +18,10 @@ on:
       - 'assets/**'
       - 'scripts/check-publish.mjs'
       - 'scripts/compare-game-offers.mjs'
+      - 'scripts/price-card-model.mjs'
       - 'tests/check-publish.test.mjs'
       - 'tests/compare-game-offers.test.mjs'
+      - 'tests/price-card-model.test.mjs'
       - '.github/workflows/pages-smoke.yml'
   workflow_dispatch:
   schedule:
@@ -33,7 +37,7 @@ jobs:
         with:
           node-version: '22'
       - name: Test catalog publishing checks
-        run: node --test tests/check-publish.test.mjs tests/compare-game-offers.test.mjs
+        run: node --test tests/check-publish.test.mjs tests/compare-game-offers.test.mjs tests/price-card-model.test.mjs
   smoke:
     if: github.event_name != 'pull_request'
     needs: unit
