@@ -11,6 +11,10 @@ export function compareGameOffers(offers,{currency}={}){
    .map(o=>({store:o.store,price:o.price,currency:o.currency,discountPercent:
      typeof o.discountPercent==='number'&&Number.isFinite(o.discountPercent)&&o.discountPercent>=0&&o.discountPercent<=100?o.discountPercent:null}))
    .sort((a,b)=>a.price-b.price||a.store.localeCompare(b.store,'tr'));
- return {currency:selectedCurrency,offers:comparable,best:comparable[0]??null,
-   excluded:offers.length-comparable.length};
+ const best=comparable[0]??null;
+ const highest=comparable.length>1?comparable[comparable.length-1].price:null;
+ const savings=best!==null&&highest!==null?Math.max(0,highest-best.price):null;
+ const savingsPercent=savings!==null&&highest>0?Math.round(savings/highest*10000)/100:null;
+ return {currency:selectedCurrency,offers:comparable,best,
+   savings,savingsPercent,excluded:offers.length-comparable.length};
 }
