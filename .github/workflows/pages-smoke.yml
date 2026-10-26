@@ -1,11 +1,19 @@
 name: GitHub Pages Smoke Check
 on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'assets/**'
+      - 'scripts/check-publish.mjs'
+      - 'tests/check-publish.test.mjs'
+      - '.github/workflows/pages-smoke.yml'
   push:
     branches: [main]
     paths:
       - 'index.html'
       - 'assets/**'
       - 'scripts/check-publish.mjs'
+      - 'tests/check-publish.test.mjs'
       - '.github/workflows/pages-smoke.yml'
   workflow_dispatch:
   schedule:
@@ -13,7 +21,18 @@ on:
 permissions:
   contents: read
 jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test catalog publishing checks
+        run: node --test tests/check-publish.test.mjs
   smoke:
+    if: github.event_name != 'pull_request'
+    needs: unit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
