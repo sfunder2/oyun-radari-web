@@ -83,3 +83,14 @@ test('duplicate store prices retain cheapest offer while comparing other stores'
  assert.equal(result.savings,100);
  assert.equal(result.savingsPercent,50);
 });
+
+test('unverified feed discount labels are suppressed',()=>{
+ const result=compareGameOffers([
+  {store:'Steam',price:100,currency:'TRY',discountPercent:95},
+  {store:'Xbox',price:120,currency:'TRY',discountPercent:10}
+ ]);
+ assert.equal(result.best.store,'Steam');
+ assert.equal(result.best.discountPercent,null);
+ assert.equal(result.offers[1].discountPercent,null);
+ assert.equal(result.savings,20);
+});
