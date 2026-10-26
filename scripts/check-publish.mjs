@@ -17,13 +17,17 @@ export async function checkPublishedSite({siteUrl='https://sfunder2.github.io/oy
  for(const url of assetPaths(html,siteUrl)){
   try{
    const response=await fetchImpl(url,{redirect:'follow'});
-   const ok=response.ok&&(!response.headers?.get?.('content-type')||(/javascript|css/i).test(response.headers.get('content-type')));
+   const type=response.headers?.get?.('content-type');
+   const expected=url.split('?')[0].endsWith('.css')?/text\/css/i:/javascript|ecmascript/i;
+   const ok=response.ok&&(!type||expected.test(type));
    if(response.ok&&!ok)result.errors.push('Unexpected asset content type: '+url);
    result.assets.push({url,ok,status:response.status});
    if(!ok)result.errors.push('Asset HTTP '+response.status+': '+url);
   }catch(e){result.assets.push({url,ok:false,status:null});result.errors.push(String(e.message||e));}
  }
  if(!result.assets.length)result.errors.push('No JS or CSS assets found');
+ if(!result.assets.some(x=>/\.js(?:\?|$)/.test(x.url)))result.errors.push('No JavaScript asset found');
+ if(!result.assets.some(x=>/\.css(?:\?|$)/.test(x.url)))result.errors.push('No CSS asset found');
  return result;
 }
 if(process.argv[1]&&import.meta.url===new URL('file://'+process.argv[1]).href){
