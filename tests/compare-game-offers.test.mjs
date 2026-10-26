@@ -94,3 +94,16 @@ test('unverified feed discount labels are suppressed',()=>{
  assert.equal(result.offers[1].discountPercent,null);
  assert.equal(result.savings,20);
 });
+
+test('verified original price produces a calculated sale discount',()=>{
+ const r=compareGameOffers([{store:'Steam',price:75,originalPrice:100,originalPriceVerified:true,currency:'TRY'}]);
+ assert.equal(r.best.originalPrice,100);
+ assert.equal(r.best.discountPercent,25);
+});
+test('unverified, invalid or non-higher original prices cannot produce sale claims',()=>{
+ for(const entry of [{originalPrice:100},{originalPrice:100,originalPriceVerified:false},{originalPrice:75,originalPriceVerified:true},{originalPrice:Infinity,originalPriceVerified:true}]){
+  const r=compareGameOffers([{store:'Steam',price:75,currency:'TRY',...entry,discountPercent:99}]);
+  assert.equal(r.best.discountPercent,null);
+  assert.equal(r.best.originalPrice,null);
+ }
+});
