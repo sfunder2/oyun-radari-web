@@ -1,5 +1,12 @@
 name: GitHub Pages Smoke Check
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'assets/**'
+      - 'scripts/check-publish.mjs'
+      - '.github/workflows/pages-smoke.yml'
   workflow_dispatch:
   schedule:
     - cron: '15 8 * * *'
