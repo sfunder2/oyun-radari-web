@@ -23,3 +23,16 @@ test('empty and single-store states omit fabricated savings',()=>{
  assert.equal(c.savings,null);
  assert.equal(c.offers[0].discountText,null);
 });
+
+test('provides a clear message when a currency choice is needed',()=>{
+ const m=priceCardModel([{store:'Steam',price:10,currency:'USD'},{store:'Xbox',price:800,currency:'TRY'}]);
+ assert.equal(m.state,'choose-currency');
+ assert.match(m.message,/para birimi/);
+ assert.equal(m.best,null);
+});
+test('provides a clear message for unavailable selected currency',()=>{
+ const m=priceCardModel([{store:'Steam',price:10,currency:'USD'}],{currency:'TRY'});
+ assert.equal(m.state,'unavailable');
+ assert.match(m.message,/fiyat bulunamadı/);
+ assert.equal(m.savings,null);
+});
