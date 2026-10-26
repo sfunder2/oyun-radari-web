@@ -15,7 +15,9 @@ on:
       - 'index.html'
       - 'assets/**'
       - 'scripts/check-publish.mjs'
+      - 'scripts/compare-game-offers.mjs'
       - 'tests/check-publish.test.mjs'
+      - 'tests/compare-game-offers.test.mjs'
       - '.github/workflows/pages-smoke.yml'
   workflow_dispatch:
   schedule:
