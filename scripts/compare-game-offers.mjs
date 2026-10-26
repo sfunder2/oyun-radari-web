@@ -13,10 +13,13 @@ export function compareGameOffers(offers,{currency}={}){
    .map(o=>({store:o.store,price:o.price,currency:o.currency,discountPercent:
      typeof o.discountPercent==='number'&&Number.isFinite(o.discountPercent)&&o.discountPercent>=0&&o.discountPercent<=100?o.discountPercent:null}))
    .sort((a,b)=>a.price-b.price||a.store.localeCompare(b.store,'tr'));
- const best=comparable[0]??null;
- const highest=comparable.length>1?comparable[comparable.length-1].price:null;
+ // Multiple feed rows for one store must not inflate store-to-store savings.
+ const seen=new Set();
+ const unique=comparable.filter(o=>{const key=o.store.trim().toLocaleLowerCase('tr');if(seen.has(key))return false;seen.add(key);return true;});
+ const best=unique[0]??null;
+ const highest=unique.length>1?unique[unique.length-1].price:null;
  const savings=best!==null&&highest!==null?Math.max(0,highest-best.price):null;
  const savingsPercent=savings!==null&&highest>0?Math.round(savings/highest*10000)/100:null;
- return {currency:selectedCurrency,requiresCurrencySelection:currencies.length>1&&currency==null,availableCurrencies:currencies.sort(),offers:comparable,best,
+ return {currency:selectedCurrency,requiresCurrencySelection:currencies.length>1&&currency==null,availableCurrencies:currencies.sort(),offers:unique,best,
    savings,savingsPercent,excluded:offers.length-comparable.length};
 }
