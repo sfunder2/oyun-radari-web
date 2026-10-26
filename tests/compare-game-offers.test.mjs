@@ -25,3 +25,21 @@ test('validates input',()=>{
  assert.throws(()=>compareGameOffers(null),TypeError);
  assert.throws(()=>compareGameOffers([],{currency:'invalid'}),TypeError);
 });
+
+test('savings are calculated only between valid same-currency stores',()=>{
+ const result=compareGameOffers([
+  {store:'A',price:90,currency:'TRY'},
+  {store:'B',price:120,currency:'TRY'},
+  {store:'C',price:1,currency:'USD'}
+ ],{currency:'TRY'});
+ assert.equal(result.savings,30);
+ assert.equal(result.savingsPercent,25);
+});
+test('single store or free-only stores do not invent percentage savings',()=>{
+ const single=compareGameOffers([{store:'Only',price:49,currency:'TRY'}]);
+ assert.equal(single.savings,null);
+ assert.equal(single.savingsPercent,null);
+ const free=compareGameOffers([{store:'A',price:0,currency:'TRY'},{store:'B',price:0,currency:'TRY'}]);
+ assert.equal(free.savings,0);
+ assert.equal(free.savingsPercent,null);
+});
