@@ -55,3 +55,9 @@ test('mixed currencies never choose a price winner from feed ordering',()=>{
  assert.equal(selected.best.store,'Xbox');
  assert.equal(selected.requiresCurrencySelection,false);
 });
+
+test('invalid non-string currency values fail with a clear TypeError',()=>{
+ assert.throws(()=>compareGameOffers([],{currency:123}),TypeError);
+ assert.throws(()=>compareGameOffers([],{currency:{}}),TypeError);
+ assert.throws(()=>compareGameOffers([],{currency:false}),TypeError);
+});
