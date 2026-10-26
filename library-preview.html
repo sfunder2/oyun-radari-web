@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; connect-src 'none'; img-src 'none'; object-src 'none'">
+<title>Oyun Radarı – Kütüphane Arayüz Önizlemesi</title>
+<style>
+:root{color-scheme:dark;font:16px/1.5 system-ui,sans-serif;background:#111827;color:#f9fafb}
+body{max-width:900px;margin:auto;padding:clamp(16px,4vw,42px)}
+.warning{border:1px solid #f59e0b;border-radius:12px;padding:12px;background:#423014}
+section{display:grid;gap:12px}form{display:flex;flex-wrap:wrap;gap:8px}input,select,button{background:#1f2937;color:inherit;border:1px solid #6b7280;border-radius:9px;min-height:44px;padding:9px 12px;box-sizing:border-box}
+input{min-width:0;flex:1}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #60a5fa;outline-offset:2px}
+ul{padding:0;list-style:none}li{display:flex;align-items:center;flex-wrap:wrap;gap:10px;padding:14px 4px;border-bottom:1px solid #374151}
+li span{flex:1;min-width:180px}h1,h2{line-height:1.2}
+@media(max-width:540px){form>*{flex:1 1 100%}li>*{flex:1 1 100%}}
+</style>
+</head>
+<body>
+<p><a href="./index.html" style="color:#93c5fd">← Oyun Radarı ana sayfasına dön</a></p>
+<h1>Oyuncu Kütüphanesi – Önizleme</h1>
+<p class="warning"><strong>DEMO:</strong> Bu sayfa yalnızca arayüz testidir. Hesabınıza bağlanmaz, gerçek oyun kayıtlarını okumaz ve yaptığınız değişiklikleri kaydetmez.</p>
+<main id="demo"></main>
+<script type="module">
+import {mountLibraryPanel} from './scripts/library-panel.mjs';
+// Demo-only storage: reload resets all records; no network or account access.
+let games=[
+ {platform:'steam',game_id:'620',game_title:'Portal 2',play_status:'completed'},
+ {platform:'xbox',game_id:'halo-demo',game_title:'Halo Infinite',play_status:'playing'},
+ {platform:'playstation',game_id:'demo-ps',game_title:'Astro Bot',play_status:'backlog'}
+];
+const client={
+ list:async()=>games.map(x=>({...x})),
+ listPage:async({offset=0,limit=100}={})=>games.slice(offset,offset+limit).map(x=>({...x})),
+ add:async game=>{games=[{...game,added_at:new Date().toISOString(),updated_at:new Date().toISOString()},...games.filter(x=>x.platform!==game.platform||x.game_id!==game.game_id)];},
+ setStatus:async(platform,id,status)=>{games=games.map(x=>x.platform===platform&&x.game_id===id?{...x,play_status:status}:x);},
+ remove:async(platform,id)=>{games=games.filter(x=>x.platform!==platform||x.game_id!==id);}
+};
+mountLibraryPanel(document.getElementById('demo'),client);
+</script>
+</body></html>
