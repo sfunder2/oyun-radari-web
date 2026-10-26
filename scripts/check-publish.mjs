@@ -11,12 +11,14 @@ export async function checkPublishedSite({siteUrl='https://sfunder2.github.io/oy
   const response=await fetchImpl(siteUrl,{redirect:'follow'});
   if(!response.ok)throw new Error('HTML HTTP '+response.status);
   html=await response.text();result.htmlOk=html.includes('<div id="root"');
+  if(/library-shortcut|library-preview\.html|Kütüphane demosu/i.test(html))result.errors.push('Cancelled manual game library surfaced on homepage');
   if(!result.htmlOk)result.errors.push('Expected app root absent');
  }catch(e){result.errors.push(String(e.message||e));return result;}
  for(const url of assetPaths(html,siteUrl)){
   try{
    const response=await fetchImpl(url,{redirect:'follow'});
-   const ok=response.ok;
+   const ok=response.ok&&(!response.headers?.get?.('content-type')||(/javascript|css/i).test(response.headers.get('content-type')));
+   if(response.ok&&!ok)result.errors.push('Unexpected asset content type: '+url);
    result.assets.push({url,ok,status:response.status});
    if(!ok)result.errors.push('Asset HTTP '+response.status+': '+url);
   }catch(e){result.assets.push({url,ok:false,status:null});result.errors.push(String(e.message||e));}
