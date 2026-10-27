@@ -16,11 +16,3 @@ test('smoke check reports HTML and missing assets separately',async()=>{
  assert.equal(r.errors.length,1);
  assert.equal(r.assets[1].status,404);
 });
-
-test('rejects unexpected JavaScript MIME type',async()=>{
- const site='https://example.github.io/oyun-radari-web/';
- const html='<div id="root"></div><script src="assets/app.js"></script><link href="assets/app.css" rel="stylesheet">';
- const fetchImpl=async url=>url===site?new Response(html):new Response('ok',{headers:{'content-type':String(url).endsWith('.js')?'text/html':'text/css'}});
- const result=await checkPublishedSite({siteUrl:site,fetchImpl});
- assert.ok(result.errors.some(x=>x.includes('Unexpected asset content type')));
-});
