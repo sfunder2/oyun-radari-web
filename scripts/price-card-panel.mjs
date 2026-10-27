@@ -16,6 +16,14 @@ export function renderPriceCard(root,offers,options={}){
   if(model.state==='choose-currency'){
    const list=el('p','Para birimleri: '+model.currencies.join(', '));
    section.append(list);
+   const select=el('select','');
+   select.setAttribute('aria-label','Karşılaştırma para birimi');
+   const placeholder=el('option','Para birimi seçin');placeholder.value='';select.append(placeholder);
+   for(const code of model.currencies){const option=el('option',code);option.value=code;select.append(option);}
+   select.addEventListener('change',()=>{
+    if(model.currencies.includes(select.value))renderPriceCard(root,offers,{...options,currency:select.value});
+   });
+   section.append(select);
   }
  }else{
   const heading=el('h3','En uygun fiyat: '+model.best.store+' — '+model.best.priceText);
