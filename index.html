@@ -1,3 +1,38 @@
-<!doctype html><html lang="tr"><head><script>try{var d=document.documentElement,u=new URLSearchParams(location.search).get("gorunum");u=u==="sade"||u==="klasik"?u:localStorage.getItem("radar-ui")==="sade"?"sade":"klasik";d.dataset.ui=u;var l=new URLSearchParams(location.search).get("lang");if(l==="en"||(l!=="tr"&&localStorage.getItem("radar-lang")==="en"))d.lang="en";if(u!=="sade"&&localStorage.getItem("radar-theme")==="oled")d.dataset.theme="oled"}catch(e){}</script><meta charset="utf-8"><meta name="color-scheme" content="dark light"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090d12"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://dsosckshigzijnsxmlwh.supabase.co" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"></noscript><meta name="description" content="Steam, Xbox, PlayStation ve Switch katalogları, canlı mağaza fiyatları ve oyun değeri karşılaştırması."><title>Oyun Radarı — Canlı Mağaza Kataloğu</title>  <script type="module" crossorigin src="/oyun-radari-web/assets/index-BplIVz6G.js"></script>
+<!doctype html><html lang="tr"><head><script>try{var d=document.documentElement,u=new URLSearchParams(location.search).get("gorunum");u=u==="sade"||u==="klasik"?u:localStorage.getItem("radar-ui")==="sade"?"sade":"klasik";d.dataset.ui=u;var l=new URLSearchParams(location.search).get("lang");if(l==="en"||(l!=="tr"&&localStorage.getItem("radar-lang")==="en"))d.lang="en";if(u!=="sade"&&localStorage.getItem("radar-theme")==="oled")d.dataset.theme="oled"}catch(e){}</script><meta charset="utf-8"><meta name="color-scheme" content="dark light"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090d12"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://dsosckshigzijnsxmlwh.supabase.co" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"></noscript><meta name="description" content="Steam, Xbox, PlayStation ve Switch katalogları, canlı mağaza fiyatları ve oyun değeri karşılaştırması."><title>Oyun Radarı — Canlı Mağaza Kataloğu</title>  <script type="module" crossorigin src="/oyun-radari-web/assets/index-BplIVz6G.js?v=compact-20261028"></script>
   <link rel="stylesheet" crossorigin href="/oyun-radari-web/assets/index-BopKXvmJ.css">
-<style>@media (prefers-reduced-motion: reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}</style></head><body><div id="root"></div><noscript>Oyun Radarı için JavaScript etkin olmalıdır.</noscript></body></html>
+<style>@media (prefers-reduced-motion: reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}</style></head><body><div id="root"></div><noscript>Oyun Radarı için JavaScript etkin olmalıdır.</noscript><style>
+/* Compact navigation: keep the opening view and give content more room. */
+body> #root header{position:sticky;top:0;z-index:80;background:transparent!important;border-bottom:0!important;box-shadow:none!important;backdrop-filter:none!important;transition:transform .22s ease,background .2s ease}
+body> #root header .topbar{max-width:1600px;padding:10px 24px;gap:14px;min-height:58px}
+header .topbar>nav:empty,.bottom-nav:empty{display:none!important}
+header .brand{margin-right:auto;font-size:22px}
+header .topbar{flex-wrap:nowrap!important}
+header .topbar .account-button{margin-left:0}
+header .header-search,header .menu-button{background:transparent!important}
+header.radar-scrolled{background:color-mix(in srgb,var(--bg,#090d12) 82%,transparent)!important;backdrop-filter:blur(16px)!important}
+header.radar-hidden{transform:translateY(-110%)}
+header:focus-within{transform:translateY(0)!important}
+main{max-width:1600px;padding:16px 24px 0}
+main>.breadcrumb{margin-bottom:12px}
+main>.breadcrumb:has(+.catalog-intro){display:none}
+.catalog-intro{margin-bottom:14px!important}
+.menu-overlay{z-index:200!important}
+.menu-panel{padding:18px!important}
+.menu-panel .menu-grid button{min-height:56px;padding:10px}
+@media(max-width:700px){
+body{padding-bottom:env(safe-area-inset-bottom,0px)!important}
+body> #root header .topbar{padding:8px 12px;gap:8px;min-height:54px}
+header .brand{font-size:19px}
+header .header-search{padding:8px}
+header .header-search kbd{display:none}
+header .menu-button{min-height:40px;padding:8px 10px}
+main{padding:12px 12px 0!important}
+.catalog-intro{padding-top:0!important;margin-top:0!important}
+.menu-panel{max-height:calc(100dvh - 40px)!important;padding:16px!important}
+.menu-grid{gap:6px!important}
+.menu-panel section{margin-top:12px}
+}
+@media(prefers-reduced-motion:reduce){body> #root header{transition:none}}
+</style><script>
+(()=>{let last=window.scrollY,ticking=false;function update(){const y=window.scrollY,h=document.querySelector('#root header');if(h){h.classList.toggle('radar-scrolled',y>24);if(y<60||y<last-4)h.classList.remove('radar-hidden');else if(y>last+8&&!document.querySelector('.menu-overlay')&&!h.contains(document.activeElement))h.classList.add('radar-hidden')}last=y;ticking=false}window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(update);ticking=true}},{passive:true});window.addEventListener('radar:navigate',()=>document.querySelector('#root header')?.classList.remove('radar-hidden'));})();
+</script></body></html>
