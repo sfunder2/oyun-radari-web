@@ -1,6 +1,73 @@
-<!doctype html><html lang="tr"><head><script>try{var d=document.documentElement,u=new URLSearchParams(location.search).get("gorunum");u=u==="sade"||u==="klasik"?u:localStorage.getItem("radar-ui")==="sade"?"sade":"klasik";d.dataset.ui=u;var l=new URLSearchParams(location.search).get("lang");if(l==="en"||(l!=="tr"&&localStorage.getItem("radar-lang")==="en"))d.lang="en";if(u!=="sade"&&localStorage.getItem("radar-theme")==="oled")d.dataset.theme="oled"}catch(e){}</script><meta charset="utf-8"><meta name="color-scheme" content="dark light"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090d12"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://dsosckshigzijnsxmlwh.supabase.co" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"></noscript><meta name="description" content="Steam, Xbox, PlayStation ve Switch katalogları, canlı mağaza fiyatları ve oyun değeri karşılaştırması."><title>Oyun Radarı — Canlı Mağaza Kataloğu</title>  <script type="module" crossorigin src="/oyun-radari-web/assets/index-BplIVz6G.js?v=compact-20261028"></script>
+<!doctype html><html lang="tr"><head><script>try{var d=document.documentElement,u=new URLSearchParams(location.search).get("gorunum");u=u==="sade"||u==="klasik"?u:localStorage.getItem("radar-ui")==="sade"?"sade":"klasik";d.dataset.ui=u;var l=new URLSearchParams(location.search).get("lang");if(l==="en"||(l!=="tr"&&localStorage.getItem("radar-lang")==="en"))d.lang="en";if(u!=="sade"&&localStorage.getItem("radar-theme")==="oled")d.dataset.theme="oled"}catch(e){}</script><meta charset="utf-8"><meta name="color-scheme" content="dark light"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090d12"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="preconnect" href="https://dsosckshigzijnsxmlwh.supabase.co" crossorigin><link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"></noscript><meta name="description" content="Steam, Xbox, PlayStation ve Switch katalogları, canlı mağaza fiyatları ve oyun değeri karşılaştırması."><title>Oyun Radarı — Canlı Mağaza Kataloğu</title>  <script type="module" crossorigin src="/oyun-radari-web/assets/index-BplIVz6G.js?v=simple-20261028"></script>
   <link rel="stylesheet" crossorigin href="/oyun-radari-web/assets/index-BopKXvmJ.css">
-<style>@media (prefers-reduced-motion: reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}</style></head><body><div id="root"></div><noscript>Oyun Radarı için JavaScript etkin olmalıdır.</noscript><style>
+<style>@media (prefers-reduced-motion: reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}</style><style>
+/* Main catalogue: search, three everyday filters, then games. */
+body .simple-home{display:block!important}
+#root .simple-home>.libtools{position:static;display:flex!important;flex-direction:row;flex-wrap:wrap;order:0;gap:10px;width:100%;margin:0 0 10px!important}
+body .simple-home .libactions{position:static;margin:0;padding:0;justify-content:flex-end}
+body .simple-home .filterpanel{flex:1;background:transparent}
+body .simple-home .filterpanel summary{padding:10px 12px;border:0}
+body .simple-home .filtergrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+body .simple-home .filtergrid>label:nth-child(1),body .simple-home .filtergrid>label:nth-child(2),body .simple-home .filtergrid>label:nth-child(5){display:none}
+body .simple-home .deal-list-row{min-height:80px}
+body .simple-home .deal-list-row>.heart-button{grid-area:auto!important}
+body .simple-home .deal-score{display:block!important;grid-area:auto!important}
+body .simple-home .deal-best-price{grid-area:auto!important}
+
+main:has(.simple-home)>.catalog-intro{display:none}
+main:has(.simple-home){position:relative}
+main:has(.simple-home)>.simple-site-info{position:absolute;right:24px;top:4px;z-index:5}
+.simple-site-info{margin:0 0 10px;font-size:12px;color:var(--muted)}
+.simple-site-info>summary{cursor:pointer;width:max-content;padding:7px 10px;border:1px solid var(--line);border-radius:20px}
+.simple-site-info[open]{position:relative!important;right:auto!important;top:auto!important}
+#root .simple-site-info .insightbar{display:flex!important;margin-top:8px;flex-wrap:wrap}
+#root .simple-site-info .insightbar>span{display:inline-flex;align-items:center;gap:5px}
+.simple-empty-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+main:has(.simple-home) #search-slot .csearch{margin-top:0;padding-top:6px}
+main:has(.simple-home) .csearch-title{font-size:22px;margin:0 70px 12px 0}
+main:has(.simple-home) .csearch-under:has(.csearch-status:empty){display:none}
+.simple-primary-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0 14px}
+.simple-primary-filters label{display:grid;gap:5px;font-size:12px;font-weight:600;color:var(--muted)}
+.simple-primary-filters select,.simple-primary-filters input{width:100%;min-width:0;min-height:44px;margin:0;padding:10px 12px;background:var(--surface,#151d27);color:var(--ink);border:1px solid var(--line);border-radius:12px;font:inherit;font-size:14px}
+:root[data-ui=sade] .simple-primary-filters select,:root[data-ui=sade] .simple-primary-filters input{background:#f1eff8}
+.simple-home>.genre-strip{display:none}
+.simple-home>.catalogsearch{margin:0 0 8px;padding:0;min-height:44px}
+.simple-home .catalogtitle{font-size:15px}
+.simple-home>.libtools{margin:0 0 8px;align-items:flex-start}
+.simple-home .filterpanel{width:auto;min-width:0;flex:1}
+.simple-home .filterpanel[open]{width:100%}
+.simple-home .filterpanel summary{padding:10px 12px;min-height:42px}
+.simple-home .filtergrid>label:nth-child(1),.simple-home .filtergrid>label:nth-child(2),.simple-home .filtergrid>label:nth-child(5){display:none}
+.simple-home>.catalogcontrols{display:none}
+.simple-home .deal-list-head{display:none}
+.simple-home .deal-list-row{grid-template-columns:minmax(0,1fr) 64px minmax(110px,170px) 40px;cursor:pointer}
+.simple-home .deal-list-row:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.simple-home .deal-discount,.simple-home .deal-coverage,.simple-home .deal-checked,.simple-home .deal-best-price>del,.simple-home .deal-platforms,.simple-home .deal-game>span>small{display:none}
+.simple-home .cataloggrid .storeprices,.simple-home .cataloggrid .cardchecked,.simple-home .cataloggrid .catalogcardactions,.simple-home .cataloggrid .cardbody>small,.simple-home .cataloggrid .catalogprice>del,.simple-home .cataloggrid .tastechip{display:none}
+.simple-home .cataloggrid .scorechips>span:not(:first-child){display:none}
+.simple-home .cataloggrid .cardbody>div:not(.catalogprice):not(.scorechips){display:none}
+.simple-home .cataloggrid .cardbody{padding:12px}
+.simple-home .resultmeta{margin:8px 0 10px;font-size:12px}
+.simple-home .active-filters{margin-bottom:10px}
+main:has(.simple-home)>footer{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px;padding:16px 0;font-size:11px}
+main:has(.simple-home)>footer .brand,main:has(.simple-home)>footer>p{display:none}
+@media(max-width:700px){
+main:has(.simple-home)>.simple-site-info{right:12px;top:0}
+.simple-primary-filters{gap:7px;margin-bottom:10px}
+.simple-primary-filters label{font-size:11px}
+.simple-primary-filters select,.simple-primary-filters input{padding:8px;font-size:13px}
+main:has(.simple-home) .csearch-title{font-size:19px}
+.simple-home .deal-list-row{display:grid!important;grid-template-columns:minmax(0,1fr) 36px minmax(85px,105px) 32px!important;gap:6px!important;padding:10px 8px!important}
+.simple-home .deal-game{grid-column:auto!important;grid-row:auto!important;min-width:0;gap:8px}
+.simple-home .deal-game img{width:42px;height:56px;object-fit:cover}
+.simple-home .deal-game b{font-size:12px}
+.simple-home .deal-score,.simple-home .deal-best-price,.simple-home .deal-list-row>.favbtn{grid-column:auto!important;grid-row:auto!important}
+.simple-home .deal-best-price strong{font-size:14px}
+.simple-home .deal-best-price small{font-size:10px}
+.simple-home .deal-score small{font-size:9px}
+.simple-home .deal-discount{display:none!important}
+}
+</style></head><body><div id="root"></div><noscript>Oyun Radarı için JavaScript etkin olmalıdır.</noscript><style>
 /* Compact navigation: keep the opening view and give content more room. */
 body> #root>header{position:sticky;top:0;z-index:80;background:transparent!important;border-bottom:0!important;box-shadow:none!important;backdrop-filter:none!important;transition:transform .22s ease,background .2s ease}
 body> #root>header .topbar{max-width:1600px;padding:10px 24px;gap:14px;min-height:58px}
