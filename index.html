@@ -2,8 +2,8 @@
   <link rel="stylesheet" crossorigin href="/oyun-radari-web/assets/index-BopKXvmJ.css">
 <style>@media (prefers-reduced-motion: reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}</style></head><body><div id="root"></div><noscript>Oyun Radarı için JavaScript etkin olmalıdır.</noscript><style>
 /* Compact navigation: keep the opening view and give content more room. */
-body> #root header{position:sticky;top:0;z-index:80;background:transparent!important;border-bottom:0!important;box-shadow:none!important;backdrop-filter:none!important;transition:transform .22s ease,background .2s ease}
-body> #root header .topbar{max-width:1600px;padding:10px 24px;gap:14px;min-height:58px}
+body> #root>header{position:sticky;top:0;z-index:80;background:transparent!important;border-bottom:0!important;box-shadow:none!important;backdrop-filter:none!important;transition:transform .22s ease,background .2s ease}
+body> #root>header .topbar{max-width:1600px;padding:10px 24px;gap:14px;min-height:58px}
 header .topbar>nav:empty,.bottom-nav:empty{display:none!important}
 header .brand{margin-right:auto;font-size:22px}
 header .topbar{flex-wrap:nowrap!important}
@@ -21,7 +21,7 @@ main>.breadcrumb:has(+.catalog-intro){display:none}
 .menu-panel .menu-grid button{min-height:56px;padding:10px}
 @media(max-width:700px){
 body{padding-bottom:env(safe-area-inset-bottom,0px)!important}
-body> #root header .topbar{padding:8px 12px;gap:8px;min-height:54px}
+body> #root>header .topbar{padding:8px 12px;gap:8px;min-height:54px}
 header .brand{font-size:19px}
 header .header-search{padding:8px}
 header .header-search kbd{display:none}
@@ -32,7 +32,7 @@ main{padding:12px 12px 0!important}
 .menu-grid{gap:6px!important}
 .menu-panel section{margin-top:12px}
 }
-@media(prefers-reduced-motion:reduce){body> #root header{transition:none}}
+@media(prefers-reduced-motion:reduce){body> #root>header{transition:none}}
 </style><script>
 (()=>{let last=window.scrollY,ticking=false;function update(){const y=window.scrollY,h=document.querySelector('#root header');if(h){h.classList.toggle('radar-scrolled',y>24);if(y<60||y<last-4)h.classList.remove('radar-hidden');else if(y>last+8&&!document.querySelector('.menu-overlay')&&!h.contains(document.activeElement))h.classList.add('radar-hidden')}last=y;ticking=false}window.addEventListener('scroll',()=>{if(!ticking){requestAnimationFrame(update);ticking=true}},{passive:true});window.addEventListener('radar:navigate',()=>document.querySelector('#root header')?.classList.remove('radar-hidden'));})();
 </script></body></html>
