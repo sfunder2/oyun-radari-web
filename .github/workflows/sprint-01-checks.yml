@@ -14,11 +14,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Run repository tests
         run: node --test tests/*.test.mjs
       - name: Dependency audit
         run: |
-          if [ -f package-lock.json ]; then npm ci --ignore-scripts && npm audit --audit-level=high; else echo 'No lockfile; dependency audit requires lockfile'; fi
+          if [ -f package-lock.json ]; then npm audit --audit-level=high; else echo 'No lockfile; dependency audit requires lockfile'; fi
       - name: Check syntax
         run: |
           for file in scripts/*.mjs tests/*.test.mjs; do node --check "$file"; done
+

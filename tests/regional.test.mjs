@@ -62,9 +62,9 @@ test('kur: TCMB (birim dahil) ve open.er-api tersine çevrilir',()=>{
 });
 test('regionalPrices: ülke hatası diğerlerini durdurmaz, TL karşılığı ve kullanılan kurlar döner',async()=>{
  const f=async url=>{const cc=new URL(url).searchParams.get('cc');if(cc==='de')return res({},500);if(cc==='ua')return res({1:{success:true,data:[]}});return res({1:{success:true,data:{price_overview:{currency:cc==='tr'?'USD':'GBP',initial:2000,final:1000}}}});};
- const r=await regionalPrices({platform:'steam',id:'1',f,countries:[C.TR,C.DE,C.GB,C.UA],rates:{TRY:{rate:1},USD:{rate:40,source:'TCMB'},GBP:{rate:50,source:'TCMB'}},now:()=>'T'});
+ const r=await regionalPrices({platform:'steam',id:'1',f,countries:[C.TR,C.DE,C.GB,C.UA],rates:{TRY:{rate:1},USD:{rate:40,source:'TCMB',date:'25.10.2026'},GBP:{rate:50,source:'TCMB',date:'25.10.2026'}},now:()=>'2026-10-25T00:00:00.000Z'});
  assert.deepEqual(r.countries.map(x=>x.status),['ok','error','ok','none']);assert.equal(r.countries[0].price_try,400);assert.equal(r.countries[2].price_try,500);
- assert.deepEqual(Object.keys(r.fx).sort(),['GBP','USD']);assert.equal(r.checkedAt,'T');
+ assert.deepEqual(Object.keys(r.fx).sort(),['GBP','USD']);assert.equal(r.checkedAt,'2026-10-25T00:00:00.000Z');
  await assert.rejects(regionalPrices({platform:'switch',id:'1',f}),/bölge fiyatı yok/);
 });
 
@@ -107,3 +107,4 @@ test('sprint 02: undated real currency feed does not generate TRY equivalent',as
  const row=(await regionalPrices({platform:'steam',id:'1',f,countries:[C.US],rates:{USD:{rate:50,source:'TCMB döviz satış',date:null}},now:()=> '2026-10-25T00:00:00.000Z'})).countries[0];
  assert.equal(row.status,'ok');assert.equal(row.price,15);assert.equal(row.price_try,null);assert.equal(row.fx_stale,true);
 });
+
