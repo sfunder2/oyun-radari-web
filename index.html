@@ -10,7 +10,7 @@ body .simple-home .filterpanel summary{padding:10px 12px;border:0}
 body .simple-home .filtergrid{grid-template-columns:repeat(3,minmax(0,1fr))}
 body .simple-home .filtergrid>label:nth-child(1),body .simple-home .filtergrid>label:nth-child(2),body .simple-home .filtergrid>label:nth-child(5){display:none}
 body .simple-home .deal-list-row{min-height:80px}
-body .simple-home .deal-list-row>.heart-button{grid-area:auto!important}
+#root .simple-home .deal-list-row>button:last-child{grid-area:auto!important}
 body .simple-home .deal-score{display:block!important;grid-area:auto!important}
 body .simple-home .deal-best-price{grid-area:auto!important}
 
@@ -57,7 +57,7 @@ main:has(.simple-home)>.simple-site-info{right:12px;top:0}
 .simple-primary-filters label{font-size:11px}
 .simple-primary-filters select,.simple-primary-filters input{padding:8px;font-size:13px}
 main:has(.simple-home) .csearch-title{font-size:19px}
-.simple-home .deal-list-row{display:grid!important;grid-template-columns:minmax(0,1fr) 36px minmax(85px,105px) 32px!important;gap:6px!important;padding:10px 8px!important}
+.simple-home .deal-list-row{display:grid!important;grid-template-columns:minmax(0,1fr) 36px minmax(85px,105px) 36px!important;gap:6px!important;padding:10px 8px!important}
 .simple-home .deal-game{grid-column:auto!important;grid-row:auto!important;min-width:0;gap:8px}
 .simple-home .deal-game img{width:42px;height:56px;object-fit:cover}
 .simple-home .deal-game b{font-size:12px}
