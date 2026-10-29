@@ -54,4 +54,8 @@ test('one failing source does not stop the others; stale rows are cleaned up',as
  const v=await refreshUpcoming(sb,{say:()=>{},sources:{steam:async()=>[{id:'1',name:'A'},{id:'1',name:'A'}],xbox:async()=>{throw new Error('HTTP 403')}}});
  assert.equal(v.stats.steam,1);assert.match(v.errors.xbox,/403/);
  assert.ok(calls.some(c=>c[0]==='del'&&/release_date=lt/.test(c[1])));assert.ok(calls.some(c=>c[0]==='del'&&/checked_at=lt/.test(c[1])));
+ const today=new Date(Date.now()+3*3600e3).toISOString().slice(0,10),start=new Date(Date.parse(today)-6*864e5).toISOString().slice(0,10);
+ assert.ok(calls.some(c=>c[1]===`upcoming_games?release_date=lt.${start}`));
+ assert.ok(calls.some(c=>c[1].includes(`&or=(release_date.is.null,release_date.gt.${today})`)));
 });
+

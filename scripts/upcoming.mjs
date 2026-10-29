@@ -104,10 +104,12 @@ export async function refreshUpcoming(sb,{say=console.log,f=fetch,sources}={}){
   catch(e){errors[name]=e.message.slice(0,160);say(`Yaklaşan (${name}) atlandı: ${errors[name]}`);}
  }
  const today=trToday();
- await sb.del(`upcoming_games?release_date=lt.${today}`);
+ const recentStart=new Date(Date.parse(today)-6*864e5).toISOString().slice(0,10);
+ await sb.del(`upcoming_games?release_date=lt.${recentStart}`);
  // Listeden düşen (3 gündür görülmeyen) kayıtlar silinir; başarısız kaynağın eski satırları bu süre boyunca korunur
- await sb.del(`upcoming_games?checked_at=lt.${new Date(Date.now()-3*864e5).toISOString()}`);
+ await sb.del(`upcoming_games?checked_at=lt.${new Date(Date.now()-3*864e5).toISOString()}&or=(release_date.is.null,release_date.gt.${today})`);
  const value={at:new Date().toISOString(),count:Object.values(stats).reduce((a,b)=>a+b,0),stats,errors};
  await sb.upsert('ps_state',[{key:'upcoming',value}],'key');
  return value;
 }
+
