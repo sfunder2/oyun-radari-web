@@ -1328,7 +1328,7 @@ function D(e, { useExperience: t, useFavorites: n }) {
 			src: t,
 			alt: "",
 			loading: "lazy",
-			onError: () => n(null)
+			onError: () => n(t !== e.image && e.image ? e.image : null)
 		}) : /* @__PURE__ */ a("span", { className: "up-ph" }, e.name.slice(0, 1));
 	}
 	function d({ active: e, onClick: t, name: n }) {
