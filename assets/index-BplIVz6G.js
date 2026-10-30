@@ -1,4 +1,4 @@
-import{createReleaseComponent as radarCreateReleases}from"./releases-20261029.js";
+import{createReleaseComponent as radarCreateReleases}from"./releases-20261030.js";
 import{createLifestyle as radarCreateLife}from"./lifestyle-20261029.js";
 import{createCatalogUX as radarCreateUX,rankSuggestions as radarRankSuggestions,normalize as radarNormalize,groupEditions as radarGroupEditions}from"./catalog-ux-20261029.js";
 const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/GameJournal-KX1SCn5c.js","assets/map-9H24-bHj.js","assets/Favorites-A1z6NoYd.js","assets/download-BxEJ0KaT.js","assets/PlayerSpace-CUTSgnPK.js"])))=>i.map(i=>d[i]);
