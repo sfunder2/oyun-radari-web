@@ -1,0 +1,88 @@
+/* Hikâye şeridi ve tam ekran hikâye görüntüleyici (app/Stories.tsx).
+   Bu dosya postcss-sade'den geçmez: şerit renkleri değişkenlerden gelir, görüntüleyici iki görünümde de karanlıktır. */
+
+/* Şerit */
+.story-strip{margin:4px 0 14px}
+.story-strip ul{display:flex;gap:14px;margin:0;padding:6px 2px 4px;list-style:none;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity}
+.story-strip ul::-webkit-scrollbar{display:none}
+.story-strip li{flex:none;scroll-snap-align:start}
+.story-ring{--ring:linear-gradient(135deg,#f97316,#ec4899);display:flex;flex-direction:column;align-items:center;gap:7px;width:84px;padding:0;border:0;background:none;color:var(--ink);cursor:pointer;font:inherit}
+/* Renkli halka: dış gradyan, sayfa rengiyle ayrılan iç daire */
+.story-avatar{display:grid;width:68px;height:68px;padding:3px;border-radius:50%;background:var(--ring);transition:transform .18s ease}
+.story-avatar>b{display:grid;place-items:center;border:3px solid var(--bg,#0d1118);border-radius:50%;color:#fff;background:var(--ring)}
+.story-avatar svg{filter:drop-shadow(0 1px 2px #0005)}
+.story-ring:hover .story-avatar{transform:scale(1.05)}
+.story-ring:focus-visible{outline:none}
+.story-ring:focus-visible .story-avatar{box-shadow:0 0 0 3px var(--lime)}
+.story-ring.seen .story-avatar{background:var(--line2,#2b3947)}
+.story-ring.seen .story-avatar>b{opacity:.75}
+.story-name{display:-webkit-box;max-width:100%;overflow:hidden;font-size:12px;font-weight:700;line-height:1.2;text-align:center;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.story-ring.seen .story-name{color:var(--muted);font-weight:600}
+.s-deals{--ring:linear-gradient(135deg,#f97316,#ec4899)}
+.s-foryou{--ring:linear-gradient(135deg,#ec4899,#8b5cf6)}
+.s-new{--ring:linear-gradient(135deg,#06b6d4,#7c3aed)}
+.s-top{--ring:linear-gradient(135deg,#f59e0b,#f97316)}
+.s-soon{--ring:linear-gradient(135deg,#10b981,#06b6d4)}
+@media (max-width:640px){.story-strip ul{gap:8px}.story-ring{width:74px}.story-avatar{width:62px;height:62px}}
+
+
+/* Görüntüleyici */
+body.story-open{overflow:hidden}
+.story-overlay{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;gap:18px;background:#05060bf0;backdrop-filter:blur(14px);animation:story-in .22s ease both}
+@keyframes story-in{from{opacity:0;transform:scale(.98)}}
+.story-viewer{--ink:#f6f4ff;--muted:#cfc8e4;position:relative;display:flex;flex-direction:column;width:min(430px,100vw);height:min(860px,100dvh);overflow:hidden;border-radius:22px;background:#0d0b16;color:var(--ink);box-shadow:0 40px 90px -30px #000}
+.story-progress{position:absolute;top:10px;left:12px;right:12px;z-index:3;display:flex;gap:4px}
+.story-progress span{position:relative;flex:1;height:3px;overflow:hidden;border-radius:3px;background:#ffffff40}
+.story-progress span.done{background:#fff}
+.story-progress i{position:absolute;inset:0;background:#fff;transform-origin:left;animation:story-fill linear forwards}
+.story-progress i.still{animation:none}
+@keyframes story-fill{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.story-head{position:absolute;top:22px;left:12px;right:8px;z-index:3;display:flex;align-items:center;gap:10px;text-shadow:0 1px 3px #0008}
+.story-head>div{display:grid;min-width:0;line-height:1.2}
+.story-head strong{font-size:14px}
+.story-head small{overflow:hidden;font-size:12px;color:var(--muted);text-overflow:ellipsis;white-space:nowrap}
+.story-avatar.small{place-items:center;width:32px;height:32px;flex:none;padding:0;color:#fff}
+.story-count{margin-left:auto;font-size:12px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.story-icon{display:grid;place-items:center;width:38px;height:38px;flex:none;border:0;border-radius:50%;background:none;color:#fff;cursor:pointer}
+.story-icon:hover,.story-icon:focus-visible{background:#ffffff26}
+.story-head .story-icon:first-of-type{margin-left:auto}
+.story-count+.story-icon{margin-left:0}
+.story-stage{position:relative;flex:1;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer}
+.story-track{display:flex;height:100%;transition:transform .32s cubic-bezier(.2,.7,.2,1)}
+.story-card{position:relative;display:flex;flex-direction:column;justify-content:flex-end;flex:0 0 100%;height:100%;overflow:hidden}
+.story-bg{position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;filter:blur(36px) saturate(1.3) brightness(.55);transform:scale(1.1)}
+.story-card::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,#000a,#0000 22%,#0000 45%,#0d0b16d9 70%,#0d0b16);pointer-events:none}
+.story-cover{position:absolute;inset:0 0 auto;z-index:1;height:64%;overflow:hidden;background:#ffffff0f;-webkit-mask-image:linear-gradient(#000 62%,#0000);mask-image:linear-gradient(#000 62%,#0000)}
+.story-cover img{width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
+.story-info{position:relative;z-index:2;display:grid;gap:8px;padding:0 20px 24px}
+.story-store{display:inline-flex;align-items:center;gap:7px;width:max-content;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;background:#ffffff1f;backdrop-filter:blur(6px)}
+.story-info h3{margin:2px 0 0;font-size:clamp(24px,7vw,30px);font-weight:800;line-height:1.1;letter-spacing:-.02em;text-wrap:balance}
+.story-date{display:flex;align-items:center;gap:7px;margin:0;font-weight:700;color:var(--muted)}
+.story-price{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.story-price strong{font-size:24px;font-weight:800}
+.story-price del{color:var(--muted)}
+.story-off{padding:4px 10px;border-radius:999px;font-size:13px;font-weight:800;color:#fff;background:linear-gradient(120deg,#f97316,#ec4899)}
+.story-score{padding:4px 9px;border-radius:8px;font-size:12px;font-weight:700;background:#ffffff1f}
+.story-info .dealexpires,.story-info .checkedat{margin:0;color:var(--muted)}
+.story-info .dealexpires b{color:var(--ink)}
+.story-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.story-actions>*{display:inline-flex;align-items:center;justify-content:center;height:46px;padding:0 18px;border-radius:12px;font-weight:800;cursor:pointer}
+.story-actions .primary{border:0;color:#fff;background:linear-gradient(120deg,#7c3aed,#c026d3 50%,#ec4899)}
+.story-actions .ghostbtn{color:#fff;background:#ffffff1f;border:1px solid #ffffff4d}
+.story-empty{display:grid;place-content:center;justify-items:center;gap:14px;height:100%;padding:24px;text-align:center;color:var(--muted)}
+.story-empty .ghostbtn{display:inline-flex;gap:8px;height:42px;color:#fff;background:#ffffff1f;border:1px solid #ffffff4d;border-radius:12px;padding:0 16px;align-items:center;cursor:pointer}
+.story-spin{width:34px;height:34px;border:3px solid #ffffff33;border-top-color:#fff;border-radius:50%;animation:story-rot .8s linear infinite}
+@keyframes story-rot{to{transform:rotate(360deg)}}
+.story-nav{display:grid;place-items:center;width:48px;height:48px;flex:none;border:0;border-radius:50%;color:#fff;background:#ffffff1f;cursor:pointer}
+.story-nav:hover,.story-nav:focus-visible{background:#ffffff40}
+@media (max-width:640px),(max-height:560px){
+ .story-overlay{gap:0;background:#000}
+ .story-viewer{width:100vw;height:100dvh;border-radius:0}
+ .story-nav{display:none}
+ .story-progress{top:max(10px,env(safe-area-inset-top))}
+ .story-head{top:calc(max(10px,env(safe-area-inset-top)) + 12px)}
+ .story-info{padding-bottom:max(24px,env(safe-area-inset-bottom))}
+}
+@media (max-height:700px){.story-cover{height:56%}.story-info h3{font-size:22px}}
+/* Yayındaki "Bilgi" düğmesi Keşfet'in sağ üstünde durur; dar ekranda şerit onun altından başlar. */
+@media (max-width:640px){main:has(>.simple-site-info) .story-strip{padding-top:34px}}
