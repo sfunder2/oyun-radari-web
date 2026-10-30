@@ -57,6 +57,7 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Hype | Hesap başına oyun başına en fazla 5 ortak puan; girişsiz heyecan yalnız cihazda. Tek ortak istekle yüklenir. |
 | Ne oynasam testi | Dört soru; ruh hali, mağaza (PlayStation, Steam, Xbox, Switch, Epic, GOG ya da hepsi), puan ve varsa kişisel süre kayıtları. |
 | Sürpriz slot | Gerçek katalog kapaklarından rastgele seçim; bahis/ödül yok. |
+| Oyun radarı | Alanım > Oyun radarı: dönen radarda indirimdeki oyunlar (yeşil) ve 45 gün içinde çıkacak oyunlar (mavi) parlayan nokta olarak görünür; dokununca oyun kartı açılır. Yeni sorgu yok: Fırsatlar'ın indirim listesi ve takvim tablosu okunur, 10 dk saklanır. Ayrı modül: assets/radar-20261030.js (kaynak: oyun-radari scripts/inject-radar.mjs). |
 | Günün oyunu | Her mağazadan sırayla seçilen yüksek puanlı oyunlar; oyuncu tarzı seçildiyse tarza uyanlar. Tarihe bağlı günlük seçim. |
 | Versus | Ortak oy, kullanıcı başına tek seçim; yüzdeler oy verdikten sonra açılır. |
 | Easter egg | “do a barrel roll” komutu; azaltılmış hareket tercihi uygulanır. |
