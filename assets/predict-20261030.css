@@ -1,0 +1,16 @@
+/* Fiyat tahmin oyunu (PricePrediction.tsx) */
+.price-predict{margin:16px 0;padding:16px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(135deg,var(--limebg),transparent 60%)}
+.pp-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px}.pp-head>svg{color:var(--lime);flex:none;margin-top:4px}.pp-head h3{margin:2px 0 0;font-size:clamp(15px,1.6vw,18px);line-height:1.3}
+.pp-actions{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px}.pp-actions button{display:inline-flex;align-items:center;gap:6px;min-height:42px}
+.pp-mine{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;margin-bottom:8px}.pp-mine p{margin:0}.pp-mine small{grid-column:1/-1;color:var(--muted)}
+.pp-link{grid-column:1/-1;justify-self:start;background:none;border:0;padding:0;color:var(--muted);font-size:12.5px;text-decoration:underline;cursor:pointer}
+.pp-locked{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:4px 0 8px}.pp-locked p{margin:0;flex:1 1 220px}.pp-locked>svg{color:var(--muted)}
+.pp-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;border:1px solid var(--line2)}
+.pp-chip.open{color:var(--muted)}.pp-chip.hit{color:#22c55e;border-color:color-mix(in srgb,#22c55e 45%,transparent);background:color-mix(in srgb,#22c55e 12%,transparent)}.pp-chip.miss{color:#f87171;border-color:color-mix(in srgb,#f87171 45%,transparent);background:color-mix(in srgb,#f87171 10%,transparent)}
+.prediction-board h3,.prediction-board h4,.pp-stats strong{color:var(--text,inherit)}.prediction-board h4{margin:18px 0 8px;font-size:14px}.pp-stats{margin:12px 0}
+.pp-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}.pp-list li{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.pp-list img,.pp-blank{width:48px;height:48px;border-radius:8px;object-fit:cover}.pp-blank{display:grid;place-items:center;background:var(--limebg);color:var(--lime)}
+.pp-list strong{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pp-list p{margin:2px 0;font-size:12.5px;color:var(--muted)}.pp-list small{font-size:12px;color:var(--muted)}.pp-list li>div{min-width:0}
+@media(max-width:560px){.pp-list li{grid-template-columns:40px 1fr}.pp-list img,.pp-blank{width:40px;height:40px}.pp-list .pp-chip{grid-column:2;justify-self:start}}
+.price-predict .pp-head h3,:root[data-ui] .price-predict .pp-head h3,.pp-mine p,.pp-locked p{color:var(--text,inherit)}
+:root[data-ui=sade] .pp-chip.hit{color:#047857}:root[data-ui=sade] .pp-chip.miss{color:#b91c1c}
