@@ -16,3 +16,31 @@ html[data-hand=right] .life-thumb-filter{right:18px}html[data-hand=left] .life-t
 .life-priorities>summary{cursor:pointer;font-weight:600;min-height:28px}
 #root .life-tabs{border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;overflow:visible!important}
 @media(max-width:700px){#root .life-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}#root .life-tabs button{padding:8px 4px;font-size:11px;white-space:nowrap}}
+/* Cüzdan koçu: Bütçe sekmesindeki tasarruf özeti, koç notları ve son 6 ay (wallet-coach-20261030.js) */
+.life-budget .wallet-hero{display:grid;gap:4px;padding:16px 18px;margin:0 0 6px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,var(--limebg,#c4f85b14),transparent 70%)}
+.wallet-eyebrow{font-size:10px;letter-spacing:.14em;color:var(--muted)}
+.wallet-saved{margin:0;font-size:22px;font-weight:800;color:var(--muted)}
+.wallet-saved.good{color:var(--lime)}
+.wallet-hero small{color:var(--muted);font-size:12px}
+.wallet-meter{height:10px;border-radius:999px;background:var(--line);overflow:hidden;margin:12px 0 0}
+.wallet-meter i{display:block;height:100%;border-radius:inherit;background:var(--lime);transition:width .4s}
+.wallet-meter.near i{background:#f5b942}
+.wallet-meter.over i{background:#ff6b6b}
+.life-budget-totals dd.bad{color:#ff6b6b}
+.life-hub ul.wallet-notes{margin:6px 0 14px}
+.life-hub .wallet-notes li{padding:10px 14px;margin:8px 0;border:1px solid var(--line);border-radius:12px;font-size:13px;line-height:1.55}
+.life-hub .wallet-notes li.tone-good{border-left:3px solid var(--lime)}
+.life-hub .wallet-notes li.tone-warn{border-left:3px solid #f5b942}
+.wallet-preview{margin:4px 0 10px;font-weight:700;color:var(--lime)}
+.life-ledger .wallet-saving{font-style:normal;font-size:12px;font-weight:700;color:var(--lime);margin-left:auto;white-space:nowrap;align-self:center}
+.wallet-history{padding-top:6px;border-top:1px solid var(--line);margin-top:14px}
+.wallet-bars{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;align-items:end;height:130px}
+.wallet-bars>div{display:grid;grid-template-rows:1fr auto;gap:6px;height:100%;text-align:center}
+.wallet-bars small{color:var(--muted);font-size:11px;white-space:nowrap}
+.wallet-bar{display:flex;flex-direction:column-reverse;justify-self:center;width:min(40px,100%);height:100%;border-radius:8px;background:var(--line);overflow:hidden}
+.wallet-bar i{display:block;width:100%}
+.wallet-bar .spent,.wallet-legend .spent::before{background:var(--muted)}
+.wallet-bar .saved,.wallet-legend .saved::before{background:var(--lime)}
+.wallet-legend{display:flex;gap:16px;margin:10px 0 0;font-size:12px;color:var(--muted)}
+.wallet-legend span::before{content:'';display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+@media(max-width:700px){.wallet-saved{font-size:19px}.wallet-bars{gap:4px}}
