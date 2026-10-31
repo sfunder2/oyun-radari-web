@@ -59,6 +59,7 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Sürpriz slot | Gerçek katalog kapaklarından rastgele seçim; bahis/ödül yok. |
 | Oyun radarı | Alanım > Oyun radarı: dönen radarda indirimdeki oyunlar (yeşil) ve 45 gün içinde çıkacak oyunlar (mavi) parlayan nokta olarak görünür; dokununca oyun kartı açılır. Yeni sorgu yok: Fırsatlar'ın indirim listesi ve takvim tablosu okunur, 10 dk saklanır. Ayrı modül: assets/radar-20261030.js (kaynak: oyun-radari scripts/inject-radar.mjs). |
 | Günün oyunu | Her mağazadan sırayla seçilen yüksek puanlı oyunlar; oyuncu tarzı seçildiyse tarza uyanlar. Tarihe bağlı günlük seçim. |
+| Fiyat tahmin oyunu | Oyun sayfasında "Bu oyun 30 gün içinde indirime girer mi?" tahmini; yalnız giriş yapan oyuncu, şu an indirimde olmayan ve fiyat geçmişi tutulan oyunlarda. Tahminler hesap satırında (radar_user_data) durur, yeni tablo yok. Sonuç, kart ya da Alanım > Tahminlerim açılınca mevcut fiyat geçmişinden tek ürünlük tarih aralıklı sorguyla bulunur (tahmin başına en çok 12 saatte bir, tek seferde en çok 3). Doğru tahmin 30 XP; İlk Kehanet ve İndirim Kâhini rozetleri. Kaynak: oyun-radari app/Predict.tsx, scripts/inject-predict.mjs. |
 | Versus | Ortak oy, kullanıcı başına tek seçim; yüzdeler oy verdikten sonra açılır. |
 | Easter egg | “do a barrel roll” komutu; azaltılmış hareket tercihi uygulanır. |
 | Backlog görevi | Gerçek kişisel bitirme oranı, oynadım işaretinde konfeti. |
