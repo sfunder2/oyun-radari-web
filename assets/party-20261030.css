@@ -1,0 +1,73 @@
+/* Arkadaşla ortak liste. Yalnız tema değişkenleri kullanılır; Sade görünüm aynı değişkenleri yeniden tanımladığı için iki görünümde de uyar. */
+.party{display:grid;gap:16px;max-width:920px;margin:0 auto;padding:8px 0 40px}
+.party-intro h2{margin:6px 0 8px;font-size:clamp(24px,4vw,36px);line-height:1.1}
+.party-intro p{margin:0;color:var(--muted);max-width:60ch;line-height:1.55}
+.party-title{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.party-title h2{margin:6px 0 4px;word-break:break-word}
+.party-edit,.party-back,.party-add-toggle{display:inline-flex;align-items:center;gap:6px;background:none;color:var(--lime);font-weight:700;font-size:13.5px;padding:6px 0}
+.party-back{justify-self:start;color:var(--muted)}.party-back:hover{color:var(--ink)}
+.party-card{display:grid;gap:12px;border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:16px}
+.party-card h3{display:flex;align-items:center;gap:8px;margin:0;font-size:16px}
+.party-note{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.party-privacy{padding:0 4px}
+.party-msg{margin:0;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,#ef4444 14%,transparent);color:var(--ink);font-size:13.5px}
+.party-field{display:grid;gap:6px;font-weight:650;font-size:13.5px}.party-field small{font-weight:500;color:var(--muted)}
+.party-field input{width:100%;min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line2,var(--line));background:var(--panel2,var(--bg));color:var(--ink);font:inherit;font-weight:500}
+.party-pick{border:0;margin:0;padding:0;display:grid;gap:8px}.party-pick legend{font-weight:650;font-size:13.5px;margin-bottom:6px}.party-pick legend small{color:var(--muted);font-weight:500}
+.party-chips{display:flex;flex-wrap:wrap;gap:8px;max-height:280px;overflow:auto;padding:2px}
+.party-chips button{display:inline-flex;align-items:center;gap:8px;max-width:100%;min-height:40px;padding:4px 12px 4px 4px;border-radius:999px;border:1px solid var(--line);background:var(--panel2,var(--bg));color:var(--ink);font-size:13px;font-weight:600}
+.party-chips button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+.party-chips img,.party-chips i{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:none;background:var(--line)}
+.party-chips button[aria-pressed=true]{border-color:var(--lime);background:color-mix(in srgb,var(--lime) 16%,transparent)}
+.party-chips button:disabled{opacity:.45}
+.party-create>.primary,.party-go{justify-self:start;display:inline-flex;align-items:center;gap:8px;font-weight:800}
+.party-known{list-style:none;margin:0;padding:0;display:grid;gap:6px}.party-known li{display:flex;align-items:center;gap:6px}
+.party-open{flex:1;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:46px;padding:0 14px;border-radius:12px;background:var(--panel2,var(--bg));color:var(--ink);text-align:left}
+.party-open b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.party-open small{color:var(--muted);flex:none}
+.party-icon{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:10px;background:none;color:var(--muted);flex:none}.party-icon:hover{background:color-mix(in srgb,var(--ink) 8%,transparent);color:var(--ink)}
+.party-actions,.party-foot{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.party-actions .primary{display:inline-flex;align-items:center;gap:7px;font-weight:800}
+.party-winner{display:flex;align-items:center;gap:14px;padding:14px;border-radius:18px;background:linear-gradient(120deg,color-mix(in srgb,var(--lime) 22%,var(--panel)),var(--panel));border:1px solid color-mix(in srgb,var(--lime) 45%,var(--line))}
+.party-winner img{width:96px;height:56px;border-radius:10px;object-fit:cover;flex:none}
+.party-crown{display:grid;place-items:center;width:56px;height:56px;border-radius:50%;background:color-mix(in srgb,var(--lime) 20%,transparent);color:var(--lime);flex:none}
+.party-winner div{display:grid;gap:2px;min-width:0}.party-winner small{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--lime)}
+.party-winner strong{font-size:clamp(18px,3vw,24px);line-height:1.2;word-break:break-word}.party-winner span{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:13px}
+.party-games{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.party-games li{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.party-games li.lead{border-color:color-mix(in srgb,var(--lime) 55%,var(--line))}
+.party-games li>img,.party-ph{width:84px;height:48px;border-radius:9px;object-fit:cover;background:var(--line)}
+.party-game{display:grid;gap:4px;min-width:0}.party-game strong{display:flex;align-items:center;gap:6px;font-size:15px}.party-game strong span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.party-game strong svg{color:var(--lime);flex:none}
+.party-game small{color:var(--muted);font-size:12.5px}
+.party-bar{height:6px;border-radius:99px;background:color-mix(in srgb,var(--ink) 9%,transparent);overflow:hidden}.party-bar i{display:block;height:100%;border-radius:inherit;background:var(--lime);transition:width .4s ease}
+.party-row-actions{display:flex;align-items:center;gap:4px}
+.party-vote{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--lime) 50%,var(--line));background:none;color:var(--lime);font-weight:800;font-size:13.5px;white-space:nowrap}
+.party-vote.on{background:var(--lime);color:var(--bg);border-color:var(--lime)}
+.party-vote:disabled,.party-icon:disabled{opacity:.6}
+.party-danger{color:#ef4444!important}
+.party-empty{display:grid;justify-items:center;gap:8px;text-align:center;padding:28px 16px;border:1px dashed var(--line);border-radius:16px;color:var(--muted)}.party-empty h3{margin:0;color:var(--ink)}.party-empty p{margin:0;max-width:46ch}
+/* Oyun ayrıntısındaki ekleme düğmesi ve menüsü */
+.party-add{position:relative;display:inline-block;vertical-align:middle;margin-left:4px}
+.party-add-btn{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.party-add-btn:hover,.party-add-btn[aria-expanded=true]{border-color:var(--lime);color:var(--lime)}
+.party-pop{position:absolute;z-index:30;top:46px;left:0;display:grid;gap:4px;min-width:230px;max-width:min(300px,80vw);padding:8px;border-radius:14px;border:1px solid var(--line);background:var(--panel);box-shadow:0 18px 40px -16px #000a;font-size:14px;font-weight:600;letter-spacing:0;text-transform:none}
+.party-pop b{padding:4px 8px;font-size:12px;color:var(--muted)}
+.party-pop button{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px;padding:0 10px;border-radius:9px;background:none;color:var(--ink);text-align:left}
+.party-pop button span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.party-pop button:hover{background:color-mix(in srgb,var(--lime) 12%,transparent)}
+.party-pop-new{color:var(--lime)!important;justify-content:flex-start!important}
+:root[data-ui=sade] .party-pop{box-shadow:0 18px 40px -18px #4c1d9555}
+/* Yayındaki paket sayfa zeminini iki görünümde de koyu tutuyor (html body{background:#11161e!important}); Sade'nin açık renk
+   değişkenleri bu zeminde okunmadığı için ortak liste sayfası Sade'de koyu yüzeyler ve mor vurgu kullanır (Oyun radarı gibi). */
+:root[data-ui=sade] .party{--bg:#11161e;--panel:#19212c;--panel2:#1f2834;--line:#2b3543;--line2:#344052;--ink:#e8edf4;--muted:#9aa8b9;--lime:#b794ff;color:var(--ink)}
+:root[data-ui=sade] .party .primary{background:linear-gradient(120deg,#7c3aed,#c026d3 50%,#ec4899);color:#fff}
+:root[data-ui=sade] .party .refresh{background:var(--panel);border-color:var(--line);color:var(--ink)}
+:root[data-ui=sade] .party-vote.on{background:linear-gradient(120deg,#7c3aed,#ec4899);border-color:transparent;color:#fff}
+@media (max-width:640px){
+ .party{padding:0 0 90px}
+ .party-games li{grid-template-columns:64px 1fr;gap:10px}
+ .party-games li>img,.party-ph{width:64px;height:40px}
+ .party-row-actions{grid-column:1/-1;justify-content:flex-end}
+ .party-vote{flex:1;justify-content:center}
+ .party-winner img{width:72px;height:44px}
+ .party-pop{left:auto;right:-8px}
+ .party-actions>*{flex:1;justify-content:center}
+}
