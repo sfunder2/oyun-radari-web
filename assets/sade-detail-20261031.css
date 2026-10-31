@@ -1,0 +1,13 @@
+/* Sade: kompakt oyun ayrıntısı koyu renkleri zorladığı için başlık ve fiyatlar okunmuyordu; Sade'de açık zemin geri gelir. */
+:root[data-ui=sade] body .modal.game-detail{background:#fff!important;border-color:#e6e2f0}
+:root[data-ui=sade] body .game-detail>.eyebrow{color:#6b6480}
+:root[data-ui=sade] body .game-detail .metachip{background:#f3f1fa;border-color:#e2ddef;color:#1d1533}
+:root[data-ui=sade] body .modal.game-detail>.catalognotice{background:#f6f4fd!important;border-color:#e2ddef;color:#3b3450}
+:root[data-ui=sade] body .game-detail .pc-row{background:#fff;border-color:#e6e2f0}
+:root[data-ui=sade] body .game-detail .pc-price strong{color:#1d1533}
+:root[data-ui=sade] body .game-detail .pc-row.best{background:#f1f8ea;border-color:#9cc77d}
+:root[data-ui=sade] body .game-detail .pc-row.best .pc-price strong{color:#2f6b12}
+:root[data-ui=sade] body .game-detail .close{background:#f6f4fd;border-color:#e2ddef;color:#1d1533}
+:root[data-ui=sade] body .detail-disclosure{background:#fff;border-color:#e6e2f0}
+:root[data-ui=sade] body .detail-disclosure>summary{color:#3b3450}
+:root[data-ui=sade] body .detail-disclosure[open]>summary{color:#1d1533;border-bottom-color:#e6e2f0}
