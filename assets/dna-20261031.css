@@ -95,3 +95,6 @@
 :root[data-ui=sade] .dna-bubble circle{stroke:#fff}
 :root[data-ui=sade] .dna-core{fill:#fff;stroke:#1d1533}
 :root[data-ui=sade] .dna-icon,:root[data-ui=sade] .dna-type b{color:#fff}
+
+/* Global .eyebrow is hidden site-wide; keep the feature name visible on the DNA card. */
+.dna-head .eyebrow{display:block;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:.08em}
