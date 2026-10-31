@@ -1,0 +1,72 @@
+/* One navigation and a quiet, compact catalogue. */
+body #root>header,body>header{transform:none!important;background:var(--bg,#090d12)!important;border-bottom:1px solid var(--line)!important;backdrop-filter:none!important}
+body #root>header .topbar,.topbar{max-width:1280px;margin:auto;min-height:64px;gap:16px}
+body main{max-width:1280px;margin:auto}
+.topbar>nav[aria-label="Ana gezinme"]{display:flex!important;align-items:center;gap:6px}
+.topbar>nav button{min-height:42px;padding:8px 14px;border:0;border-radius:10px;background:transparent;color:var(--muted);font:inherit;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.topbar>nav button[aria-current="page"]{background:var(--surface,#17212b);color:var(--ink,#fff)}
+.topbar>nav button em{font-size:11px;font-style:normal;opacity:.7}
+.topbar .brand{margin-right:auto}
+body .bottom-nav{display:none!important}
+#search-slot .csearch{margin:0 0 16px;padding:0;max-width:none}
+#search-slot .csearch-title{font-size:22px;margin:0 0 12px}
+#search-slot .device-picker,#search-slot .csearch-chips{display:none}
+.csearch-under:has(.csearch-status:empty){display:none}
+.new-releases{margin:0 0 24px;padding:16px 0!important;border:0!important;background:transparent!important;box-shadow:none!important}
+.new-release-head h2{font-size:19px!important}
+.new-release-head .eyebrow,.new-release-head p,.new-releases .release-note{display:none}
+.new-releases .release-rail{grid-auto-columns:148px!important;gap:12px!important}
+.new-releases .release-art{height:112px!important;aspect-ratio:auto!important}
+.new-releases .release-art img{width:100%;height:100%;object-fit:cover}
+.new-releases .release-tabs{margin:8px 0 12px}
+.simple-primary-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 12px}
+.simple-primary-filters label{display:grid;gap:5px;font-size:12px;color:var(--muted)}
+.simple-primary-filters input,.simple-primary-filters select{width:100%;min-width:0;min-height:44px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface,#151d27);color:var(--ink);font:inherit;font-size:14px}
+.simple-home{display:block!important}
+.simple-home>.genre-strip,.simple-home>.catalogcontrols{display:none}
+.simple-home>.libtools{position:static;display:flex!important;flex-wrap:wrap;width:100%;gap:10px;margin:0 0 10px}
+.simple-home .filterpanel{flex:1;min-width:0;background:transparent}
+.simple-home .filterpanel summary{padding:10px 12px;min-height:44px}
+.simple-home .filtergrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.simple-home .filtergrid>label:nth-child(1),.simple-home .filtergrid>label:nth-child(2),.simple-home .filtergrid>label:nth-child(5){display:none}
+.simple-home .libactions{position:static;margin:0;padding:0}
+.simple-home>.catalogsearch{min-height:44px;margin:0 0 8px;padding:0}
+.simple-home .catalogtitle{font-size:15px}
+.simple-home .deal-list-head{display:none}
+body .simple-home .deal-list-row{display:grid;grid-template-columns:minmax(0,1fr) 50px 60px minmax(110px,160px) 40px;align-items:center;gap:10px;min-height:76px;padding:10px}
+body .simple-home .deal-discount{display:block!important;font-size:12px;color:var(--lime,#c4f85b)}
+body .simple-home .deal-score,body .simple-home .deal-best-price{grid-area:auto!important}
+body .simple-home .deal-list-row>button:last-child{grid-area:auto!important}
+.simple-home .deal-game img{width:42px;height:56px;object-fit:cover;border-radius:5px}
+.simple-home .deal-coverage,.simple-home .deal-checked,.simple-home .deal-best-price>del,.simple-home .deal-platforms,.simple-home .deal-game>span>small{display:none}
+main>.catalog-intro,main>.breadcrumb:has(+.catalog-intro){display:none}
+.account-shortcuts{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 20px}
+.account-shortcuts button{min-height:44px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.account-shortcuts button:hover,.account-shortcuts button:focus-visible{border-color:var(--lime,#c4f85b)}
+.menu-panel .menu-grid button{min-height:54px}
+@media(max-width:700px){
+ body{padding-bottom:calc(70px + env(safe-area-inset-bottom,0px))!important}
+ body .bottom-nav{position:fixed!important;display:flex!important;inset:auto 0 0!important;z-index:100;background:var(--bg,#090d12);border-top:1px solid var(--line);padding:5px 8px calc(5px + env(safe-area-inset-bottom,0px));justify-content:space-around}
+ .bottom-nav button{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:50px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:11px}
+ .bottom-nav button[aria-current="page"]{color:var(--lime,#c4f85b)}
+ .topbar>nav[aria-label="Ana gezinme"]{display:none!important}
+ body #root>header .topbar{min-height:56px;gap:8px;padding:8px 12px}
+ body main{padding:12px!important}
+ #search-slot .csearch-title{font-size:20px;margin-right:0}
+ .simple-primary-filters{gap:7px}
+ .simple-primary-filters input,.simple-primary-filters select{padding:8px;font-size:13px}
+ .simple-home .filtergrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body #root .simple-home .deal-list-row{grid-template-columns:minmax(0,1fr) 42px minmax(85px,105px) 36px!important;gap:6px!important;padding:10px 6px!important}
+ body .simple-home .deal-score{display:none!important}
+ body .simple-home .deal-discount{grid-column:2;grid-row:1}
+ .simple-home .deal-game{grid-column:1!important;grid-row:1!important;min-width:0;gap:8px}
+ .simple-home .deal-game b{font-size:12px}
+ .simple-home .deal-best-price{grid-column:3!important;grid-row:1!important}
+ .simple-home .deal-best-price strong{font-size:14px}
+ .simple-home .deal-best-price small{font-size:10px}
+ body #root .simple-home .deal-list-row>button:last-child{grid-column:4!important;grid-row:1!important}
+ .new-releases .release-rail{grid-auto-columns:132px!important}
+}
+
+/* Keep the optional countdown with the upcoming view. */
+.new-releases:not(:has(.release-tabs button:nth-child(3)[aria-pressed="true"])) .release-countdown{display:none}
