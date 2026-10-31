@@ -1,0 +1,7 @@
+.steamdb-panel{margin:18px 0;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--surface,transparent)}
+.steamdb-panel h3{font-size:15px;margin:0 0 12px}
+.steamdb-actions{display:flex;flex-wrap:wrap;gap:8px}
+.steamdb-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-size:13px;text-decoration:none}
+.steamdb-actions a:hover,.steamdb-actions a:focus-visible{border-color:var(--lime,#c4f85b);outline:2px solid var(--lime,#c4f85b);outline-offset:2px}
+.steamdb-panel p{margin:12px 0 0;color:var(--muted);font-size:12px;line-height:1.6}
+@media(max-width:500px){.steamdb-actions{display:grid;grid-template-columns:1fr}.steamdb-actions a{justify-content:flex-start}}

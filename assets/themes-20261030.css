@@ -1,0 +1,88 @@
+/* Seviye ve sezon temaları (lib/themes.mjs). html[data-site-theme] yalnız tema açıksa ve renk erişilebilirliği modu standartken konur.
+ Bu dosya Sade dönüştürücüsünden geçmez: Klasik (koyu) ve Sade (açık) renkleri burada ayrı ayrı yazılır. */
+html[data-site-theme=ocean]{--accent:#5fd4ff!important;--lime:#5fd4ff;--limebg:#5fd4ff1c}
+:root[data-ui=sade][data-site-theme=ocean]{--accent:#0284c7!important;--lime:#0284c7;--limebg:#0284c714;--s-violet:#0284c7;--s-grad:linear-gradient(120deg,#0369a1,#0891b2 50%,#06b6d4)}
+html[data-site-theme=sunset]{--accent:#ff9f6b!important;--lime:#ff9f6b;--limebg:#ff9f6b1c}
+:root[data-ui=sade][data-site-theme=sunset]{--accent:#ea580c!important;--lime:#ea580c;--limebg:#ea580c14;--s-violet:#ea580c;--s-grad:linear-gradient(120deg,#ea580c,#f43f5e 55%,#f59e0b)}
+html[data-site-theme=synth]{--accent:#ff71ce!important;--lime:#ff71ce;--limebg:#ff71ce1c}
+:root[data-ui=sade][data-site-theme=synth]{--accent:#db2777!important;--lime:#db2777;--limebg:#db277714;--s-violet:#db2777;--s-grad:linear-gradient(120deg,#db2777,#9333ea 55%,#2563eb)}
+html[data-site-theme=ember]{--accent:#ff7a66!important;--lime:#ff7a66;--limebg:#ff7a661c}
+:root[data-ui=sade][data-site-theme=ember]{--accent:#dc2626!important;--lime:#dc2626;--limebg:#dc262614;--s-violet:#dc2626;--s-grad:linear-gradient(120deg,#b91c1c,#ea580c 60%,#f59e0b)}
+html[data-site-theme=gold]{--accent:#ffd166!important;--lime:#ffd166;--limebg:#ffd1661c}
+:root[data-ui=sade][data-site-theme=gold]{--accent:#b45309!important;--lime:#b45309;--limebg:#b4530914;--s-violet:#b45309;--s-grad:linear-gradient(120deg,#92400e,#d97706 55%,#eab308)}
+html[data-site-theme=aurora]{--accent:#7dffc4!important;--lime:#7dffc4;--limebg:#7dffc41c}
+:root[data-ui=sade][data-site-theme=aurora]{--accent:#059669!important;--lime:#059669;--limebg:#05966914;--s-violet:#059669;--s-grad:linear-gradient(120deg,#059669,#0891b2 50%,#7c3aed)}
+html[data-site-theme=winter]{--accent:#a8d8ff!important;--lime:#a8d8ff;--limebg:#a8d8ff1c}
+:root[data-ui=sade][data-site-theme=winter]{--accent:#2563eb!important;--lime:#2563eb;--limebg:#2563eb14;--s-violet:#2563eb;--s-grad:linear-gradient(120deg,#1d4ed8,#0ea5e9 60%,#67e8f9)}
+html[data-site-theme=spring]{--accent:#ffb3d9!important;--lime:#ffb3d9;--limebg:#ffb3d91c}
+:root[data-ui=sade][data-site-theme=spring]{--accent:#be185d!important;--lime:#be185d;--limebg:#be185d14;--s-violet:#be185d;--s-grad:linear-gradient(120deg,#be185d,#ec4899 55%,#65a30d)}
+html[data-site-theme=summer]{--accent:#ffe066!important;--lime:#ffe066;--limebg:#ffe0661c}
+:root[data-ui=sade][data-site-theme=summer]{--accent:#0d9488!important;--lime:#0d9488;--limebg:#0d948814;--s-violet:#0d9488;--s-grad:linear-gradient(120deg,#f59e0b,#f97316 40%,#0d9488)}
+html[data-site-theme=autumn]{--accent:#ffa94d!important;--lime:#ffa94d;--limebg:#ffa94d1c}
+:root[data-ui=sade][data-site-theme=autumn]{--accent:#c2410c!important;--lime:#c2410c;--limebg:#c2410c14;--s-violet:#c2410c;--s-grad:linear-gradient(120deg,#9a3412,#ea580c 55%,#ca8a04)}
+
+/* Kompakt katalog (compact.css) birkaç vurguyu sabit yeşille yazar; tema seçiliyse onları da tema rengine çeker. */
+html[data-site-theme] body .brandmark{color:var(--accent)}
+html[data-site-theme] body .csearch-bar:focus-within{border-color:var(--accent)!important}
+html[data-site-theme] body .csearch-go{background:var(--accent)!important;color:#141a22!important}
+html[data-site-theme] .release-tabs button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#141a22}
+
+/* Profil çerçeveleri: avatarın çevresinde maske ile çizilen halka. Hesap düğmesindeki küçük avatar yalnız düz renkli halka alır. */
+.has-frame,html[data-frame] .player-identity>.pixel-avatar,html[data-frame] .account-avatar{position:relative;--frame:#c08457;--frame-grad:linear-gradient(140deg,#f3c49b,#a0623a 45%,#e8b088 70%,#7a4526)}
+.frame-bronze,html[data-frame=bronze] .player-identity>.pixel-avatar,html[data-frame=bronze] .account-avatar{--frame:#c08457;--frame-grad:linear-gradient(140deg,#f3c49b,#a0623a 45%,#e8b088 70%,#7a4526)}
+.frame-silver,html[data-frame=silver] .player-identity>.pixel-avatar,html[data-frame=silver] .account-avatar{--frame:#c9d3de;--frame-grad:linear-gradient(140deg,#ffffff,#9aa6b4 40%,#e8eef5 65%,#6f7b89)}
+.frame-gold,html[data-frame=gold] .player-identity>.pixel-avatar,html[data-frame=gold] .account-avatar{--frame:#f2c14e;--frame-grad:linear-gradient(140deg,#fff2b0,#d9a21b 40%,#ffe28a 65%,#a8740a)}
+.frame-flame,html[data-frame=flame] .player-identity>.pixel-avatar,html[data-frame=flame] .account-avatar{--frame:#ff7a3d;--frame-grad:linear-gradient(0deg,#ff3d2e,#ff8a1f 45%,#ffd23f)}
+.frame-prism,html[data-frame=prism] .player-identity>.pixel-avatar,html[data-frame=prism] .account-avatar{--frame:#b28cff;--frame-grad:linear-gradient(135deg,#ff6ad5,#ffd166 25%,#5fd4ff 50%,#7dffc4 75%,#b28cff)}
+.frame-legend,html[data-frame=legend] .player-identity>.pixel-avatar,html[data-frame=legend] .account-avatar{--frame:#ffd166;--frame-grad:conic-gradient(from 0deg,#ffd166,#ff6ad5,#5fd4ff,#7dffc4,#ffd166)}
+.frame-winter,html[data-frame=winter] .player-identity>.pixel-avatar,html[data-frame=winter] .account-avatar{--frame:#a8d8ff;--frame-grad:linear-gradient(140deg,#ffffff,#a8d8ff 40%,#6aa8ff 70%,#e0f0ff)}
+.frame-spring,html[data-frame=spring] .player-identity>.pixel-avatar,html[data-frame=spring] .account-avatar{--frame:#f59ec8;--frame-grad:linear-gradient(140deg,#ffc1df,#7fd67f 45%,#f59ec8 75%,#4caf50)}
+.frame-summer,html[data-frame=summer] .player-identity>.pixel-avatar,html[data-frame=summer] .account-avatar{--frame:#ffcf3f;--frame-grad:linear-gradient(140deg,#ffe066,#ff9f1c 45%,#3fe0d0 80%)}
+.frame-autumn,html[data-frame=autumn] .player-identity>.pixel-avatar,html[data-frame=autumn] .account-avatar{--frame:#e8833a;--frame-grad:linear-gradient(140deg,#ffb35c,#c2410c 45%,#8f5a1d 70%,#f2a541)}
+.pixel-avatar.has-frame,html[data-frame] .player-identity>.pixel-avatar{border-color:transparent}
+.pixel-avatar.has-frame::before,html[data-frame] .player-identity>.pixel-avatar::before{content:"";position:absolute;inset:-5px;border-radius:29px;padding:4px;background:var(--frame-grad);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);pointer-events:none}
+.pixel-avatar.has-frame,html[data-frame] .player-identity>.pixel-avatar{box-shadow:inset 0 0 30px #0005,0 0 22px -6px var(--frame)}
+.pixel-avatar.frame-legend::before,html[data-frame=legend] .player-identity>.pixel-avatar::before{animation:frame-spin 6s linear infinite}
+.pixel-avatar.frame-flame::before,html[data-frame=flame] .player-identity>.pixel-avatar::before{animation:frame-flicker 1.8s ease-in-out infinite alternate}
+@keyframes frame-spin{to{filter:hue-rotate(360deg)}}
+@keyframes frame-flicker{from{filter:brightness(1)}to{filter:brightness(1.25) saturate(1.2)}}
+.pixel-avatar.has-frame::after,html[data-frame] .player-identity>.pixel-avatar::after{position:absolute;top:-11px;right:-9px;font-size:18px;line-height:1;text-shadow:0 1px 3px #0008;pointer-events:none}
+.frame-winter::after,html[data-frame=winter] .player-identity>.pixel-avatar::after{content:"❄";color:#e0f0ff}.frame-spring::after,html[data-frame=spring] .player-identity>.pixel-avatar::after{content:"✿";color:#ff9ccf}.frame-summer::after,html[data-frame=summer] .player-identity>.pixel-avatar::after{content:"☀";color:#ffd23f}.frame-autumn::after,html[data-frame=autumn] .player-identity>.pixel-avatar::after{content:"❦";color:#e8833a}.frame-legend::after,html[data-frame=legend] .player-identity>.pixel-avatar::after{content:"♛";color:#ffd166}.frame-gold::after,html[data-frame=gold] .player-identity>.pixel-avatar::after{content:"★";color:#ffd166}
+.account-avatar.has-frame,html[data-frame] .account-avatar{border-color:var(--frame);box-shadow:0 0 0 2px var(--frame)}
+html[data-reduce-motion=true] .has-frame::before,html[data-reduce-motion=true] .player-identity>.pixel-avatar::before{animation:none}
+@media (prefers-reduced-motion:reduce){.has-frame::before,.player-identity>.pixel-avatar::before{animation:none}}
+
+/* Tema ve çerçeve sekmesi */
+.style-shop{margin:28px 0}
+.style-shop h4{font-size:15px;margin:28px 0 12px;letter-spacing:-.01em}
+.style-head{display:grid;grid-template-columns:1fr minmax(260px,380px);gap:20px;align-items:start}
+.style-head h3{margin:0 0 4px}.style-head p{margin:0;font-size:13px;color:var(--muted)}
+.season-card{display:grid;gap:7px;padding:16px 18px;border-radius:16px;border:1px solid var(--line2,#2b3947);background:linear-gradient(130deg,color-mix(in srgb,var(--season) 18%,var(--panel)),var(--panel))}
+.season-card .season-label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--season)}.season-card strong{font-size:15px}.season-card .season-count{font-size:12px;font-weight:700;color:var(--season)}.season-card small{font-size:12px;color:var(--muted);line-height:1.5}
+.season-card progress,.style-need progress{width:100%;height:6px;accent-color:var(--season,var(--accent))}
+.season-winter{--season:#6aa8ff}.season-spring{--season:#f472b6}.season-summer{--season:#f59e0b}.season-autumn{--season:#ea580c}
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.theme-grid button,.frame-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:14px;border-radius:14px;border:1px solid var(--line2,#2b3947);background:var(--panel);color:var(--ink);cursor:pointer;min-height:100%;font:inherit}
+.theme-grid button:not(:disabled):hover,.frame-grid button:not(:disabled):hover{border-color:var(--accent)}
+.theme-grid button[aria-checked=true],.frame-grid button[aria-checked=true]{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.theme-grid button:disabled,.frame-grid button:disabled{cursor:default}
+.theme-grid .locked i,.frame-grid .locked .pixel-avatar{filter:grayscale(.85);opacity:.55}
+.theme-grid i{display:block;width:100%;height:44px;border-radius:10px;background:linear-gradient(120deg,var(--sw1),var(--sw2))}
+.theme-grid strong,.frame-grid strong{font-size:13px}
+.theme-grid small{font-size:11.5px;color:var(--muted);line-height:1.4}
+.theme-grid b,.frame-grid b{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--accent)}
+.style-need{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:3px 5px;font-size:11px;color:var(--muted);width:100%}
+.style-need progress{grid-column:1/-1}
+.frame-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.frame-grid button{align-items:center;text-align:center;padding:20px 12px 14px}
+.frame-grid .pixel-avatar{width:70px;height:70px;border-radius:20px;margin-bottom:6px}
+.frame-grid .pixel-avatar svg{width:52px;height:52px}
+.frame-grid .pixel-avatar.has-frame::before,html[data-frame] .player-identity>.pixel-avatar::before{border-radius:24px}
+.frame-grid .style-need{grid-template-columns:1fr;justify-items:center;text-align:center}
+.frame-grid .style-need svg{display:none}
+:root[data-ui=sade] .theme-grid button,:root[data-ui=sade] .frame-grid button{box-shadow:var(--s-shadow)}
+:root[data-ui=sade] .theme-grid button[aria-checked=true],:root[data-ui=sade] .frame-grid button[aria-checked=true]{box-shadow:0 0 0 2px var(--accent) inset,var(--s-shadow)}
+:root[data-ui=sade] .season-card{border-color:var(--line);background:linear-gradient(130deg,color-mix(in srgb,var(--season) 14%,#fff),#fff)}
+:root[data-ui=sade] .frame-grid .pixel-avatar{background:#f3f0ff}
+@media(max-width:700px){.style-head{grid-template-columns:1fr}.theme-grid{grid-template-columns:repeat(2,1fr);gap:9px}.frame-grid{grid-template-columns:repeat(3,1fr);gap:8px}.frame-grid button{padding:14px 6px 10px}.frame-grid .pixel-avatar{width:56px;height:56px;border-radius:16px}.frame-grid .pixel-avatar svg{width:42px;height:42px}.frame-grid .pixel-avatar.has-frame::before,html[data-frame] .player-identity>.pixel-avatar::before{border-radius:20px}.theme-grid button{padding:11px}}
+
