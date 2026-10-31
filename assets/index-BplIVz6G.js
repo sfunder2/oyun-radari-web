@@ -1,3 +1,4 @@
+import"./sfx-20261031.js";
 import{createParty as radarCreateParty}from"./party-20261030.js";
 import{createGameDna as radarCreateDna}from"./dna-20261031.js";
 import{createPriceHeat as radarCreateHeat}from"./heat-20261031.js";
