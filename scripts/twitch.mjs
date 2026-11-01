@@ -66,13 +66,14 @@ export function pickOffer(rows){
 }
 
 /** Twitch oyunlarını katalogla eşler: Map(twitchId -> {key, item}). */
-export async function matchCatalog(sb,games){
+export async function matchCatalog(sb,games,say=()=>{}){
  const out=new Map(),keyOf=new Map();
  // 1) IGDB kimliği (oyun süresi toplayıcısının game_ttb tablosu kuruluysa)
  const ids=[...new Set(games.map(g=>g.igdbId).filter(Number.isInteger))];
  if(ids.length){
   try{for(const r of await sb.select('game_ttb?select=title_key,igdb_id&igdb_id=in.('+ids.join(',')+')'))if(r.igdb_id&&!keyOf.has(r.igdb_id))keyOf.set(r.igdb_id,r.title_key);}
-  catch(e){if(!/404|PGRST205|does not exist/.test(e.message))throw e;}
+  // game_ttb yoksa ya da sorgu zaman aşımına düşerse (igdb_id dizinsiz) adla eşleşmeye devam edilir; tur yarıda kalmaz.
+  catch(e){say('IGDB eşleşmesi atlandı, yalnız adla eşleniyor: '+e.message.slice(0,160));}
  }
  const cand=new Map();for(const g of games){const ks=[keyOf.get(g.igdbId),titleKey(g.name)].filter(k=>k&&KEY.test(k));cand.set(g.id,[...new Set(ks)]);}
  const keys=[...new Set([...cand.values()].flat())];
@@ -96,7 +97,7 @@ export async function runTwitch({sb,get,limit=40,pages=5,say=()=>{},now=new Date
  const rows=[];
  for(const g of games){const v=await viewersFor(get,g.id,pages);rows.push({...g,...v});}
  rows.sort((a,b)=>b.viewers-a.viewers);
- const match=await matchCatalog(sb,rows);
+ const match=await matchCatalog(sb,rows,say);
  const out=rows.map((g,i)=>({twitch_id:g.id,rank:i+1,name:g.name,igdb_id:g.igdbId,box_art:boxArt(g.boxArt)||null,viewers:g.viewers,streams:g.streams,
   title_key:match.get(g.id)?.key??null,item:match.get(g.id)?.item??null,updated_at:iso}));
  if(out.length){
