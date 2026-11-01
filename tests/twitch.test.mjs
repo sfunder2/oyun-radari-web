@@ -41,6 +41,8 @@ test('katalog eşleşmesi: IGDB kimliği game_ttb üzerinden, yoksa ad; game_ttb
  assert.match(decodeURIComponent(sb.log[1]),/title_key=in\.\("grand theft auto v","some name","hades ii","not in catalog"\)/);
  const sb2=fakeSb({game_ttb:new Error('Supabase GET game_ttb HTTP 404: PGRST205'),ps_products:[{id:'EP-H2',title_key:'hades ii',name:'Hades II'}]});
  assert.equal((await matchCatalog(sb2,games)).get('2').item.id,'EP-H2');
+ const sb3=fakeSb({game_ttb:new Error('Supabase GET game_ttb HTTP 500: statement timeout'),ps_products:[{id:'EP-H2',title_key:'hades ii',name:'Hades II'}]});
+ const said=[];assert.equal((await matchCatalog(sb3,games,m=>said.push(m))).get('2').item.id,'EP-H2');assert.match(said[0],/statement timeout/);
 });
 test('tur: izleyiciye göre sıralar, tabloyu yazar ve eski satırları siler',async()=>{
  const get=async(p,q)=>p==='games/top'?{data:[{id:'a',name:'Hades II',igdb_id:'1'},{id:'b',name:'Other',igdb_id:'2'}]}:{data:[{viewer_count:q.game_id==='a'?10:500}]};
