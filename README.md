@@ -2,6 +2,12 @@
 
 GitHub Pages yayın dosyaları. PlayStation Türkiye ürün bağlantısı ekleme, fiyat yenileme ve eşleşen oyunların platformlar arası karşılaştırması. Kayıtlı bağlantılar ziyaretçinin tarayıcısında saklanır. Tam PlayStation katalog akışı kapsam dışıdır.
 
+## Veri toplayıcı iş akışları
+
+Toplayıcılar (`enrich`, `update-ps-prices`, `family`, `igdb-release`, `igdb-score`, `playmodes`, `similar`, `ttb`, `twitch-top`) push ile çalışmaz; yalnız kendi zamanlamalarıyla (ya da Supabase Cron ile) ve Actions sekmesindeki "Run workflow" düğmesiyle başlar. Eskiden `scripts/**` değişen her push (özellik dallarındakiler dahil) bu işlerin çoğunu aynı anda başlatıyor, hepsi aynı Supabase veritabanına yazdığı için sorgular zaman aşımına düşüyordu. Toplayıcı kodu `test.yml` ile push'ta sınanmaya devam eder. Yeni ya da değişen bir toplayıcıyı hemen çalıştırmak için birleştirmeden sonra o işi elle başlat. IGDB işleri saatin farklı dakikalarına dağıtıldı (`similar` 03:17, `igdb-release` 03:47 UTC).
+
+Arayüz dosyalarının kaynağı oyun-radari deposundaki `live/` klasörüdür (`node scripts/live-sync.mjs check <bu-depo>` ile eşitlik denetlenir).
+
 ## Android uygulaması
 
 `android/` klasörü siteyi tam ekran açan küçük bir Android uygulamasıdır (WebView). `android/**` değiştiğinde **Android APK** iş akışı APK'yı derler ve `apk-N` etiketli bir GitHub Release olarak yayımlar. Her sürüm aynı anahtarla imzalanır, bu yüzden yeni APK eskisinin üzerine kurulur.

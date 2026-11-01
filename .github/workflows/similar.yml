@@ -1,10 +1,8 @@
 name: Similar games (IGDB)
 on:
   schedule:
-    - cron: '47 3 * * *'
+    - cron: '17 3 * * *'
   workflow_dispatch:
-  push:
-    paths: ['scripts/similar.mjs', 'scripts/similar-run.mjs', '.github/workflows/similar.yml']
 concurrency:
   group: similar
   cancel-in-progress: false
