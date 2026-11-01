@@ -103,3 +103,13 @@ Oyun ayrıntısında "Benzer oyunlar" bölümü: IGDB'nin `similar_games` listes
 - Arayüz `assets/similar-20261101.js` / `.css` modülüyle eklenir; tablo yoksa bölüm görünmez ve "Benzer ama daha ucuz" eskisi gibi çalışır.
 
 Açmak için: SQL Editor'da `supabase/schema-v43-benzer-oyunlar.sql` dosyasını çalıştır, **Similar games (IGDB)** iş akışını elle bir kez başlat.
+
+## Çıkış tarihi ve fragman (IGDB)
+
+Mağazada tarihi olmayan ya da yer tutucu tarih gösteren yaklaşan oyunların tarihi IGDB'den tamamlanır; fragmanı olmayan oyunlara IGDB'deki YouTube fragmanı eklenir. Mağaza tabloları değişmez, düzeltme arayüzde yapılır.
+
+- `supabase/schema-v42-igdb-cikis-fragman.sql`: `game_igdb_info` tablosu (başlık anahtarı başına tek satır: en erken çıkış ve kesinliği, mağaza ailesi başına kesin tarih, YouTube fragman kimliği). Herkes okur, yalnız toplayıcı yazar. Geri almak için `schema-v42-igdb-cikis-fragman-geri-al.sql`.
+- `scripts/igdb-release.mjs`, `scripts/igdb-release-run.mjs`, `.github/workflows/igdb-release.yml`: günde bir çalışır. Yaklaşan oyunlar Steam kimliğiyle ya da adla (aynı adlı eski oyun değil, yenisi) eşlenir; katalogdaki oyunlar oyun süresi toplayıcısının bulduğu IGDB kimlikleriyle 14 günde bir tazelenir. Oyun süresiyle aynı `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` anahtarlarını kullanır. `tests/igdb-release.test.mjs` ile sınanır.
+- Arayüz `assets/igdb-20261101.js/.css` modülüyle eklenir (`releases-20261101.js` ve ana paketteki takvim bunu kullanır). Kurallar: tarihsiz satıra aynı platformun IGDB kesin tarihi yazılır, yoksa "2027 3. çeyrek" gibi dönem bilgisi gösterilir; Nintendo'nun 31 Aralık yer tutucusu IGDB tarihiyle değişir ya da yalnız yıl gösterilir; Xbox satırında IGDB'nin Xbox tarihi tercih edilir; Steam ve PlayStation tarihlerine dokunulmaz. Geri sayımda "Tarih IGDB'den" etiketi ve "Fragmanı izle" düğmesi, oyun ayrıntısında PlayStation fragmanı yoksa YouTube fragmanı (çerezsiz alan adı, yalnız tıklayınca yüklenir). SQL kurulmadan sayfa açılırsa her şey eskisi gibi çalışır.
+
+Açmak için sırayla: SQL Editor'da `supabase/schema-v42-igdb-cikis-fragman.sql` dosyasını çalıştır, **Release dates and trailers (IGDB)** iş akışını elle bir kez başlat.

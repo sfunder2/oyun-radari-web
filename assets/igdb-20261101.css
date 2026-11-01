@@ -1,0 +1,30 @@
+/* IGDB çıkış tarihi ve fragman (igdb-parts.tsx): oyun ayrıntısında YouTube fragmanı, geri sayımda fragman düğmesi ve oynatıcı. */
+.igdb-trailer{margin:12px 0 4px}
+/* Mağazanın kendi (PlayStation) fragmanı bulunduysa IGDB fragmanı gösterilmez. */
+.detail-media:has(.modalhero:not(.no-trailer)) .igdb-trailer{display:none}
+.igdb-poster{position:relative;display:block;width:100%;aspect-ratio:16/9;padding:0;border:1px solid var(--line,#ffffff1f);border-radius:12px;overflow:hidden;background:#000;cursor:pointer;color:#fff}
+.igdb-poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.82;transition:opacity .2s ease,transform .3s ease}
+.igdb-poster::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,#000000b8)}
+.igdb-poster:hover img{opacity:1;transform:scale(1.02)}
+.igdb-poster:focus-visible{outline:2px solid var(--lime,#b2e27a);outline-offset:2px}
+.igdb-play{position:absolute;left:50%;top:50%;z-index:1;display:grid;place-items:center;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;background:#000000a6;border:2px solid #ffffffd9;box-shadow:0 6px 24px #0008}
+.igdb-play svg{margin-left:3px}
+.igdb-label{position:absolute;left:14px;right:14px;bottom:12px;z-index:1;display:grid;gap:2px;text-align:left}
+.igdb-label b{font-size:15px;font-weight:800}
+.igdb-label small{font-size:12px;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.igdb-player{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:#000}
+.igdb-player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.igdb-source{margin:6px 0 0;font-size:11px;color:var(--muted)}
+.igdb-source a{color:inherit;text-decoration:underline}
+/* Geri sayım */
+.rc-actions .rc-trailer{border:1px solid #b2e27a66;background:transparent;color:#d6f3b0}
+.rc-actions .rc-trailer.on{background:#b2e27a;color:#0b1118;border-color:#b2e27a}
+.rc-player{grid-column:1/-1;width:100%;max-width:760px;justify-self:center}
+.rc-src{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.02em;color:#b2e27a;border:1px solid #b2e27a59;vertical-align:1px;cursor:help}
+.release-igdb-note{opacity:.9}
+:root[data-ui=sade] .rc-actions .rc-trailer{border-color:#5b3fd04d;color:#4b30b8}
+:root[data-ui=sade] .rc-actions .rc-trailer.on{background:#5b3fd0;color:#fff;border-color:#5b3fd0}
+:root[data-ui=sade] .rc-src{color:#4b30b8;border-color:#5b3fd04d}
+:root[data-ui=sade] .igdb-poster{border-color:#00000014}
+@media(max-width:600px){.igdb-play{width:48px;height:48px;margin:-24px 0 0 -24px}.igdb-label b{font-size:14px}.rc-player{max-width:none}}
+@media(max-width:600px){.rc-actions{flex-wrap:wrap}.rc-actions .rc-trailer{flex:1 0 100%}}
