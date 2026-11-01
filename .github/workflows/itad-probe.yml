@@ -1,0 +1,28 @@
+name: ITAD probe (read only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/project-thread-pu8t9h]
+    paths: [scripts/itad-probe.mjs, .github/workflows/itad-probe.yml, .itad-probe-run]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Measure ITAD shop and price coverage
+        env:
+          ITAD_API_KEY: ${{ secrets.ITAD_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node scripts/itad-probe.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: itad-probe
+          path: itad-probe.json
