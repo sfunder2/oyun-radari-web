@@ -1,4 +1,4 @@
--- Şema v37: "Şu an Twitch'te en çok izlenenler" (Keşfet bölümü ve kartlardaki izleyici rozeti).
+-- Şema v38: "Şu an Twitch'te en çok izlenenler" (Keşfet bölümü ve kartlardaki izleyici rozeti).
 -- Kaynak: Twitch Helix API (games/top + streams), IGDB toplayıcısıyla aynı Twitch uygulaması.
 --
 -- twitch_top_games: son turun anlık görüntüsü, en çok ~40 satır (birkaç KB). Toplayıcı her 30 dakikada tüm satırları
