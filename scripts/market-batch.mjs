@@ -1,17 +1,25 @@
 import {fetchSteamPage,fetchXboxPage,fetchSwitchPage,fetchEpicPage,fetchGogPage} from './market-catalog.mjs';
 import {changedOffers,existingQuery} from './offer-diff.mjs';
-// Her turda mağazaların (Steam, Xbox, Switch, Epic, GOG) katalogundan birkaç sayfa okunur; imleçler ps_state.market içinde saklanır, tur bitince başa dönülür.
+import {makeItadFetcher,ITAD_PLATFORMS} from './itad.mjs';
+export const ITAD_STALE_MS=3*24*3600e3; // tur boyunca yeniden görülmeyen ITAD teklifleri (mağaza satıştan kaldırdı) silinir
+// Her turda mağazaların (Steam, Xbox, Switch, Epic, GOG; isteğe bağlı ITAD) katalogundan birkaç sayfa okunur; imleçler ps_state.market içinde saklanır, tur bitince başa dönülür.
 // GitHub Actions (CLI) ve Supabase Edge Function aynı çekirdeği çalıştırır.
-export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,fetchers={steam:fetchSteamPage,xbox:fetchXboxPage,switch:fetchSwitchPage,epic:fetchEpicPage,gog:fetchGogPage}}){
+// itadKey verilirse ITAD (Fanatical, Humble, GMG, WinGameStore, GamesPlanet) işi de eklenir; stateKey ayrı imleç kaydı içindir
+// (ITAD GitHub Actions'ta ayrı çalışır, Edge Function'ın 'market' imleçlerini ezmesin).
+export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,stateKey='market',itadKey='',only=null,fetchers={steam:fetchSteamPage,xbox:fetchXboxPage,switch:fetchSwitchPage,epic:fetchEpicPage,gog:fetchGogPage}}){
+ if(itadKey&&!fetchers.itad)fetchers={...fetchers,itad:makeItadFetcher({sb,key:itadKey})};
+ if(only)fetchers=Object.fromEntries(Object.entries(fetchers).filter(([k])=>only.includes(k)));
  const sleep=ms=>new Promise(r=>setTimeout(r,ms)),deadline=deadlineMs?Date.now()+deadlineMs:Infinity;
- const saved=(await sb.select('ps_state?select=value&key=eq.market'))?.[0]?.value||{};
- const cur={steam:0,xbox:'',switch:0,epic:0,gog:0,...saved.cursors},stats={},written={},errors=[];
+ const saved=(await sb.select('ps_state?select=value&key=eq.'+stateKey))?.[0]?.value||{};
+ const cur={steam:0,xbox:'',switch:0,epic:0,gog:0,itad:0,...saved.cursors},stats={},written={},errors=[];
  const jobs={ // wrapped: katalog bitti, imleç başa döndü; bu tur o mağaza için tamam
   steam:async()=>{const r=await fetchers.steam(cur.steam),wrapped=!(r.hasMore&&r.rows.length);cur.steam=wrapped?0:cur.steam+1;return{rows:r.rows,wrapped}},
   xbox:async()=>{const r=await fetchers.xbox(cur.xbox),wrapped=!r.hasMore;cur.xbox=wrapped?'':r.next;return{rows:r.rows,wrapped}},
   switch:async()=>{const r=await fetchers.switch(cur.switch),wrapped=!(r.hasMore&&r.rows.length);cur.switch=wrapped?0:cur.switch+1;return{rows:r.rows,wrapped}},
   epic:async()=>{const r=await fetchers.epic(cur.epic),wrapped=!(r.hasMore&&r.rows.length);cur.epic=wrapped?0:cur.epic+1;return{rows:r.rows,wrapped}},
   gog:async()=>{const r=await fetchers.gog(cur.gog),wrapped=!(r.hasMore&&r.rows.length);cur.gog=wrapped?0:cur.gog+1;return{rows:r.rows,wrapped}},
+  // ITAD sayfası Steam satırlarının bir dilimidir; dilimde hiç teklif çıkmasa da tur sürer (hasMore).
+  itad:async()=>{const r=await fetchers.itad(cur.itad),wrapped=!r.hasMore;cur.itad=wrapped?0:r.next;return{rows:r.rows,wrapped}},
  };
  for(const market of Object.keys(jobs))if(!fetchers[market])delete jobs[market]; // verilmeyen mağaza bu turda atlanır
  // Mağazalar aynı anda okunur (farklı sunucular); her mağazanın tur başına sayfa sınırı ayrı verilebilir: {steam:10,xbox:20,switch:8}.
@@ -25,16 +33,23 @@ export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,fe
     const r=await job();wrapped=r.wrapped;const rows=r.rows;
     const uniq=[...new Map(rows.map(r=>[r.platform+':'+r.store_id,r])).values()];
     // Değişmeyen ve yakın zamanda kontrol edilmiş teklifler yeniden yazılmaz; kayıtlı hâl okunamazsa hepsi yazılır.
-    let fresh=uniq;if(uniq.length){try{fresh=changedOffers(uniq,await sb.select(existingQuery(uniq)))}catch{fresh=uniq}}
+    let fresh=uniq;if(uniq.length){try{fresh=changedOffers(uniq,await existingOffers(sb,uniq))}catch{fresh=uniq}}
     if(fresh.length)await sb.upsert('store_offers',fresh,'platform,store_id');stats[market]+=uniq.length;written[market]=(written[market]||0)+fresh.length;
     say(`${market} sayfa ${i+1}: ${uniq.length} kayıt, ${fresh.length} yazıldı`);
    }catch(e){errors.push({source:market,error:e.message});say(`${market} hata: ${e.message}`);break;}
+   if(wrapped&&market==='itad'){try{await sb.del(`store_offers?platform=in.(${ITAD_PLATFORMS.join(',')})&checked_at=lt.${new Date(Date.now()-ITAD_STALE_MS).toISOString()}`)}catch(e){errors.push({source:market,error:'eski teklifler silinemedi: '+e.message})}}
    if(wrapped)break;
    await sleep(market==='xbox'?800:1200);
   }
  }));
  const finishedAt=new Date().toISOString(),total=Object.values(stats).reduce((a,b)=>a+b,0);
  const status=total===0&&errors.length?'failed':errors.length?'partial':'ok';
- await sb.upsert('ps_state',[{key:'market',value:{cursors:cur,finishedAt,stats,written,errors,status}}],'key');
+ await sb.upsert('ps_state',[{key:stateKey,value:{cursors:cur,finishedAt,stats,written,errors,status}}],'key');
  return{status,stats,written,errors,finishedAt};
+}
+// Kayıtlı hâl platform başına ve 100'erli parçalarla okunur (ITAD sayfası birden çok platform içerir, kimlikler uzun).
+async function existingOffers(sb,rows){
+ const out=[],by=new Map();for(const r of rows){if(!by.has(r.platform))by.set(r.platform,[]);by.get(r.platform).push(r);}
+ for(const g of by.values())for(let i=0;i<g.length;i+=100)out.push(...(await sb.select(existingQuery(g.slice(i,i+100)))||[]));
+ return out;
 }
