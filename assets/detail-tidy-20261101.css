@@ -1,0 +1,44 @@
+/* Oyun ayrıntısı düzeni (detail-tidy-20261101.js). data-dt yoksa hiçbir kural çalışmaz. */
+body .modal.game-detail[data-dt]{display:flex!important;flex-direction:column;gap:12px}
+.modal.game-detail[data-dt]>*{flex-shrink:0;margin-top:0;margin-bottom:0}
+.game-detail[data-dt]>[data-dt-g=close]{order:0!important;align-self:flex-end;margin-bottom:-56px}
+.game-detail[data-dt]>[data-dt-g=head]{order:1!important}
+.game-detail[data-dt]>.eyebrow,.game-detail[data-dt]>.ux-detail-meta,.game-detail[data-dt]>.life-countdown{align-self:flex-start}
+.game-detail[data-dt]>[data-dt-g=head]+[data-dt-g=head]{margin-top:-6px}
+.game-detail[data-dt]>.dt-summary{order:2!important;display:flex;flex-wrap:wrap;gap:8px}
+.game-detail[data-dt]>.dt-summary[hidden]{display:none}
+.dt-chip{display:inline-flex;align-items:baseline;gap:6px;min-height:36px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
+.dt-chip small{color:var(--muted);font-size:11px}
+.dt-chip:hover,.dt-chip:focus-visible{border-color:var(--lime)}
+.game-detail[data-dt]>[data-dt-g=price]{order:3!important}
+.game-detail[data-dt] .dt-more{display:block;min-height:40px;margin:8px 0 4px;padding:8px 14px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
+.game-detail[data-dt] .dt-more[hidden]{display:none}
+.game-detail[data-dt] .dt-more:hover{border-color:var(--lime)}
+.game-detail .pricecompare[data-dt-less] .pc-list>.pc-row:nth-child(n+6){display:none}
+.game-detail[data-dt]>[data-dt-g=heat]{order:5!important;align-self:stretch}
+.game-detail[data-dt]>[data-dt-g=note]{order:6!important;padding:8px 12px;font-size:11px;opacity:.8}
+.game-detail[data-dt]>.dt-tabs{order:10!important;position:sticky;top:0;z-index:4;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-top:8px;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--panel,var(--surface,#121922))}
+.game-detail[data-dt]>.dt-tabs[hidden],.dt-tabs>[hidden]{display:none}
+.dt-tabs::-webkit-scrollbar{display:none}
+.dt-tabs>button{flex:1 0 auto;min-height:40px;padding:8px 14px;border:0!important;border-radius:10px;background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer}
+.dt-tabs>button[aria-selected=true]{background:var(--lime);color:#0b1118}
+.dt-tabs>button:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.game-detail[data-dt]>[data-dt-g^=tab-]{order:11!important}
+.game-detail[data-dt-tab=price]>[data-dt-g^=tab-]:not([data-dt-g=tab-price]),
+.game-detail[data-dt-tab=about]>[data-dt-g^=tab-]:not([data-dt-g=tab-about]),
+.game-detail[data-dt-tab=family]>[data-dt-g^=tab-]:not([data-dt-g=tab-family]),
+.game-detail[data-dt-tab=mine]>[data-dt-g^=tab-]:not([data-dt-g=tab-mine]){display:none!important}
+.game-detail[data-dt]>[data-dt-g=foot]{order:20!important}
+.game-detail[data-dt]>.radar-feedback{padding:0;border:0!important;background:transparent}
+.game-detail[data-dt]>[data-dt-g=store]{order:21!important;align-self:flex-start}
+.game-detail[data-dt]>[data-dt-g=dock]{order:22!important}
+:root[data-ui=sade] .game-detail[data-dt]>.dt-tabs{background:#f6f4fd;border-color:#e2ddef}
+:root[data-ui=sade] .dt-tabs>button{color:#6b6480}
+:root[data-ui=sade] .dt-tabs>button[aria-selected=true]{background:#1d1533;color:#fff}
+:root[data-ui=sade] .dt-chip,:root[data-ui=sade] .game-detail[data-dt] .dt-more{color:#1d1533;border-color:#e2ddef}
+:root[data-ui=sade] .dt-chip small{color:#6b6480}
+@media(max-width:700px){
+.modal.game-detail[data-dt]{gap:10px}
+.dt-tabs>button{flex:0 0 auto;padding:8px 12px;font-size:13px}
+.game-detail[data-dt]>[data-dt-g=store]{align-self:stretch;text-align:center}
+}
