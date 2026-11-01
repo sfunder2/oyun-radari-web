@@ -2233,7 +2233,7 @@ var De = () => {
 	window.dispatchEvent(new CustomEvent("radar:navigate", { detail: "profile" }));
 	for (let e of [60, 400]) setTimeout(() => window.dispatchEvent(new CustomEvent("radar:space-tab", { detail: "steam" })), e);
 };
-function Oe(e, { useExperience: t, useFavorites: n, steamLibrary: r }) {
+function Oe(e, { useExperience: t, useFavorites: n, steamLibrary: r, ModeDna: radarModeDna }) {
 	let { useEffect: i, useMemo: a, useState: o } = e, s = e.createElement, l = (e) => function({ size: t = 18 }) {
 		return /* @__PURE__ */ s("svg", {
 			width: t,
@@ -2505,7 +2505,12 @@ function Oe(e, { useExperience: t, useFavorites: n, steamLibrary: r }) {
 				tag: e.tag,
 				at: Date.now()
 			})
-		}, e.label)))))), L, S.linked && !S.visible && /* @__PURE__ */ s("p", { className: "dna-hint" }, "Steam oyun listen gizli olduğu için yalnız favorilerin kullanıldı."), O && /* @__PURE__ */ s("p", { className: "dna-hint" }, /* @__PURE__ */ s("button", {
+		}, e.label)))))), radarModeDna && s(radarModeDna, {
+			favKeys: N.titleKeys,
+			steam: M,
+			meta: w,
+			onPick: (f) => l.setFilterIntent({ ...f, at: Date.now() })
+		}), L, S.linked && !S.visible && /* @__PURE__ */ s("p", { className: "dna-hint" }, "Steam oyun listen gizli olduğu için yalnız favorilerin kullanıldı."), O && /* @__PURE__ */ s("p", { className: "dna-hint" }, /* @__PURE__ */ s("button", {
 			className: "linkbtn",
 			onClick: () => {
 				try {
