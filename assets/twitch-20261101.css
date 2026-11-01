@@ -1,0 +1,42 @@
+/* Şu an Twitch'te en çok izlenenler (twitch-20261101.js): Keşfet şeridi ve kart rozeti. Twitch moru, canlı noktası kırmızı. */
+.twitch-top,.twchip{--tw:#a970ff;--tw-live:#ff4f5e}
+:root[data-ui=sade] .twitch-top,:root[data-ui=sade] .twchip{--tw:#7a3fe0;--tw-live:#e5283a}
+.twitch-top{margin:8px 0 26px;padding:20px;border:1px solid color-mix(in srgb,var(--tw) 35%,var(--line,#344354));border-radius:10px;background:radial-gradient(70% 90% at 0% 0%,color-mix(in srgb,var(--tw) 16%,transparent),transparent 70%),var(--panel,#19232f);min-width:0}
+.tw-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.tw-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--tw)}
+.tw-head h2{font-size:23px;margin:5px 0 7px;letter-spacing:-.5px}
+.tw-head p,.tw-note{color:var(--muted,#a2afbf);font-size:12px;margin:0}
+.tw-note{margin-top:4px}.tw-note a{color:inherit;text-decoration:underline}
+.tw-total{display:grid;justify-items:end;font-size:22px;font-weight:800;line-height:1.1;color:var(--ink,#eef4fa);white-space:nowrap}
+.tw-total small{font-size:11px;font-weight:600;color:var(--muted,#a2afbf)}
+.tw-dot{display:inline-block;flex:none;width:7px;height:7px;border-radius:50%;background:var(--tw-live);box-shadow:0 0 0 0 color-mix(in srgb,var(--tw-live) 60%,transparent);animation:tw-pulse 2s ease-out infinite}
+@keyframes tw-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--tw-live) 55%,transparent)}70%,100%{box-shadow:0 0 0 6px transparent}}
+.tw-rail{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;list-style:none;padding:14px 0 12px;margin:0;scrollbar-width:thin}
+.tw-rail>li{flex:0 0 168px;scroll-snap-align:start;border:1px solid var(--line,#354456);background:var(--surface,#1d2a38);border-radius:8px;overflow:hidden}
+.tw-open{display:flex;flex-direction:column;text-align:left;width:100%;height:100%;padding:0 10px 12px;background:none;border:0;color:var(--ink,#eef4fa);gap:5px;cursor:pointer;font:inherit}
+.tw-open:hover .tw-art img{transform:scale(1.04)}
+.tw-open:focus-visible{outline:2px solid var(--tw);outline-offset:-3px}
+.tw-art{position:relative;display:block;width:calc(100% + 20px);margin:0 -10px 4px;aspect-ratio:3/4;overflow:hidden;background:#263849}
+.tw-art img{width:100%;height:100%;object-fit:cover;transition:transform .25s ease}
+.tw-ph{display:grid;place-items:center;width:100%;height:100%;font-size:40px;font-weight:800;color:#d8c6ff;background:linear-gradient(135deg,#4b2d7f,#1a1330)}
+.tw-rank{position:absolute;left:0;top:0;min-width:30px;padding:4px 8px;border-radius:0 0 8px 0;background:var(--tw);color:#fff;font-size:15px;font-weight:800;text-align:center}
+.tw-viewers{position:absolute;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;background:#0b0e14e0;color:#fff;font-size:12px;font-weight:800;font-style:normal}
+.tw-open strong{font-size:14px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+.tw-open small{color:var(--muted,#afbfce);font-size:11px}
+.tw-price{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700}
+.tw-price mark{padding:1px 5px;border-radius:4px;background:var(--lime,#b2e27a);color:#0b1118;font-size:11px}
+.twchip{display:inline-flex;align-items:center;gap:5px;width:max-content;max-width:100%;margin:4px 0 0;padding:2px 7px;border-radius:999px;font-size:11px;line-height:1.5;color:var(--tw);background:color-mix(in srgb,var(--tw) 13%,transparent);border:1px solid color-mix(in srgb,var(--tw) 38%,transparent);white-space:nowrap}
+.twchip b,.deal-game .twchip b{font-size:inherit;font-weight:800;color:inherit}
+.deal-game .twchip{margin:3px 0 0}
+:root[data-ui=sade] .twitch-top{padding:16px;border:1px solid var(--line,#e8e3f7);border-radius:16px;background:radial-gradient(70% 90% at 0% 0%,#7a3fe014,transparent 70%),var(--panel,#fff);color:var(--ink,#1d1533)}
+:root[data-ui=sade] .tw-head h2,:root[data-ui=sade] .tw-total,:root[data-ui=sade] .tw-open{color:var(--ink,#1d1533)}
+:root[data-ui=sade] .tw-head h2{font-size:19px}
+:root[data-ui=sade] .tw-rail>li{flex-basis:148px;border-radius:12px;background:#fff;border-color:var(--line,#e8e3f7)}
+:root[data-ui=sade] .tw-art{background:#e9e5f4}
+@media(max-width:600px){.twitch-top{padding:14px;margin:4px 0 20px}
+.tw-head h2{font-size:20px}.tw-head p{font-size:11px}.tw-total{font-size:18px}
+.tw-rail>li,:root[data-ui=sade] .tw-rail>li{flex-basis:132px}
+.tw-open strong{font-size:13px;min-height:35px}.tw-viewers{font-size:11px;padding:3px 7px}}
+@media(max-width:760px){:root[data-ui=sade] .cataloggrid:not(.list) .twchip{font-size:10px;padding:1px 6px}}
+@media(prefers-reduced-motion:reduce){.tw-dot{animation:none}.tw-art img{transition:none}}
+.igdbchips>.twchip{margin:0}

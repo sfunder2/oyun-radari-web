@@ -81,3 +81,14 @@ Oyun ayrıntısında iki bölüm: **Serideki diğer oyunlar** (IGDB serisi, çı
 - Arayüz `assets/family-20261101.js` ve `.css` modülüyle eklenir. IGDB serisi yoksa ya da SQL kurulmamışsa eski "Seri zaman çizelgesi" (ada göre tahmin) aynen görünür; DLC bölümü görünmez.
 
 Açmak için sırayla: SQL Editor'da `supabase/schema-v40-seri-dlc.sql` dosyasını çalıştır, **Series and DLC (IGDB)** iş akışını elle bir kez başlat (oyun süresi toplayıcısı en az bir kez çalışmış olmalı).
+
+## Şu an Twitch'te en çok izlenenler
+
+Keşfet'te (Oyunlar) "Şu an Twitch'te en çok izlenenler" şeridi: canlı izleyici sayısına göre ilk 20 oyun, sıra numarası ve izleyici rozetiyle; karta dokununca oyunun ayrıntısı açılır. Listedeki oyunlar katalog kartlarında da "● 45 B izliyor" rozeti taşır. Yalnız kataloğumuzdaki oyunlar gösterilir; Just Chatting gibi oyun olmayan kategoriler atılır.
+
+- `supabase/schema-v38-twitch-izlenenler.sql`: `twitch_top_games` tablosu (son turun anlık görüntüsü, en çok ~40 satır; herkes okur, yalnız toplayıcı yazar). Başka tabloya ve fonksiyona dokunmaz. Geri almak için `drop table if exists public.twitch_top_games;`.
+- `scripts/twitch.mjs` ve `scripts/twitch-run.mjs`: Twitch Helix `games/top` sırası, her oyun için en çok 500 canlı yayının izleyici toplamı. Katalog eşleşmesi önce Twitch'in verdiği IGDB kimliğiyle (`game_ttb.igdb_id` üzerinden), sonra adla. `tests/twitch.test.mjs` ile sınanır.
+- `.github/workflows/twitch-top.yml`: 30 dakikada bir çalışır. Oyun süresiyle aynı `TWITCH_CLIENT_ID` ve `TWITCH_CLIENT_SECRET` gizli anahtarlarını kullanır; yoksa ya da SQL kurulmamışsa iş sessizce atlanır.
+- Arayüz `assets/twitch-20261101.js` modülüyle eklenir. Tablo yoksa ya da veri 6 saatten eskiyse şerit ve rozet görünmez, sitenin geri kalanı etkilenmez.
+
+Açmak için: SQL Editor'da `supabase/schema-v38-twitch-izlenenler.sql` dosyasını çalıştır, sonra **Twitch top watched games** iş akışını elle bir kez başlat.
