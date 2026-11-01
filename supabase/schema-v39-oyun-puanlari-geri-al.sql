@@ -1,4 +1,4 @@
--- schema-v37-oyun-puanlari.sql'i geri alır: arama fonksiyonlarındaki "userScore" sıralamasını çıkarır, igdb_user_rank ve game_igdb_score'u siler.
+-- schema-v39-oyun-puanlari.sql'i geri alır: arama fonksiyonlarındaki "userScore" sıralamasını çıkarır, igdb_user_rank ve game_igdb_score'u siler.
 -- game_ttb ve v35/v36'nın süre eklemelerine dokunmaz.
 do $undo$
 declare r record; def text;

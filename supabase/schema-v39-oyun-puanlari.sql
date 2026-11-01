@@ -1,4 +1,4 @@
--- Şema v37: oyun puanları (IGDB oyuncu ve eleştirmen puanı) ve Keşfet'te "Oyuncu puanı: en yüksek" sıralaması ("userScore").
+-- Şema v39: oyun puanları (IGDB oyuncu ve eleştirmen puanı) ve Keşfet'te "Oyuncu puanı: en yüksek" sıralaması ("userScore").
 -- Kaynak: IGDB API (Twitch). Eşleştirme oyun süresi toplayıcısının game_ttb.igdb_id değerinden gelir; bu dosya game_ttb'ye dokunmaz.
 -- Gerekli: schema-v35-oyun-suresi.sql (game_ttb; toplayıcı igdb_id'yi oradan okur). v36 kurulu olsa da olmasa da çalışır.
 --
@@ -12,7 +12,7 @@
 -- 3) Canlı arama fonksiyonlarına yerinde ekleme (v35/v36 gibi; her yama noktası tam bir kez eşleşmezse hiçbir şey değişmez):
 --      search_games_t   : sıralamaya bir satır (search_games_s2/_s bilinmeyen sıralamayı zaten buraya yollar).
 --      search_market_s/d: "matched" adımına score_m sütunu ve sıralamaya bir satır. Ölçü yalnız bu sıralamada hesaplanır.
---    Geri almak için: supabase/schema-v37-oyun-puanlari-geri-al.sql
+--    Geri almak için: supabase/schema-v39-oyun-puanlari-geri-al.sql
 
 create table if not exists public.game_igdb_score (
  title_key text primary key,

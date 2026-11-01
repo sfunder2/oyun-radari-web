@@ -1,6 +1,6 @@
 // Oyun puanları: IGDB oyuncu puanı (rating) ve eleştirmen puanı (aggregated_rating), ikisi de 0–100, ve puan sayıları.
 // Eşleştirme yeniden yapılmaz: oyun süresi toplayıcısının game_ttb tablosuna yazdığı igdb_id kullanılır (ttb.mjs).
-// Bu dosya game_ttb'yi yalnız okur; puanlar ayrı game_igdb_score tablosuna yazılır (schema-v37-oyun-puanlari.sql).
+// Bu dosya game_ttb'yi yalnız okur; puanlar ayrı game_igdb_score tablosuna yazılır (schema-v39-oyun-puanlari.sql).
 export const FRESH_DAYS=7,BATCH=500;
 const num=v=>Number.isFinite(v)?Math.round(v*10)/10:null;
 const cnt=v=>Number.isInteger(v)&&v>0?v:0;
