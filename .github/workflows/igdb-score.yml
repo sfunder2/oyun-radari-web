@@ -3,8 +3,6 @@ on:
   schedule:
     - cron: '47 4 * * *'
   workflow_dispatch:
-  push:
-    paths: ['scripts/igdb-score.mjs', 'scripts/igdb-score-run.mjs', '.github/workflows/igdb-score.yml']
 concurrency:
   group: igdb-score
   cancel-in-progress: false

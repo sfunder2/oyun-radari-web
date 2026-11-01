@@ -3,8 +3,6 @@ on:
   schedule:
     - cron: '47 3 * * *'
   workflow_dispatch:
-  push:
-    paths: ['scripts/igdb-release.mjs', 'scripts/igdb-release-run.mjs', '.github/workflows/igdb-release.yml']
 concurrency:
   group: igdb-release
   cancel-in-progress: false
