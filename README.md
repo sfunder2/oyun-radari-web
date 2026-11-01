@@ -46,3 +46,14 @@ Açmak için SQL Editor'da sırayla `supabase/schema-v27-admin-saglik.sql` ve `s
 `supabase/schema-v34-ortak-liste.sql` tek bir `party_lists` tablosu kurar (liste başına tek satır; oyunlar en çok 30, oy veren en çok 20, jsonb içinde). Tablo istemcilere tamamen kapalıdır; listeler yalnız kimliği bilen `party_get` ve `party_update` uçlarıyla okunur ve değiştirilir, `party_create` için giriş gerekir (hesap başına en çok 10 liste). Liste kimliği sunucuda üretilen 122 bit rastgele bir koddur; sahibin hesabı ve oy verenlerin tarayıcı anahtarı yanıtlarda dönmez. 60 gün kullanılmayan listeleri `oyun-radari-party-prune` cron işi her gece siler. `tests/party-lists-rls.sql` erişim kurallarını doğrular (her şey geri alınır).
 
 Açmak için SQL Editor'da `supabase/schema-v34-ortak-liste.sql` dosyasını çalıştır. Arayüz `assets/party-20261030.js` modülüyle eklenir (kaynak: oyun-radari `app/Party.tsx`, `scripts/inject-party.mjs`); SQL kurulmadan sayfa açılırsa "Ortak liste şu an güncellenemedi" uyarısı görünür, sitenin geri kalanı etkilenmez.
+
+## Oyun süresi (IGDB)
+
+Kartlarda ve oyun ayrıntısında oyunun bitirme süresi, Keşfet'te "Oyun süresi" filtresi (Kısa: 8 saate kadar, Orta: 8–20, Uzun: 20–50, Çok uzun: 50 saatten fazla). Süreler IGDB'nin "time to beat" verisidir (ana hikâye, ana + yan içerik, tamamlama); HowLongToBeat'in resmi API'si olmadığı için kullanılmaz. Kova "ana + yan içerik" süresine göre seçilir, yoksa ana hikâye süresine göre.
+
+- `supabase/schema-v35-oyun-suresi.sql`: `game_ttb` tablosu (başlık anahtarı başına tek satır, herkes okur, yalnız toplayıcı yazar), `ttb_ok()` filtre yardımcısı ve canlı arama fonksiyonlarına (`search_games_s2/_s/_t`, `search_market_s/_d`) yerinde eklenen tek `ttb` koşulu. Filtre seçilmediğinde arama değişmez. Geri almak için `schema-v35-oyun-suresi-geri-al.sql`.
+- `scripts/ttb.mjs` ve `scripts/ttb-run.mjs`: Steam kimliği olan oyunlar IGDB `external_games` ile toplu eşlenir, kalanlar adla aranır ve başlık anahtarı birebir aynıysa kabul edilir. Bulunamayanlar 30 gün sonra yeniden denenir. `tests/ttb.test.mjs` ile sınanır.
+- `.github/workflows/ttb.yml`: 6 saatte bir çalışır. `TWITCH_CLIENT_ID` ve `TWITCH_CLIENT_SECRET` Actions gizli anahtarları gerekir (dev.twitch.tv'de ücretsiz uygulama); yoksa iş sessizce atlanır.
+- Arayüz `assets/ttb-20261101.js` modülüyle eklenir (kaynak: oyun-radari `app/ttb-parts.tsx`, `scripts/inject-ttb.mjs`). SQL kurulmadan sayfa açılırsa rozet ve panel görünmez, sitenin geri kalanı etkilenmez.
+
+Açmak için sırayla: SQL Editor'da `supabase/schema-v35-oyun-suresi.sql` dosyasını çalıştır, Twitch anahtarlarını ekle, **Game length (IGDB time to beat)** iş akışını elle bir kez başlat.

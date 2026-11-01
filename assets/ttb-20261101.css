@@ -1,0 +1,16 @@
+/* Oyun süresi (Ttb.tsx): IGDB bitirme süresi rozeti, ayrıntı paneli ve Keşfet filtresi. Renk kovaya göre: kısa yeşil, orta mavi, uzun turuncu, çok uzun mor. */
+.ttbchip,.ttbpanel{--ttb:#8d9bad}.ttbchip.short,.ttbpanel.short{--ttb:#3fcf8e}.ttbchip.medium,.ttbpanel.medium{--ttb:#4fa8ff}.ttbchip.long,.ttbpanel.long{--ttb:#f0a43a}.ttbchip.epic,.ttbpanel.epic{--ttb:#b07cff}
+:root[data-ui=sade] .ttbchip.short,:root[data-ui=sade] .ttbpanel.short{--ttb:#13865a}:root[data-ui=sade] .ttbchip.medium,:root[data-ui=sade] .ttbpanel.medium{--ttb:#1f6fc5}:root[data-ui=sade] .ttbchip.long,:root[data-ui=sade] .ttbpanel.long{--ttb:#b56a00}:root[data-ui=sade] .ttbchip.epic,:root[data-ui=sade] .ttbpanel.epic{--ttb:#7a46d6}
+.ttbchip{display:inline-flex;align-items:center;gap:4px;width:max-content;max-width:100%;margin:4px 0 0;padding:2px 7px;border-radius:999px;font-size:11px;line-height:1.5;color:var(--ttb);background:color-mix(in srgb,var(--ttb) 13%,transparent);border:1px solid color-mix(in srgb,var(--ttb) 35%,transparent);white-space:nowrap}
+.ttbchip b{font-weight:800}.ttbchip svg{flex:none}
+.deal-game .ttbchip{margin:3px 0 0}
+.ttbpanel{margin:0 0 14px;padding:14px 16px;border-radius:14px;border:1px solid color-mix(in srgb,var(--ttb) 40%,var(--line,#ffffff1f));background:color-mix(in srgb,var(--ttb) 7%,transparent)}
+.ttbpanel .ttbhead{display:flex;align-items:center;gap:8px;color:var(--ttb)}.ttbpanel .ttbhead strong{font-size:14px;color:var(--ink)}
+.ttbtag{margin-left:auto;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:800;color:var(--ttb);border:1px solid color-mix(in srgb,var(--ttb) 45%,transparent)}
+.ttbcols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:12px 0 8px}
+.ttbcols>div{display:grid;gap:3px;min-width:0}.ttbcols small{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ttbcols b{font-size:20px;line-height:1.2;font-weight:800;color:var(--ink)}.ttbcols .none b{color:var(--muted)}
+.ttbcols i{display:block;height:5px;border-radius:999px;background:var(--ttb);opacity:.85}
+.ttbsource{margin:0;font-size:11px;color:var(--muted)}.ttbsource a{color:inherit;text-decoration:underline}
+@media (max-width:560px){.ttbpanel{padding:12px}.ttbcols{gap:8px}.ttbcols b{font-size:16px}}
+@media (max-width:760px){:root[data-ui=sade] .cataloggrid:not(.list) .ttbchip{font-size:10px;padding:1px 6px}}
