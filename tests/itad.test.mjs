@@ -41,3 +41,9 @@ test('market batch: itad job keeps its own state key, wraps and removes stale of
  assert.equal(sb.calls.del.length,1);assert.match(sb.calls.del[0],new RegExp(`platform=in\\.\\(${ITAD_PLATFORMS.join(',')}\\)&checked_at=lt\\.`));
  const st=sb.calls.upsert.find(u=>u.t==='ps_state').rows[0];assert.equal(st.key,'market_itad');assert.equal(st.value.cursors.itad,0);
 });
+test('itad v47: new key shops and publisher stores map to their own platforms',()=>{
+ const rows=parseItadPrices([{id:'g1',deals:[deal(20,400,500),deal(42,300,900),deal(62,1499,1499,{drm:[{name:'Ubisoft Store'}]}),deal(4,2795,2795,{drm:[{name:'Blizzard'}]}),deal(48,50,50)]}],src,'T');
+ assert.deepEqual(rows.map(r=>r.platform).sort(),['blizzard','gamebillet','indiegala','ubisoft']);   // Microsoft Store (48) Xbox ile aynı, atlanır
+ assert.equal(rows.find(r=>r.platform==='ubisoft').edition,null);assert.equal(rows.find(r=>r.platform==='indiegala').edition,'Anahtar (Steam)');
+ for(const p of ['gamebillet','dreamgame','allyouplay','gamersgate','indiegala','planetplay','playsum','playerland','ubisoft','blizzard'])assert.ok(ITAD_PLATFORMS.includes(p),p);
+});

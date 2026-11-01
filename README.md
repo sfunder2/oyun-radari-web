@@ -148,3 +148,12 @@ Başlıktaki arama ve Keşfet araması `search_market` / `search_market_v2` üze
 - Sunucu sıraladığında (yanıtta `fuzzy` alanı) öneri kutusu sırayı yeniden kurmaz.
 - Geri almak için `supabase/schema-v45-arama-siralama-geri-al.sql`. Not: ileride `search_market_s/_d`'ye yerinde eklenen süzgeçler `search_market_r`'ye de eklenmelidir.
 
+
+## Anahtar ve yayıncı mağazaları (IsThereAnyDeal)
+
+Elimizdeki Steam oyunları için ITAD'den Türkiye (TL) fiyatları okunur ve `store_offers`'a mağaza başına ayrı platform olarak yazılır; ad, görsel ve türler Steam satırından gelir, böylece en ucuz teklif birleştirmesi yeni mağazaları kendiliğinden görür.
+
+- Mağazalar `scripts/itad.mjs` içindeki `ITAD_SHOPS` listesindedir. v46: Fanatical, Humble, Green Man Gaming, WinGameStore, GamesPlanet. v47: GameBillet, Dreamgame, AllYouPlay, GamersGate, IndieGala, PlanetPlay, Playsum, PlayerLand, Ubisoft Store, Battle.net.
+- Seçim ölçümle yapıldı (`scripts/itad-probe-all.mjs`, **ITAD probe** iş akışı `script=itad-probe-all`, yalnız okur): ITAD'in TR listesindeki her mağaza için kapsam, para birimi ve mevcut en ucuzu kaç oyunda geçtiği. Microsoft Store, Xbox Store TR toplayıcısıyla aynı kataloğu getirdiği için eklenmedi; EA Store, Nuuvem, JoyBuggy ve Newegg Türkiye'de oyun listelemiyor.
+- Yeni bir mağaza eklemek: `ITAD_SHOPS`'a kimliği ekle, v47 gibi bir şema dosyasıyla platform kısıtını ve `search_market_r/_d/_s` listelerini genişlet, arayüzdeki mağaza adı haritalarına ekle.
+- `.github/workflows/itad-prices.yml` 30 dakikada bir çalışır (`ITAD_API_KEY` gizli anahtarı gerekir).

@@ -1,6 +1,10 @@
 name: ITAD probe (read only)
 on:
   workflow_dispatch:
+    inputs:
+      script:
+        description: 'itad-probe (5 mağaza, 4 ülke) ya da itad-probe-all (TR, tüm mağazalar)'
+        default: itad-probe
 permissions:
   contents: read
 jobs:
@@ -17,7 +21,7 @@ jobs:
           ITAD_API_KEY: ${{ secrets.ITAD_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: node scripts/itad-probe.mjs
+        run: node scripts/${{ inputs.script || 'itad-probe' }}.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

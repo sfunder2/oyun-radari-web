@@ -1,6 +1,6 @@
 // IsThereAnyDeal (ITAD) üzerinden anahtar mağazalarının Türkiye fiyatları -> store_offers satırları.
-// Katalog taranmaz: elimizdeki Steam oyunları ITAD kimliğine eşlenir, bu oyunlar için Fanatical, Humble, GMG,
-// WinGameStore ve GamesPlanet fiyatları istenir. Ad, görsel, tür ve etiketler Steam satırından alınır; böylece
+// Katalog taranmaz: elimizdeki Steam oyunları ITAD kimliğine eşlenir, bu oyunlar için ITAD_SHOPS'taki mağazaların
+// fiyatları istenir. Ad, görsel, tür ve etiketler Steam satırından alınır; böylece
 // başlık anahtarı (title_key) Steam satırıyla aynı olur ve en ucuz teklif birleştirmesi ek iş gerektirmez.
 // Ölçüm (1 Kasım 2026, 300 oyun): beş mağaza TR için TL fiyat veriyor; scripts/itad-probe.mjs.
 import {titleKey} from './titles.mjs';
@@ -8,9 +8,15 @@ import {norm} from './ps-store.mjs';
 
 export const ITAD_API='https://api.isthereanydeal.com';
 // ITAD mağaza kimliği -> platform. GamesPlanet'in dört bölge mağazası tek platformda birleşir (en ucuzu tutulur).
-export const ITAD_SHOPS={6:'fanatical',37:'humble',36:'gmg',64:'wingamestore',26:'gamesplanet',27:'gamesplanet',28:'gamesplanet',29:'gamesplanet'};
+// v47 (1 Kasım 2026, 597 oyunluk TR ölçümü, scripts/itad-probe-all.mjs): mevcut en ucuzu en az bir kez geçen sekiz anahtar
+// mağazası ve iki resmî yayıncı mağazası (Ubisoft Store, Blizzard/Battle.net). Microsoft Store eklenmez: Xbox Store TR
+// toplayıcısı aynı kataloğu ve aynı TL fiyatlarını zaten getiriyor.
+export const ITAD_SHOPS={6:'fanatical',37:'humble',36:'gmg',64:'wingamestore',26:'gamesplanet',27:'gamesplanet',28:'gamesplanet',29:'gamesplanet',
+ 20:'gamebillet',15:'dreamgame',2:'allyouplay',24:'gamersgate',42:'indiegala',73:'planetplay',70:'playsum',74:'playerland',62:'ubisoft',4:'blizzard'};
 export const ITAD_PLATFORMS=[...new Set(Object.values(ITAD_SHOPS))];
 const STEAM_SHOP=61;
+// Yayıncının kendi mağazası: satış anahtar değil, hesaba doğrudan eklenir; sürüm etiketi yazılmaz.
+export const PUBLISHER_STORES=new Set(['ubisoft','blizzard']);
 export const LOOKUP_TTL_MS=30*24*3600e3; // eşleşmeyen oyunlar 30 günde bir yeniden sorulur
 
 export function itadEdition(drm){
@@ -34,7 +40,7 @@ export function parseItadPrices(res,sources,now=new Date().toISOString()){
    const k=platform+':'+g.id,old=best.get(k);if(old&&old.price<=price)continue;
    const orig=Number.isFinite(regular)&&regular>price?regular:null;
    best.set(k,{platform,store_id:String(g.id),title_key:titleKey(src.name),name:String(src.name).slice(0,200),name_search:norm(src.name),image:src.image||null,
-    price,original_price:orig,discount_percent:orig?Math.round((1-price/orig)*100):0,currency:'TRY',url:d.url,edition:itadEdition(d.drm),
+    price,original_price:orig,discount_percent:orig?Math.round((1-price/orig)*100):0,currency:'TRY',url:d.url,edition:PUBLISHER_STORES.has(platform)?null:itadEdition(d.drm),
     genres:src.genres||[],tags:src.tags||[],checked_at:now});
   }
  }
