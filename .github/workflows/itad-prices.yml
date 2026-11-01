@@ -1,4 +1,4 @@
-name: ITAD prices (Fanatical, Humble, GMG, WinGameStore, GamesPlanet)
+name: ITAD prices (key shops and publisher stores)
 on:
   schedule:
     - cron: '17,47 * * * *'
