@@ -35,4 +35,6 @@ Object.assign(t,{"Ortak liste":"Shared list","Arkadaşınla seç, birlikte oyla"
 n.unshift(...[["ORTAK LİSTE · {0} OYUN · {1} OY","SHARED LIST · {0} GAMES · {1} VOTES"],["{0} · isteğe bağlı","{0} · optional"],["{0} oyun eşit oyda; kura herkese aynı sonucu gösterir.","{0} games are tied; the draw shows everyone the same result."],["{0} / {1} oy","{0} / {1} votes"],["{0} oy","{0} votes"],["Ortak listeye eklendi: {0}","Added to shared list: {0}"]]);
 Object.assign(t,{"Süre: kısadan uzuna":"Length: shortest first","Süre: uzundan kısaya":"Length: longest first"});
 Object.assign(t,{"Oyuncu puanı: en yüksek":"Player rating: highest"});
+Object.assign(t,{"Vitrin görünümü":"Shelf view","Liste görünümü":"List view","Görünüm":"View","Şu an rafında indirim yok. İndirime giren oyunun rafı parlar.":"Nothing on your shelf is on sale right now. A game's shelf lights up when it goes on sale.","Eklediğinden beri ucuzladı":"Cheaper since you added it","Eklerken kaydedilen fiyat":"Price saved when added"});
+n.unshift(...[["Rafında {0} oyun indirimde","Games on sale on your shelf: {0}"],["İndirimde −%{0}","On sale −{0}%"],["Bitiyor −%{0}","Ending −{0}%"],["Ucuzladı −%{0}","Price drop −{0}%"]]);
 var r={exact:t,patterns:n};export{r as default};
