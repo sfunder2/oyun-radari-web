@@ -3,9 +3,6 @@ on:
   schedule:
     - cron: '17,47 * * * *'
   workflow_dispatch:
-  push:  # GEÇİCİ: dalda canlı deneme, birleştirmeden önce kaldırılacak
-    branches: [claude/project-thread-pu8t9h]
-    paths: [.github/workflows/itad-prices.yml]
 concurrency:
   group: itad-prices
   cancel-in-progress: false
@@ -26,6 +23,6 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           ITAD_API_KEY: ${{ secrets.ITAD_API_KEY }}
           MARKET_ONLY: itad
-          MARKET_PAGES: ${{ github.event_name == 'push' && '2' || '20' }}
+          MARKET_PAGES: '20'
           MARKET_DEADLINE_MS: '600000'
         run: node scripts/market-run.mjs
