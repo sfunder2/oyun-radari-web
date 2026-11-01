@@ -10,7 +10,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 /** Twitch istemci kimliğiyle IGDB'ye istek atan küçük istemci. Saniyede 4 istek sınırına uyar, 429'da bekleyip yeniden dener. */
 export async function igdbClient(clientId,clientSecret,{f=fetch,gap=260}={}){
  const t=await f('https://id.twitch.tv/oauth2/token?'+new URLSearchParams({client_id:clientId,client_secret:clientSecret,grant_type:'client_credentials'}),{method:'POST'});
- if(!t.ok)throw new Error('Twitch jetonu alınamadı: HTTP '+t.status+' '+(await t.text().catch(()=>'')).slice(0,200));
+ if(!t.ok)throw new Error('Twitch jetonu alınamadı: HTTP '+t.status+' '+(await t.text().catch(()=>'')).slice(0,200)+` (Client ID ${clientId.length} karakter, Secret ${clientSecret.length} karakter)`);
  const token=(await t.json()).access_token;if(!token)throw new Error('Twitch jetonu boş döndü');
  let last=0;
  return async function query(endpoint,body){
