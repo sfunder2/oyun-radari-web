@@ -1,0 +1,20 @@
+/* Oyun puanları (Score.tsx): IGDB oyuncu puanı rozeti ve oyuncu + eleştirmen puanı paneli. Renk puana göre: 75+ yeşil, 50–74 sarı, altı kırmızı. */
+.scorechip,.scorecols>div{--sc:#8d9bad}.scorechip.hi,.scorecols .hi{--sc:#7bd65a}.scorechip.mid,.scorecols .mid{--sc:#f2c14e}.scorechip.lo,.scorecols .lo{--sc:#f2716b}
+:root[data-ui=sade] .scorechip.hi,:root[data-ui=sade] .scorecols .hi{--sc:#2f7d14}:root[data-ui=sade] .scorechip.mid,:root[data-ui=sade] .scorecols .mid{--sc:#946200}:root[data-ui=sade] .scorechip.lo,:root[data-ui=sade] .scorecols .lo{--sc:#c0362f}
+.scorechip{display:inline-flex;align-items:center;gap:4px;width:max-content;max-width:100%;margin:4px 0 0;padding:2px 7px;border-radius:999px;font-size:11px;line-height:1.5;color:var(--sc);background:color-mix(in srgb,var(--sc) 13%,transparent);border:1px solid color-mix(in srgb,var(--sc) 35%,transparent);white-space:nowrap;font-variant-numeric:tabular-nums}
+.scorechip b{font-weight:800}.scorechip svg{flex:none}
+.igdbchips{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin:4px 0 0;min-width:0}.igdbchips:empty{display:none}.igdbchips>.ttbchip,.igdbchips>.scorechip{margin:0}
+.deal-game .igdbchips{margin-top:3px}
+.scorepanel{--sp:#f2c14e;margin:0 0 14px;padding:14px 16px;border-radius:14px;border:1px solid color-mix(in srgb,var(--sp) 35%,var(--line,#ffffff1f));background:color-mix(in srgb,var(--sp) 6%,transparent)}
+:root[data-ui=sade] .scorepanel{--sp:#b58100}
+.scorehead{display:flex;align-items:center;gap:8px;color:var(--sp)}.scorehead strong{font-size:14px;color:var(--ink)}
+.scorecols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:12px 0 8px}
+.scorecols>div{display:grid;gap:3px;min-width:0}
+.scorecols small{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scorecols b{font-size:24px;line-height:1.15;font-weight:800;color:var(--sc);font-variant-numeric:tabular-nums}.scorecols b span{margin-left:2px;font-size:12px;font-weight:600;color:var(--muted)}
+.scorecols .none b{color:var(--muted)}
+.scorecols i{display:block;height:5px;border-radius:999px;background:color-mix(in srgb,var(--sc) 18%,transparent);overflow:hidden}.scorecols i u{display:block;height:100%;border-radius:inherit;background:var(--sc)}
+.scorecols em{font-style:normal;font-size:11px;color:var(--muted)}
+.scoresource{margin:0;font-size:11px;color:var(--muted)}.scoresource a{color:inherit;text-decoration:underline}
+@media (max-width:560px){.scorepanel{padding:12px}.scorecols{gap:10px}.scorecols b{font-size:20px}}
+@media (max-width:760px){:root[data-ui=sade] .cataloggrid:not(.list) .scorechip{font-size:10px;padding:1px 6px}.igdbchips{gap:4px}}
