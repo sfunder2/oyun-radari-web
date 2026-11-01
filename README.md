@@ -59,3 +59,14 @@ Kartlarda ve oyun ayrıntısında oyunun bitirme süresi, Keşfet'te "Oyun süre
 Sıralama ("Süre: kısadan uzuna" / "uzundan kısaya") için `supabase/schema-v36-oyun-suresi-siralama.sql` (`ttb_min()` ve `search_games_t`, `search_market_s/_d` sıralamasına iki satır; süresi olmayanlar sonda; geri alma: `schema-v36-oyun-suresi-siralama-geri-al.sql`). Menü seçenekleri oyun-radari `scripts/inject-ttb-sort.mjs` ile eklenir.
 
 Açmak için sırayla: SQL Editor'da `supabase/schema-v35-oyun-suresi.sql` dosyasını çalıştır, Twitch anahtarlarını ekle, **Game length (IGDB time to beat)** iş akışını elle bir kez başlat.
+
+## Şu an Twitch'te en çok izlenenler
+
+Keşfet'te (Oyunlar) "Şu an Twitch'te en çok izlenenler" şeridi: canlı izleyici sayısına göre ilk 20 oyun, sıra numarası ve izleyici rozetiyle; karta dokununca oyunun ayrıntısı açılır. Listedeki oyunlar katalog kartlarında da "● 45 B izliyor" rozeti taşır. Yalnız kataloğumuzdaki oyunlar gösterilir; Just Chatting gibi oyun olmayan kategoriler atılır.
+
+- `supabase/schema-v37-twitch-izlenenler.sql`: `twitch_top_games` tablosu (son turun anlık görüntüsü, en çok ~40 satır; herkes okur, yalnız toplayıcı yazar). Başka tabloya ve fonksiyona dokunmaz. Geri almak için `drop table if exists public.twitch_top_games;`.
+- `scripts/twitch.mjs` ve `scripts/twitch-run.mjs`: Twitch Helix `games/top` sırası, her oyun için en çok 500 canlı yayının izleyici toplamı. Katalog eşleşmesi önce Twitch'in verdiği IGDB kimliğiyle (`game_ttb.igdb_id` üzerinden), sonra adla. `tests/twitch.test.mjs` ile sınanır.
+- `.github/workflows/twitch-top.yml`: 30 dakikada bir çalışır. Oyun süresiyle aynı `TWITCH_CLIENT_ID` ve `TWITCH_CLIENT_SECRET` gizli anahtarlarını kullanır; yoksa ya da SQL kurulmamışsa iş sessizce atlanır.
+- Arayüz `assets/twitch-20261101.js` modülüyle eklenir. Tablo yoksa ya da veri 6 saatten eskiyse şerit ve rozet görünmez, sitenin geri kalanı etkilenmez.
+
+Açmak için: SQL Editor'da `supabase/schema-v37-twitch-izlenenler.sql` dosyasını çalıştır, sonra **Twitch top watched games** iş akışını elle bir kez başlat.
