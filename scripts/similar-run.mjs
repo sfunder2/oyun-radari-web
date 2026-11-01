@@ -9,7 +9,7 @@ const {SUPABASE_URL,SUPABASE_SERVICE_KEY,TWITCH_CLIENT_ID,TWITCH_CLIENT_SECRET}=
 if(!SUPABASE_URL||!SUPABASE_SERVICE_KEY){console.error('SUPABASE_URL ve SUPABASE_SERVICE_KEY gerekli');process.exit(2)}
 if(!TWITCH_CLIENT_ID||!TWITCH_CLIENT_SECRET){console.log('TWITCH_CLIENT_ID ve TWITCH_CLIENT_SECRET tanımlı değil; benzer oyunlar toplanmadı.');process.exit(0)}
 const sb=supabase(SUPABASE_URL,SUPABASE_SERVICE_KEY);
-for(const [table,file] of [['game_ttb','schema-v35-oyun-suresi.sql'],['game_similar','schema-v37-benzer-oyunlar.sql']]){
+for(const [table,file] of [['game_ttb','schema-v35-oyun-suresi.sql'],['game_similar','schema-v38-benzer-oyunlar.sql']]){
  try{await sb.select(table+'?select=title_key&limit=1')}catch(e){if(/404|PGRST205/.test(e.message)){console.log(`supabase/${file} henüz çalıştırılmamış; benzer oyunlar atlandı.`);process.exit(0)}throw e}
 }
 const log=[],say=m=>{console.log(m);log.push(m)};

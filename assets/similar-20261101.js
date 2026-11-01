@@ -1,5 +1,5 @@
 // Benzer oyunlar (IGDB "similar_games"): ayrıntıda "Benzer oyunlar" bölümü ve "Benzer ama daha ucuz" için aday havuzu.
-// Veri game_similar tablosundan okunur (supabase/schema-v37-benzer-oyunlar.sql); tablo yoksa ya da satır boşsa hiçbir şey gösterilmez.
+// Veri game_similar tablosundan okunur (supabase/schema-v38-benzer-oyunlar.sql); tablo yoksa ya da satır boşsa hiçbir şey gösterilmez.
 var URL_ = "https://dsosckshigzijnsxmlwh.supabase.co", KEY = "sb_publishable_SjkjwIlJ_HFqd5hWhILF5g_6QJThaNO";
 var KEY_RE = /^[a-z0-9 ]{1,160}$/, missing = false, keyMemo = new Map(), itemMemo = new Map();
 var isEn = () => typeof document < "u" && document.documentElement.lang === "en";
