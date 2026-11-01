@@ -58,7 +58,7 @@ if(KEY){
  // 4. Ülke başına fiyatlar: mağaza başına kaç oyunda teklif var, para birimi, örnek fiyat.
  const all=Object.values(gid);
  for(const c of COUNTRIES){
-  const cov={};
+  const cov={},beat={};
   try{
    for(let i=0;i<all.length;i+=100){
     const res=await post('/games/prices/v3',{country:c,deals:'false',vouchers:'true',capacity:'0'},all.slice(i,i+100));
@@ -69,10 +69,25 @@ if(KEY){
      s.currencies[d.price?.currency]=(s.currencies[d.price?.currency]||0)+1;s.shopNames[d.shop?.name]=1;
      if(popularIds.has(g.id)&&s.examples.length<4)s.examples.push({id:g.id,price:d.price?.amount,regular:d.regular?.amount,cur:d.price?.currency,cut:d.cut,drm:(d.drm||[]).map(x=>x.name),url:d.url});
     }
+    // Yeni mağaza mevcut en ucuzdan (Steam/GOG/Epic) daha mı ucuz? Oyun başına mağazanın en ucuz teklifi sayılır.
+    for(const g of res){
+     const best={};
+     for(const d of g.deals||[]){const k=Object.entries(WANT).find(([,re])=>re.test(d.shop?.name||''))?.[0];const v=Number(d.price?.amount);if(k&&Number.isFinite(v)&&(best[k]===undefined||v<best[k]))best[k]=v;}
+     const base=Math.min(...['steam','gog','epic'].map(k=>best[k]??Infinity));
+     for(const k of Object.keys(best)){
+      if(['steam','gog','epic'].includes(k))continue;
+      const b=beat[k]??={games:0,cheaper:0,only:0,savePct:[],popularCheaper:0};
+      b.games++;
+      if(base===Infinity){b.only++;continue;}
+      if(best[k]<base-0.005){b.cheaper++;if(popularIds.has(g.id))b.popularCheaper++;if(base>0)b.savePct.push(Math.round((1-best[k]/base)*100));}
+     }
+    }
     await sleep(800);
    }
   }catch(e){out.errors.push({step:'prices '+c,error:e.message})}
   out.coverage[c]=cov;
+  for(const b of Object.values(beat)){const a=b.savePct.sort((x,y)=>x-y);b.medianSavePct=a.length?a[a.length>>1]:null;delete b.savePct;}
+  out.beats=(out.beats||{});out.beats[c]=beat;
  }
 }
 
@@ -85,6 +100,7 @@ for(const[c,cov]of Object.entries(out.coverage)){
  for(const[k,s]of Object.entries(cov).sort((a,b)=>b[1].games-a[1].games))md+=`| ${k} | ${s.games} | ${s.popular} | ${s.discounted} | ${JSON.stringify(s.currencies)} |\n`;
  md+='\n';
 }
+for(const[c,bt]of Object.entries(out.beats||{})){md+=`**${c}** daha ucuz | mağaza | oyun | Steam/GOG/Epic'ten ucuz | popülerde ucuz | yalnız bu mağazada | medyan kazanç %\n|---|---|---|---|---|---|\n`;for(const[k,b]of Object.entries(bt).sort((a,b)=>b[1].cheaper-a[1].cheaper))md+=`| ${k} | ${b.games} | ${b.cheaper} | ${b.popularCheaper} | ${b.only} | ${b.medianSavePct??'-'} |\n`;md+='\n';}
 md+=out.errors.map(e=>`- Hata: ${e.step}: ${e.error}`).join('\n')+'\n';
-console.log(md);console.log(JSON.stringify(out).slice(0,60000));
+console.log(md);
 if(process.env.GITHUB_STEP_SUMMARY)await appendFile(process.env.GITHUB_STEP_SUMMARY,md);
