@@ -42,7 +42,7 @@ if(KEY){
  try{
   if(process.env.SUPABASE_URL&&process.env.SUPABASE_SERVICE_KEY){
    const sb=supabase(process.env.SUPABASE_URL,process.env.SUPABASE_SERVICE_KEY);
-   const rows=await sb.select('store_offers?select=store_id&platform=eq.steam&order=store_id&limit=20000');
+   const rows=await sb.selectAll('store_offers?select=store_id&platform=eq.steam&order=store_id');
    const step=Math.max(1,Math.floor(rows.length/270));
    for(let i=0;i<rows.length&&appids.length<300;i+=step)if(/^\d+$/.test(rows[i].store_id))appids.push(Number(rows[i].store_id));
    out.steamRowsInDb=rows.length;
