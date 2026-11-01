@@ -59,3 +59,14 @@ Kartlarda ve oyun ayrıntısında oyunun bitirme süresi, Keşfet'te "Oyun süre
 Sıralama ("Süre: kısadan uzuna" / "uzundan kısaya") için `supabase/schema-v36-oyun-suresi-siralama.sql` (`ttb_min()` ve `search_games_t`, `search_market_s/_d` sıralamasına iki satır; süresi olmayanlar sonda; geri alma: `schema-v36-oyun-suresi-siralama-geri-al.sql`). Menü seçenekleri oyun-radari `scripts/inject-ttb-sort.mjs` ile eklenir.
 
 Açmak için sırayla: SQL Editor'da `supabase/schema-v35-oyun-suresi.sql` dosyasını çalıştır, Twitch anahtarlarını ekle, **Game length (IGDB time to beat)** iş akışını elle bir kez başlat.
+
+## Oyun puanları (IGDB)
+
+Kartlarda IGDB oyuncu puanı rozeti (en az 5 oy varsa), oyun ayrıntısında oyuncu ve eleştirmen puanı paneli (0–100, oy ve eleştiri sayısıyla), Keşfet sıralamasında "Oyuncu puanı: en yüksek". Mevcut "En yüksek puan" sıralaması Metacritic/OpenCritic'e göre kalır.
+
+- `supabase/schema-v37-oyun-puanlari.sql`: `game_igdb_score` tablosu (başlık anahtarı başına tek satır, herkes okur, yalnız toplayıcı yazar), `igdb_user_rank()` ve `search_games_t`, `search_market_s/_d` sıralamasına "userScore" satırı. Sıralama az oylu uç puanları 70'e doğru çeker: (oy × puan + 10 × 70) / (oy + 10); puanı olmayanlar sonda. Geri almak için `schema-v37-oyun-puanlari-geri-al.sql`. `game_ttb` ve süre eklemelerine dokunmaz.
+- `scripts/igdb-score.mjs` ve `scripts/igdb-score-run.mjs`: eşleştirmeyi yeniden yapmaz, oyun süresi toplayıcısının `game_ttb.igdb_id` değerini okur ve IGDB `games` uç noktasından 500'lük parçalarla puanları alır. Puanlar 7 günde bir yenilenir. `tests/igdb-score.test.mjs` ile sınanır.
+- `.github/workflows/igdb-score.yml`: günde bir çalışır, aynı `TWITCH_CLIENT_ID` ve `TWITCH_CLIENT_SECRET` anahtarlarını kullanır.
+- Arayüz `assets/score-20261101.js` modülüyle eklenir (kaynak: oyun-radari `app/score-parts.tsx`, `scripts/inject-score.mjs`). SQL kurulmadan sayfa açılırsa rozet ve panel görünmez, sitenin geri kalanı etkilenmez.
+
+Açmak için sırayla: SQL Editor'da `supabase/schema-v37-oyun-puanlari.sql` dosyasını çalıştır, **Game ratings (IGDB)** iş akışını elle bir kez başlat.
