@@ -132,3 +132,13 @@ Mağazalar arası eşleştirme `title_key` başlık anahtarıyla yapılır (`scr
 - `supabase/schema-v44-oyun-anahtari.sql`: aynı kuralların Postgres karşılığı `radar_title_key()` (üretim: `node scripts/title-key-sql.mjs`; `tests/titles.test.mjs` iki tarafın aynı kaldığını denetler), `store_offers`/`ps_products`/`upcoming_games` üzerinde anahtarı adından hesaplayan tetikleyici, mevcut satırların yeniden anahtarlanması (`title_key_rekey_log` günlüğüyle), zenginleştirme satırlarının yeni anahtara taşınması ve aramada PlayStation ürünlerinin de başlık anahtarıyla gruplanması (aynı oyunun PS4 ve PS5 ürünü "Tümü"nde tek sonuç).
 - Tetikleyici sayesinde edge fonksiyonları yeniden yayımlanmadan da doğru anahtar yazılır; yönetici eşleştirmesi (`radar_ops.match_overrides`) yine üstündür.
 - Geri almak için `schema-v44-oyun-anahtari-geri-al.sql`.
+
+## Genel arama sıralaması (v45)
+
+Başlıktaki arama ve Keşfet araması `search_market` / `search_market_v2` üzerinden `search_market_r`'yi çağırır (`supabase/schema-v45-arama-siralama.sql`). Yalnız yazılı aramada değişiklik vardır; arama kutusu boşken eski `search_market_d` yolu aynen çalışır.
+
+- Eşleşme: kısaltmalar açılır (gta, rdr2, cod, gow, tlou, botw, totk, fifa → fc, nfs, mgs, ff7, re4, fh5 ...), rakam ve Roma rakamı aynı sayılır (god of war 3 = III), 1–2 harfli kelimeler yalnız kelime başında aranır. Hiç sonuç yoksa yazım hatası toleranslı ikinci tur çalışır (elden rnig, assasins creed, eldenring).
+- Sıralama: sorgu bir kelimenin başında geçenler önce; sonra tam ad artısı + bilinirlik (IGDB oy, OpenCritic eleştiri sayısı, puan, mağaza sayısı) − tür cezası (sürüm/paket < DLC/kostüm/yükseltme < film müziği/demo). Sürüm adları ana oyunun bilinirliğini alır.
+- Sunucu sıraladığında (yanıtta `fuzzy` alanı) öneri kutusu sırayı yeniden kurmaz.
+- Geri almak için `supabase/schema-v45-arama-siralama-geri-al.sql`. Not: ileride `search_market_s/_d`'ye yerinde eklenen süzgeçler `search_market_r`'ye de eklenmelidir.
+
