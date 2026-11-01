@@ -1,4 +1,4 @@
--- Şema v38: benzer oyunlar (IGDB "similar_games").
+-- Şema v43: benzer oyunlar (IGDB "similar_games").
 -- Kaynak: IGDB API (Twitch). Toplayıcı: scripts/similar-run.mjs (.github/workflows/similar.yml).
 -- Gerekli: schema-v35-oyun-suresi.sql (game_ttb). IGDB oyun kimlikleri oyun süresi toplayıcısının game_ttb.igdb_id
 -- eşleşmesinden okunur; bu tablo yalnız benzer oyun listesini tutar, game_ttb'ye ve arama fonksiyonlarına dokunulmaz.
@@ -8,7 +8,7 @@
 --    similar_total: IGDB'deki benzer oyun sayısı (katalogda olmayanlar dahil).
 --    Satırı yalnız toplayıcı (service role) yazar; herkes okuyabilir. Toplayıcı 30 günde bir yeniler.
 --    Disk: ~30 bin satır × ~250 bayt ≈ 8 MB.
--- Geri almak için: supabase/schema-v38-benzer-oyunlar-geri-al.sql
+-- Geri almak için: supabase/schema-v43-benzer-oyunlar-geri-al.sql
 
 create table if not exists public.game_similar (
  title_key text primary key,
