@@ -1,9 +1,6 @@
 name: ITAD probe (read only)
 on:
   workflow_dispatch:
-  push:
-    branches: [claude/project-thread-pu8t9h]
-    paths: [scripts/itad-probe.mjs, .github/workflows/itad-probe.yml, .itad-probe-run]
 permissions:
   contents: read
 jobs:

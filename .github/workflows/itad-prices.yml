@@ -1,0 +1,28 @@
+name: ITAD prices (Fanatical, Humble, GMG, WinGameStore, GamesPlanet)
+on:
+  schedule:
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+concurrency:
+  group: itad-prices
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  itad:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Read ITAD Turkey prices into store_offers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          ITAD_API_KEY: ${{ secrets.ITAD_API_KEY }}
+          MARKET_ONLY: itad
+          MARKET_PAGES: '20'
+          MARKET_DEADLINE_MS: '600000'
+        run: node scripts/market-run.mjs
