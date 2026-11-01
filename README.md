@@ -124,3 +124,11 @@ Mağazada tarihi olmayan ya da yer tutucu tarih gösteren yaklaşan oyunların t
 - Arayüz `assets/igdb-20261101.js/.css` modülüyle eklenir (`releases-20261101.js` ve ana paketteki takvim bunu kullanır). Kurallar: tarihsiz satıra aynı platformun IGDB kesin tarihi yazılır, yoksa "2027 3. çeyrek" gibi dönem bilgisi gösterilir; Nintendo'nun 31 Aralık yer tutucusu IGDB tarihiyle değişir ya da yalnız yıl gösterilir; Xbox satırında IGDB'nin Xbox tarihi tercih edilir; Steam ve PlayStation tarihlerine dokunulmaz. Geri sayımda "Tarih IGDB'den" etiketi ve "Fragmanı izle" düğmesi, oyun ayrıntısında PlayStation fragmanı yoksa YouTube fragmanı (çerezsiz alan adı, yalnız tıklayınca yüklenir). SQL kurulmadan sayfa açılırsa her şey eskisi gibi çalışır.
 
 Açmak için sırayla: SQL Editor'da `supabase/schema-v42-igdb-cikis-fragman.sql` dosyasını çalıştır, **Release dates and trailers (IGDB)** iş akışını elle bir kez başlat.
+
+## Aynı oyunun platform kayıtlarını birleştirme
+
+Mağazalar arası eşleştirme `title_key` başlık anahtarıyla yapılır (`scripts/titles.mjs`). Anahtar artık yalnız "PS4/PS5" değil, tüm platform etiketlerini atar: "(Xbox One & Xbox Series X|S)", "(Windows)", "(PC)", "(PlayStation®5)", "- Windows Edition", "for Xbox One", "(Game Preview)" ve sondaki "Enhanced". Böylece örneğin GTA V'in PlayStation, Xbox, Steam ve Epic kayıtları tek oyun olarak aranır ve ayrıntıda birlikte görünür. Paketler ("... ve Great White Shark Kartı Paketi"), Deluxe/Ultimate gibi sürümler ve yükseltme paketleri ayrı kalır.
+
+- `supabase/schema-v44-oyun-anahtari.sql`: aynı kuralların Postgres karşılığı `radar_title_key()` (üretim: `node scripts/title-key-sql.mjs`; `tests/titles.test.mjs` iki tarafın aynı kaldığını denetler), `store_offers`/`ps_products`/`upcoming_games` üzerinde anahtarı adından hesaplayan tetikleyici, mevcut satırların yeniden anahtarlanması (`title_key_rekey_log` günlüğüyle), zenginleştirme satırlarının yeni anahtara taşınması ve aramada PlayStation ürünlerinin de başlık anahtarıyla gruplanması (aynı oyunun PS4 ve PS5 ürünü "Tümü"nde tek sonuç).
+- Tetikleyici sayesinde edge fonksiyonları yeniden yayımlanmadan da doğru anahtar yazılır; yönetici eşleştirmesi (`radar_ops.match_overrides`) yine üstündür.
+- Geri almak için `schema-v44-oyun-anahtari-geri-al.sql`.
