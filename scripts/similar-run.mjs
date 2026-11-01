@@ -1,6 +1,6 @@
 // Benzer oyun toplayıcısı (IGDB). Kullanım: node scripts/similar-run.mjs
 // Gerekenler: SUPABASE_URL, SUPABASE_SERVICE_KEY, TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET (oyun süresiyle aynı anahtarlar).
-// Twitch anahtarları yoksa ya da v35/v37 SQL'i çalıştırılmamışsa sessizce çıkar.
+// Twitch anahtarları yoksa ya da v35/v38 SQL'i çalıştırılmamışsa sessizce çıkar.
 import {supabase} from './supabase.mjs';
 import {igdbClient} from './ttb.mjs';
 import {runSimilar} from './similar.mjs';
