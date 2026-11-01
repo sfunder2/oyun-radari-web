@@ -1,0 +1,32 @@
+/* Oyun modu ve tema (playmodes-parts.tsx): kart rozeti, ayrıntı paneli, Keşfet filtreleri ve Oyun DNA kartı. Kaynak IGDB. */
+.gmchip,.gmtag,.gmmeter i{--gm:#8d9bad}
+.gmchip.coop,.gmtag.gmode,.gmmeter i.coop{--gm:#2dd4bf}.gmchip.multi,.gmmeter i.multi{--gm:#60a5fa}.gmchip.split,.gmmeter i.split{--gm:#fbbf24}
+.gmchip.mmo,.gmmeter i.mmo{--gm:#22d3ee}.gmchip.br,.gmmeter i.br{--gm:#f87171}.gmmeter i.solo{--gm:#a3b1c2}.gmtag.gtheme{--gm:#c4b5fd}
+:root[data-ui=sade] .gmchip.coop,:root[data-ui=sade] .gmtag.gmode,:root[data-ui=sade] .gmmeter i.coop{--gm:#0f766e}:root[data-ui=sade] .gmchip.multi,:root[data-ui=sade] .gmmeter i.multi{--gm:#1d4ed8}
+:root[data-ui=sade] .gmchip.split,:root[data-ui=sade] .gmmeter i.split{--gm:#a15c00}:root[data-ui=sade] .gmchip.mmo,:root[data-ui=sade] .gmmeter i.mmo{--gm:#0e7490}
+:root[data-ui=sade] .gmchip.br,:root[data-ui=sade] .gmmeter i.br{--gm:#b91c1c}:root[data-ui=sade] .gmmeter i.solo{--gm:#64748b}:root[data-ui=sade] .gmtag.gtheme{--gm:#6d28d9}
+.gmchip{display:inline-flex;align-items:center;gap:4px;width:max-content;max-width:100%;margin:4px 0 0;padding:2px 7px;border-radius:999px;font-size:11px;line-height:1.5;color:var(--gm);background:color-mix(in srgb,var(--gm) 13%,transparent);border:1px solid color-mix(in srgb,var(--gm) 35%,transparent);white-space:nowrap;vertical-align:top}
+.gmchip b{font-weight:800}.gmchip svg{flex:none}
+.gmchip .gmsplit{display:inline-flex;align-items:center;gap:4px;color:#fbbf24}:root[data-ui=sade] .gmchip .gmsplit{color:#a15c00}
+.gmchip b+.gmsplit{margin-left:2px;padding-left:5px;border-left:1px solid color-mix(in srgb,var(--gm) 35%,transparent)}
+.ttbchip+.gmchip{margin-left:4px}
+.gmpanel{margin:0 0 14px;padding:14px 16px;border-radius:14px;border:1px solid var(--line,#ffffff1f);background:color-mix(in srgb,#2dd4bf 5%,transparent)}
+.gmpanel .gmhead{display:flex;align-items:center;gap:8px;color:#2dd4bf}.gmpanel .gmhead strong{font-size:14px;color:var(--ink)}
+:root[data-ui=sade] .gmpanel .gmhead{color:#0f766e}
+.gmrow{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 0}
+.gmtag{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:6px 12px;border-radius:999px;font:inherit;font-size:13px;font-weight:700;color:var(--ink);background:color-mix(in srgb,var(--gm) 12%,transparent);border:1px solid color-mix(in srgb,var(--gm) 40%,transparent)}
+.gmtag svg{color:var(--gm);flex:none}
+button.gmtag{cursor:pointer}button.gmtag:hover{border-color:var(--gm);background:color-mix(in srgb,var(--gm) 22%,transparent)}
+button.gmtag:focus-visible,.gmbars button:focus-visible{outline:2px solid var(--lime,#b6f36a);outline-offset:2px}
+.gmsource{margin:10px 0 0;font-size:11px;color:var(--muted)}.gmsource a{color:inherit;text-decoration:underline}
+.gmdna .gmbars{display:grid;gap:6px;margin:10px 0 0;padding:0;list-style:none}
+.gmdna .gmbars button{display:grid;grid-template-columns:18px minmax(90px,auto) minmax(0,1fr) 42px;align-items:center;gap:8px;width:100%;min-height:36px;padding:4px 6px;border:0;border-radius:10px;background:transparent;color:var(--ink);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.gmdna .gmbars button:hover{background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.gmdna .gmbars svg{color:var(--muted)}
+.gmdna .gmmeter{display:block;height:8px;border-radius:999px;background:color-mix(in srgb,var(--ink) 10%,transparent);overflow:hidden}
+.gmdna .gmmeter i{display:block;height:100%;border-radius:inherit;background:var(--gm)}
+.gmdna em{font-style:normal;font-weight:800;text-align:right}
+.gmdna .gmsub{margin-top:14px}
+.gmthemes small{opacity:.7;font-weight:600}
+@media (max-width:560px){.gmpanel{padding:12px}.gmtag{font-size:12px;padding:5px 10px}.gmdna .gmbars button{grid-template-columns:18px 96px minmax(0,1fr) 38px;font-size:12px}}
+@media (max-width:760px){:root[data-ui=sade] .cataloggrid:not(.list) .gmchip{font-size:10px;padding:1px 6px}}

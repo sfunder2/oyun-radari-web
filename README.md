@@ -81,3 +81,14 @@ Oyun ayrıntısında iki bölüm: **Serideki diğer oyunlar** (IGDB serisi, çı
 - Arayüz `assets/family-20261101.js` ve `.css` modülüyle eklenir. IGDB serisi yoksa ya da SQL kurulmamışsa eski "Seri zaman çizelgesi" (ada göre tahmin) aynen görünür; DLC bölümü görünmez.
 
 Açmak için sırayla: SQL Editor'da `supabase/schema-v40-seri-dlc.sql` dosyasını çalıştır, **Series and DLC (IGDB)** iş akışını elle bir kez başlat (oyun süresi toplayıcısı en az bir kez çalışmış olmalı).
+
+## Oyun modu ve tema (IGDB)
+
+Kartlarda co-op / çok oyunculu / bölünmüş ekran rozeti, oyun ayrıntısında "Oyun modu ve tema" paneli (çipe basınca Keşfet o mod ya da temayla süzülür), Keşfet'te "Diğer filtreler" altında **Oyun modu** (Tek kişilik, Co-op, Bölünmüş ekran, Çok oyunculu, MMO, Battle royale) ve **Tema** (Açık dünya, Fantastik, Bilim kurgu, Korku, Hayatta kalma…) seçimleri, Oyun DNA'sında "Nasıl oynuyorsun" kartı (favoriler ve Steam oyunlarından mod payları ve en sık temalar). Veri IGDB'nin `game_modes`, `multiplayer_modes` ve `themes` alanlarıdır.
+
+- `supabase/schema-v41-oyun-modu-tema.sql`: `game_modes` tablosu (başlık anahtarı başına tek satır, herkes okur, yalnız toplayıcı yazar), `gmode_ok()` filtre yardımcısı ve canlı arama fonksiyonlarına (`search_games_s2/_s/_t`, `search_market_s/_d`) v35'teki süre koşulunun yanına yerinde eklenen tek koşul. Filtre seçilmediğinde arama değişmez. v35 gerekir. Geri almak için `schema-v41-oyun-modu-tema-geri-al.sql`.
+- `scripts/playmodes.mjs` ve `scripts/playmodes-run.mjs`: eşleştirme yeniden yapılmaz; oyun süresi toplayıcısının `game_ttb.igdb_id` değeri kullanılır ve IGDB `games` uç noktası 500'lük parçalarla sorulur. 30 günde bir yenilenir. `tests/playmodes.test.mjs` ile sınanır.
+- `.github/workflows/playmodes.yml`: 12 saatte bir çalışır, oyun süresiyle aynı `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` anahtarlarını kullanır.
+- Arayüz `assets/playmodes-20261101.js` modülüyle eklenir (kaynak: oyun-radari `app/playmodes-parts.tsx`, `lib/playmodes.mjs`, `scripts/inject-playmodes.mjs`). SQL kurulmadan sayfa açılırsa rozet, panel ve DNA kartı görünmez; filtreler seçilirse sonuç değişmez. Sitenin geri kalanı etkilenmez.
+
+Açmak için sırayla: SQL Editor'da `supabase/schema-v41-oyun-modu-tema.sql` dosyasını çalıştır, **Game modes and themes (IGDB)** iş akışını elle bir kez başlat.
