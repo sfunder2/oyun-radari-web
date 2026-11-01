@@ -70,3 +70,14 @@ Kartlarda IGDB oyuncu puanı rozeti (en az 5 oy varsa), oyun ayrıntısında oyu
 - Arayüz `assets/score-20261101.js` modülüyle eklenir (kaynak: oyun-radari `app/score-parts.tsx`, `scripts/inject-score.mjs`). SQL kurulmadan sayfa açılırsa rozet ve panel görünmez, sitenin geri kalanı etkilenmez.
 
 Açmak için sırayla: SQL Editor'da `supabase/schema-v39-oyun-puanlari.sql` dosyasını çalıştır, **Game ratings (IGDB)** iş akışını elle bir kez başlat.
+
+## Seri ve DLC (IGDB)
+
+Oyun ayrıntısında iki bölüm: **Serideki diğer oyunlar** (IGDB serisi, çıkış yılına göre zaman çizelgesi; "Bu oyun" işaretli) ve **DLC ve genişlemeler** (DLC, genişleme, bağımsız genişleme; 6'sı görünür, "Tümünü göster" ile en yeni 60'a kadar). Açılan oyun bir ek paketse ana oyunu da gösterilir. Katalogda bulunan oyun ve DLC'ler (başlık anahtarıyla, PlayStation ya da diğer mağazalar) fiyatıyla gösterilir ve tıklanınca kendi ayrıntısı açılır.
+
+- `supabase/schema-v40-seri-dlc.sql`: yalnız yeni bir `game_family` tablosu (başlık anahtarı başına tek satır, herkes okur, yalnız toplayıcı yazar). Canlı fonksiyonlara dokunmaz. Geri almak için `schema-v40-seri-dlc-geri-al.sql`. Gerekli: `schema-v35-oyun-suresi.sql`.
+- `scripts/family.mjs`, `scripts/family-run.mjs`: IGDB kimliğini oyun süresi tablosundan (`game_ttb.igdb_id`) alır, oyunları yeniden eşleştirmez. Seri yoksa marka (franchise) kullanılır. Seri üyeleri yalnız konsol ve PC oyunlarıdır (ana oyun, yeniden yapım, remaster). Her oyun 30 günde bir yenilenir. `tests/family.test.mjs` ile sınanır.
+- `.github/workflows/family.yml`: 6 saatte bir (oyun süresinden farklı dakikada), tur başına en çok 3000 oyun. Oyun süresiyle aynı `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` anahtarlarını kullanır; tablo ya da anahtar yoksa sessizce atlanır.
+- Arayüz `assets/family-20261101.js` ve `.css` modülüyle eklenir. IGDB serisi yoksa ya da SQL kurulmamışsa eski "Seri zaman çizelgesi" (ada göre tahmin) aynen görünür; DLC bölümü görünmez.
+
+Açmak için sırayla: SQL Editor'da `supabase/schema-v40-seri-dlc.sql` dosyasını çalıştır, **Series and DLC (IGDB)** iş akışını elle bir kez başlat (oyun süresi toplayıcısı en az bir kez çalışmış olmalı).
