@@ -103,3 +103,24 @@ Keşfet'te (Oyunlar) "Şu an Twitch'te en çok izlenenler" şeridi: canlı izley
 - Arayüz `assets/twitch-20261101.js` modülüyle eklenir. Tablo yoksa ya da veri 6 saatten eskiyse şerit ve rozet görünmez, sitenin geri kalanı etkilenmez.
 
 Açmak için: SQL Editor'da `supabase/schema-v38-twitch-izlenenler.sql` dosyasını çalıştır, sonra **Twitch top watched games** iş akışını elle bir kez başlat.
+
+## Benzer oyunlar (IGDB)
+
+Oyun ayrıntısında "Benzer oyunlar" bölümü: IGDB'nin `similar_games` listesinden katalogda olan oyunlar (önce 4, "Daha fazla göster" ile 8), her birinde en ucuz mağaza fiyatı. "Benzer ama daha ucuz" artık önce IGDB'nin benzer bulduğu oyunlara bakar (ortak tür şartı aranmaz, kartta "IGDB" etiketi), sonra eskisi gibi ortak türlü oyunlara. "Keşfedilecek başka dünyalar" IGDB bölümünde gösterilenleri tekrar etmez.
+
+- `supabase/schema-v43-benzer-oyunlar.sql`: yalnız yeni `game_similar` tablosu (başlık anahtarı başına IGDB sırasıyla en çok 20 katalog anahtarı; herkes okur, yalnız toplayıcı yazar). Arama fonksiyonlarına ve `game_ttb`'ye dokunmaz. Geri almak için `schema-v43-benzer-oyunlar-geri-al.sql`.
+- `scripts/similar.mjs` ve `scripts/similar-run.mjs`: IGDB kimlikleri oyun süresi toplayıcısının `game_ttb.igdb_id` eşleşmesinden okunur, `games.similar_games` 400'lük parçalarla sorulur, kimlikler yine `game_ttb` üzerinden başlık anahtarına çevrilir. 30 günde bir yenilenir. `tests/similar.test.mjs` ile sınanır.
+- `.github/workflows/similar.yml`: günde bir çalışır, oyun süresiyle aynı `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` anahtarlarını kullanır. Anahtar ya da tablo yoksa sessizce atlanır.
+- Arayüz `assets/similar-20261101.js` / `.css` modülüyle eklenir; tablo yoksa bölüm görünmez ve "Benzer ama daha ucuz" eskisi gibi çalışır.
+
+Açmak için: SQL Editor'da `supabase/schema-v43-benzer-oyunlar.sql` dosyasını çalıştır, **Similar games (IGDB)** iş akışını elle bir kez başlat.
+
+## Çıkış tarihi ve fragman (IGDB)
+
+Mağazada tarihi olmayan ya da yer tutucu tarih gösteren yaklaşan oyunların tarihi IGDB'den tamamlanır; fragmanı olmayan oyunlara IGDB'deki YouTube fragmanı eklenir. Mağaza tabloları değişmez, düzeltme arayüzde yapılır.
+
+- `supabase/schema-v42-igdb-cikis-fragman.sql`: `game_igdb_info` tablosu (başlık anahtarı başına tek satır: en erken çıkış ve kesinliği, mağaza ailesi başına kesin tarih, YouTube fragman kimliği). Herkes okur, yalnız toplayıcı yazar. Geri almak için `schema-v42-igdb-cikis-fragman-geri-al.sql`.
+- `scripts/igdb-release.mjs`, `scripts/igdb-release-run.mjs`, `.github/workflows/igdb-release.yml`: günde bir çalışır. Yaklaşan oyunlar Steam kimliğiyle ya da adla (aynı adlı eski oyun değil, yenisi) eşlenir; katalogdaki oyunlar oyun süresi toplayıcısının bulduğu IGDB kimlikleriyle 14 günde bir tazelenir. Oyun süresiyle aynı `TWITCH_CLIENT_ID` / `TWITCH_CLIENT_SECRET` anahtarlarını kullanır. `tests/igdb-release.test.mjs` ile sınanır.
+- Arayüz `assets/igdb-20261101.js/.css` modülüyle eklenir (`releases-20261101.js` ve ana paketteki takvim bunu kullanır). Kurallar: tarihsiz satıra aynı platformun IGDB kesin tarihi yazılır, yoksa "2027 3. çeyrek" gibi dönem bilgisi gösterilir; Nintendo'nun 31 Aralık yer tutucusu IGDB tarihiyle değişir ya da yalnız yıl gösterilir; Xbox satırında IGDB'nin Xbox tarihi tercih edilir; Steam ve PlayStation tarihlerine dokunulmaz. Geri sayımda "Tarih IGDB'den" etiketi ve "Fragmanı izle" düğmesi, oyun ayrıntısında PlayStation fragmanı yoksa YouTube fragmanı (çerezsiz alan adı, yalnız tıklayınca yüklenir). SQL kurulmadan sayfa açılırsa her şey eskisi gibi çalışır.
+
+Açmak için sırayla: SQL Editor'da `supabase/schema-v42-igdb-cikis-fragman.sql` dosyasını çalıştır, **Release dates and trailers (IGDB)** iş akışını elle bir kez başlat.
