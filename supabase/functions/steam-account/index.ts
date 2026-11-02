@@ -6,7 +6,7 @@ const ALLOWED=new Set(['https://sfunder2.github.io','https://oyun-radari-tr.gokh
 const env=(name:string)=>Deno.env.get(name)||'';
 const BASE=env('SUPABASE_URL')+'/functions/v1/steam-account';
 const SECRET=env('STEAM_LINK_SECRET')||env('SUPABASE_SERVICE_ROLE_KEY');
-const sb=supabase(env('SUPABASE_URL'),env('SUPABASE_SERVICE_ROLE_KEY'));
+const sb=supabase(env('SUPABASE_URL'),env('SUPABASE_SERVICE_ROLE_KEY'),fetch,{retries:1}); // Kullanıcı bekliyor: tek yeniden deneme
 const cache=new Map<string,{at:number,data:unknown}>();
 const hashState=async(state:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(state)))).map(x=>x.toString(16).padStart(2,'0')).join('');
 const consumeState=async(state:string)=>sb.rpc('consume_steam_link_state',{p_hash:await hashState(state)});
