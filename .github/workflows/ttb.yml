@@ -1,7 +1,8 @@
 name: Game length (IGDB time to beat)
 on:
+  # Dakikalar Supabase Cron işlerinin (markets :x1/:x6, admin :x2/:x7, enrich :x3/:x8, */3 arama görünümü, genres :07/:37) boş kaldığı dakikalara ve birbirinden ayrı saatlere yerleştirildi.
   schedule:
-    - cron: '23 */6 * * *'
+    - cron: '14 2,8,14,20 * * *'
   workflow_dispatch:
 concurrency:
   group: ttb

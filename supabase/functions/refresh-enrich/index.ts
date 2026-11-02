@@ -6,7 +6,7 @@ Deno.serve(async req=>{
  const key=req.headers.get('x-batch-secret')||'';
  const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(key))),x=>x.toString(16).padStart(2,'0')).join('');
  if(req.method!=='POST'||hash!==expected)return new Response('Unauthorized',{status:401});
- const sb=supabase(Deno.env.get('SUPABASE_URL'),Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'));
+ const sb=supabase(Deno.env.get('SUPABASE_URL'),Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'),fetch,{retries:2}); // Edge süre sınırı: kısa yeniden deneme
  const log:string[]=[],started=new Date().toISOString();
  try{
   const result=await runEnrichBatch({sb,batch:24,concurrency:4,accentLimit:150,deadlineMs:95000,say:(m:string)=>log.push(m),ocIndex:await loadOcIndex(sb)});

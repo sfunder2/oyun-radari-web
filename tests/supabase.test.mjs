@@ -40,10 +40,36 @@ test('preview video is the first PREVIEW mp4',()=>{
   assert.equal(bodies.length,2);for(const rows of bodies)for(const row of rows)assert.deepEqual(Object.keys(row).sort(),Object.keys(rows[0]).sort());assert.ok(!('news' in bodies.flat().find(x=>x.id==='b')));
  });
 test('supabase client retries gateway timeouts, not client errors',async()=>{
- let calls=0;const sb=supabase('https://example.test','key',async()=>{calls++;return new Response(calls<3?'{"message":"Gateway Timeout"}':'',{status:calls<3?504:201});},{retryDelay:0});
+ let calls=0;const sb=supabase('https://example.test','key',async()=>{calls++;return new Response(calls<3?'{"message":"Gateway Timeout"}':'',{status:calls<3?504:201});},{retryDelay:0,log:()=>{}});
  await sb.upsert('store_offers',[{platform:'steam',store_id:'1'}],'platform,store_id');assert.equal(calls,3);
  let bad=0;const sb2=supabase('https://example.test','key',async()=>{bad++;return new Response('no',{status:400});},{retryDelay:0});
  await assert.rejects(sb2.select('t?select=*'),/HTTP 400/);assert.equal(bad,1);
- let down=0;const sb3=supabase('https://example.test','key',async()=>{down++;return new Response('x',{status:504});},{retryDelay:0});
- await assert.rejects(sb3.select('t?select=*'),/HTTP 504/);assert.equal(down,3);
+ let down=0;const sb3=supabase('https://example.test','key',async()=>{down++;return new Response('x',{status:504});},{retryDelay:0,log:()=>{}});
+ await assert.rejects(sb3.select('t?select=*'),/HTTP 504/);assert.equal(down,5);
+});
+
+const quiet={retryDelay:0,log:()=>{}};
+const timeout=()=>{const e=new DOMException('The operation was aborted due to timeout','TimeoutError');return e;};
+test('statement timeout (57014) is retried, other 500s are not',async()=>{
+ let n=0;const sb=supabase('https://example.test','k',async()=>{n++;return n<3?new Response('{"code":"57014","message":"canceling statement due to statement timeout"}',{status:500}):new Response('[{"a":1}]',{status:200});},quiet);
+ assert.deepEqual(await sb.select('store_offers?select=*'),[{a:1}]);assert.equal(n,3);
+ let m=0;const sb2=supabase('https://example.test','k',async()=>{m++;return new Response('{"code":"42P01","message":"relation missing"}',{status:500});},quiet);
+ await assert.rejects(sb2.select('t?select=*'),/HTTP 500/);assert.equal(m,1);
+});
+test('client-side timeouts are retried for reads and upserts',async()=>{
+ let n=0;const sb=supabase('https://example.test','k',async()=>{n++;if(n<3)throw timeout();return new Response('',{status:201});},quiet);
+ await sb.upsert('game_ttb',[{title_key:'a'}],'title_key');assert.equal(n,3);
+ let m=0;const sb2=supabase('https://example.test','k',async()=>{m++;throw timeout();},{...quiet,retries:2,timeoutMs:30000});
+ await assert.rejects(sb2.select('twitch_top_games?select=twitch_id&limit=1'),/twitch_top_games: 30 sn içinde yanıt yok/);assert.equal(m,3);
+});
+test('rpc is not replayed after a client timeout but is after a cancelled statement',async()=>{
+ let n=0;const sb=supabase('https://example.test','k',async()=>{n++;throw timeout();},quiet);
+ await assert.rejects(sb.rpc('claim_ps_batch',{}),/rpc\/claim_ps_batch/);assert.equal(n,1);
+ let m=0;const sb2=supabase('https://example.test','k',async()=>{m++;return m<2?new Response('{"code":"57014"}',{status:500}):new Response('true',{status:200});},quiet);
+ assert.equal(await sb2.rpc('claim_ps_batch',{}),true);assert.equal(m,2);
+});
+test('backoff grows exponentially with jitter',async()=>{
+ const waits=[];const sb=supabase('https://example.test','k',async()=>new Response('x',{status:503}),{retryDelay:1000,log:()=>{},sleep:async ms=>{waits.push(ms)}});
+ await assert.rejects(sb.select('t'),/HTTP 503/);assert.equal(waits.length,4);
+ waits.forEach((ms,i)=>{assert.ok(ms>=750*2**i&&ms<=1250*2**i,`bekleme ${i}: ${ms}`)});
 });
