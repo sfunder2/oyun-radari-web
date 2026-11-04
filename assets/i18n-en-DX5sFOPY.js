@@ -37,4 +37,6 @@ Object.assign(t,{"Süre: kısadan uzuna":"Length: shortest first","Süre: uzunda
 Object.assign(t,{"Oyuncu puanı: en yüksek":"Player rating: highest"});
 Object.assign(t,{"Vitrin görünümü":"Shelf view","Liste görünümü":"List view","Görünüm":"View","Şu an rafında indirim yok. İndirime giren oyunun rafı parlar.":"Nothing on your shelf is on sale right now. A game's shelf lights up when it goes on sale.","Eklediğinden beri ucuzladı":"Cheaper since you added it","Eklerken kaydedilen fiyat":"Price saved when added"});
 n.unshift(...[["Rafında {0} oyun indirimde","Games on sale on your shelf: {0}"],["İndirimde −%{0}","On sale −{0}%"],["Bitiyor −%{0}","Ending −{0}%"],["Ucuzladı −%{0}","Price drop −{0}%"]]);
+Object.assign(t,{"Son başlayan indirimler":"Newest discounts"});
 var r={exact:t,patterns:n};export{r as default};
+
