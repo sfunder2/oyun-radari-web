@@ -1,5 +1,4 @@
-// Genel arama (v45): sunucu sıralı sonuç döndürünce öneri kutusu sırayı yeniden kurmaz.
-// Yeni arama yanıtında "fuzzy" alanı vardır; eski yanıtta (v45 öncesi) yoktur ve eski istemci sıralaması sürer.
+// The suggestion client preserves the order returned by the search endpoint.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -8,9 +7,21 @@ const bundle = readFileSync(new URL('../assets/index-BplIVz6G.js', import.meta.u
 const sql = readFileSync(new URL('../supabase/schema-v45-arama-siralama.sql', import.meta.url), 'utf8');
 const undo = readFileSync(new URL('../supabase/schema-v45-arama-siralama-geri-al.sql', import.meta.url), 'utf8');
 
-test('suggestions keep server order when the server ranked them', () => {
-  assert.match(bundle, /total:i\.total\|\|0,ranked:`fuzzy`in i\}/);
-  assert.match(bundle, /if\(direct\.items\?\.length\)\{if\(direct\.ranked\)return direct;let ranked=radarRankSuggestions/);
+test('suggestions use the lightweight endpoint and preserve server order', async () => {
+  const start = bundle.indexOf('function radarSearchSignal(');
+  const end = bundle.indexOf('async function Jr(', start);
+  assert.ok(start >= 0 && end > start);
+  const items = [{name:'Zelda'}, {name:'Animal Crossing'}];
+  const calls = [];
+  const fetch = async (url, request) => {
+    calls.push([url, JSON.parse(request.body)]);
+    return {ok:true, json:async () => items};
+  };
+  const suggest = new Function('on', 'cr', 'lr', 'Ur', 'fetch', bundle.slice(start,end) + 'return qr;')(
+    text => text.trim(), 'https://example.invalid', 'test-key', item => item, fetch
+  );
+  assert.deepEqual(await suggest('zelda'), {items, total:null});
+  assert.deepEqual(calls, [['https://example.invalid/rest/v1/rpc/search_suggestions', {query_text:'zelda'}]]);
 });
 
 test('v45 wrappers use the ranked search and a fresh cache prefix; undo restores the old ones', () => {
