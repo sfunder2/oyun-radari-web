@@ -19,6 +19,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Cancel the stale Pages deployment
+        if: github.event.head_commit.message == 'Recover the stuck Pages deployment'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          deployment="repos/$GITHUB_REPOSITORY/pages/deployments/714868a1421886ffc6835049ba1c4e0b7003d330"
+          gh api "$deployment" --jq '.status'
+          if gh api --method POST "$deployment/cancel"; then
+            echo "Pages accepted the cancellation."
+          else
+            echo "::warning::Pages did not accept the cancellation. The deploy step will check whether publishing is available."
+          fi
+          gh api "$deployment" --jq '.status'
       - uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages-${{ github.run_attempt }}
