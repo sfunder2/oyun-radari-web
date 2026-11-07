@@ -1,8 +1,6 @@
 // scripts/supabase.mjs ile aynı arayüz (rpc, select, selectAll, upsert, patch, del), ama Neon Postgres'e doğrudan SQL ile yazar.
 // Neon Data API'de service key yoktur; toplayıcılar bu yüzden PostgREST yerine veritabanına kendi bağlantı adresiyle bağlanır.
 // Yalnızca toplayıcıların kullandığı PostgREST alt kümesi çevrilir: select, eq/neq/gt/gte/lt/lte/like/ilike/is/in (not. önekiyle), or=(...), order, limit, offset.
-import {neon} from '@neondatabase/serverless';
-
 const ident=s=>{if(!/^[A-Za-z_][A-Za-z0-9_]*$/.test(s))throw new Error('Geçersiz ad: '+s);return '"'+s+'"';};
 const table=name=>{const parts=name.split('.');if(parts.length>2)throw new Error('Geçersiz tablo: '+name);return parts.map(ident).join('.');};
 const dec=s=>decodeURIComponent(s);
@@ -107,8 +105,8 @@ const TYPES={20:v=>v==null?v:Number(v),1700:v=>v==null?v:Number(v),1184:iso,1114
 const TRANSIENT=/^(57014|40P01|55P03|53300|57P01|08\w{3}|XX000)$/;
 
 export function neonDb(connectionString,{retries=4,retryDelay=1500,sleep=ms=>new Promise(ok=>setTimeout(ok,ms)),log=m=>console.log(m),run}={}){
- const sql=run?null:neon(connectionString,{fullResults:false,arrayMode:false,types:{getTypeParser:(oid,format)=>TYPES[oid]||undefined}});
- const exec=run||((text,params)=>sql.query(text,params));
+ let sql;
+ const exec=run||(async(text,params)=>{sql??=(await import('@neondatabase/serverless')).neon(connectionString,{fullResults:false,arrayMode:false,types:{getTypeParser:(oid)=>TYPES[oid]||undefined}});return sql.query(text,params);});
  async function query(text,params=[],{replayable=true}={}){
   for(let attempt=0;;attempt++){
    try{return await exec(text,params);}
