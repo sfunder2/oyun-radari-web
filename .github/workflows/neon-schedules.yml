@@ -8,7 +8,7 @@ on:
       job:
         description: 'Which job to run by hand'
         type: choice
-        options: [ps-prices, markets, enrich, genres]
+        options: [ps-prices, markets, markets-loop, enrich, genres]
         default: ps-prices
   schedule:
     - cron: '*/5 * * * *'
@@ -42,6 +42,20 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '22' }
       - run: node scripts/market-run.mjs
+  # GitHub's */5 cron can run late or not at all; this one run keeps working through the catalog on its own (about 20 batches finish a full Nintendo pass).
+  markets-loop:
+    if: github.event_name == 'workflow_dispatch' && inputs.job == 'markets-loop'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    concurrency: { group: neon-markets, cancel-in-progress: false }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: |
+          for i in $(seq 1 25); do
+            echo "::group::batch $i"; node scripts/market-run.mjs || true; echo "::endgroup::"
+          done
   enrich:
     if: (github.event_name == 'workflow_dispatch' && inputs.job == 'enrich') || (github.event_name == 'schedule' && github.event.schedule == '3-59/5 * * * *')
     runs-on: ubuntu-latest
