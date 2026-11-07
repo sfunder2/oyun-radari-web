@@ -29,7 +29,7 @@ export async function xboxSearch(name,f=fetch){return parseXbox(await xboxSearch
 // Nintendo'nun tarayıcı paketinde yer alan herkese açık, yalnız arama yapabilen anahtar (yönetici anahtarı değildir).
 const NA='U3B6GR4UA3',NK='a29c6927638bfd8cee23993e51e721c9';
 export async function switchSearch(name,f=fetch){
- const q=new URLSearchParams({'x-algolia-application-id':NA,'x-algolia-api-key':NK,hitsPerPage:'8',page:'0',query:cleanTitle(name).slice(0,80),filters:'platform:"Nintendo Switch"'});
+ const q=new URLSearchParams({'x-algolia-application-id':NA,'x-algolia-api-key':NK,hitsPerPage:'8',page:'0',query:cleanTitle(name).slice(0,80),filters:'platform:"Nintendo Switch" OR platform:"Nintendo Switch 2"'});
  const r=await f(`https://${NA.toLowerCase()}-dsn.algolia.net/1/indexes/store_game_en_us?${q}`,{headers:H,signal:t(20000)});
  if(!r.ok)throw new Error('Nintendo arama HTTP '+r.status);
  return((await r.json()).hits||[]).filter(h=>Number.isFinite(h.price?.finalPrice)).map(h=>{const fin=h.price.finalPrice,reg=h.price.regPrice;

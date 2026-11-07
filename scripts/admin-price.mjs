@@ -20,7 +20,7 @@ export async function readAdminPrice(item,f=fetch){
  else if(platform==='epic')o=await epicPrice(id,TR,f,{name:item.name});
  else if(platform==='switch'){
   // This is Nintendo's existing public search-only key, never an administrative credential.
-  const q=new URLSearchParams({'x-algolia-application-id':'U3B6GR4UA3','x-algolia-api-key':'a29c6927638bfd8cee23993e51e721c9',query:String(item.name).slice(0,100),hitsPerPage:'100',filters:'platform:"Nintendo Switch"'});
+  const q=new URLSearchParams({'x-algolia-application-id':'U3B6GR4UA3','x-algolia-api-key':'a29c6927638bfd8cee23993e51e721c9',query:String(item.name).slice(0,100),hitsPerPage:'100',filters:'platform:"Nintendo Switch" OR platform:"Nintendo Switch 2"'});
   const r=await f('https://u3b6gr4ua3-dsn.algolia.net/1/indexes/store_game_en_us?'+q,{signal:AbortSignal.timeout(20000)});
   if(!r.ok)throw Error('Nintendo HTTP '+r.status);o=parseSwitch(await r.json()).rows.find(p=>p.store_id===id)||null;
  }else throw Error('Desteklenmeyen mağaza');
