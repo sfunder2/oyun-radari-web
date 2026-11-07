@@ -52,10 +52,38 @@ export function parseSwitch(j,now=new Date().toISOString()){
 }
 // Nintendo'nun tarayıcı paketindeki herkese açık, yalnız arama yapabilen anahtar (yönetici anahtarı değildir).
 const NA='U3B6GR4UA3',NK='a29c6927638bfd8cee23993e51e721c9';
-export async function fetchSwitchPage(page,f=fetch){
- const p=new URLSearchParams({'x-algolia-application-id':NA,'x-algolia-api-key':NK,hitsPerPage:'100',page:String(page),query:'',filters:'platform:"Nintendo Switch" OR platform:"Nintendo Switch 2"'});
- const r=await f(`https://${NA.toLowerCase()}-dsn.algolia.net/1/indexes/store_game_en_us?${p}`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(25000)});
- if(!r.ok)throw new Error('Nintendo katalog HTTP '+r.status);const out=parseSwitch(await r.json());return{...out,hasMore:out.page+1<out.pages};
+// Nintendo'nun arama dizini 36 binden fazla ürün listeler ama bir sorgu için yalnız ilk 1000 sonucu verir.
+// Bu yüzden katalog, her biri 1000'in altında kalana dek fiyat aralığı ve filtrelerle parçalanır; imleç tüm parçaların sayfalarında ilerler.
+const SW_BASE='(platform:"Nintendo Switch" OR platform:"Nintendo Switch 2")',SW_CAP=1000,SW_PAGE=100;
+const SW_PRICES=[[0,0],[0.01,0.49],[0.5,0.99],[1,1.49],[1.5,1.99],[2,2.49],[2.5,2.99],[3,3.49],[3.5,3.99],[4,4.49],[4.5,4.99],[5,5.99],[6,6.99],[7,7.99],[8,8.99],[9,9.99],[10,11.99],[12,14.99],[15,19.99],[20,29.99],[30,39.99],[40,49.99],[50,59.99],[60,69.99],[70,100000]];
+const SW_DIMS=['hasDlc','contentRatingCode','dlcType','availability','productType','playerCount','softwarePublisher','gameGenreLabels'];
+const swQuery=(f,filters,extra={})=>f(`https://${NA.toLowerCase()}-dsn.algolia.net/1/indexes/store_game_en_us?${new URLSearchParams({'x-algolia-application-id':NA,'x-algolia-api-key':NK,query:'',filters,...extra})}`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(25000)}).then(async r=>{if(!r.ok)throw new Error('Nintendo katalog HTTP '+r.status);return r.json()});
+const swVal=(a,v)=>v==='true'||v==='false'?`${a}:${v}`:`${a}:"${String(v).replace(/"/g,'\\"')}"`;
+// Bir süzgeci 1000'in altında kalan parçalara böler: hiç ürün yoksa atlanır, sığmıyorsa sıradaki alana göre ayrılır.
+export async function planSwitch(f=fetch,{prices=SW_PRICES,dims=SW_DIMS,cap=SW_CAP}={}){
+ const leaves=[];
+ const split=async(filters,d)=>{
+  const attr=dims[d],r=await swQuery(f,filters,{hitsPerPage:'0',...(attr?{facets:attr}:{})});
+  const n=r.nbHits||0;if(!n)return;
+  if(n<=cap||!attr){leaves.push({filters,hits:Math.min(n,cap)});return;}
+  const vals=Object.entries(r.facets?.[attr]||{});
+  if(vals.length===1&&vals[0][1]===n)return split(filters,d+1);
+  const kids=vals.map(([v])=>`${filters} AND ${swVal(attr,v)}`);
+  const seen=vals.reduce((a,[,c])=>a+c,0);
+  if(vals.length&&(seen<n||vals.length>=100))kids.push(`${filters}${vals.map(([v])=>` AND NOT ${swVal(attr,v)}`).join('')}`);
+  if(!vals.length)return split(filters,d+1);
+  for(const k of kids)await split(k,d+1);
+ };
+ await Promise.all(prices.map(([a,b])=>split(`${SW_BASE} AND price.finalPrice:${a} TO ${b}`,0)));
+ leaves.sort((x,y)=>x.filters<y.filters?-1:x.filters>y.filters?1:0);
+ return leaves.flatMap(l=>Array.from({length:Math.ceil(l.hits/SW_PAGE)},(_,page)=>({filters:l.filters,page})));
+}
+let swPlan=null;
+export async function fetchSwitchPage(cursor,f=fetch,plan=null){
+ const pages=plan||(swPlan??=planSwitch(f)),list=await pages;
+ const it=list[cursor];if(!it)return{rows:[],page:cursor,pages:list.length,hasMore:false};
+ const out=parseSwitch(await swQuery(f,it.filters,{hitsPerPage:String(SW_PAGE),page:String(it.page)}));
+ return{rows:out.rows,page:cursor,pages:list.length,hasMore:cursor+1<list.length};
 }
 // Epic Games Store TR: mağaza sitesinin GraphQL arama sorgusu (ana oyunlar). Fiyatlar kuruş cinsinden gelir, ondalık sayısı yanıttadır.
 const EPIC_QUERY=`query searchStoreQuery($country:String!,$locale:String,$count:Int,$start:Int,$category:String,$sortBy:String,$sortDir:String){Catalog{searchStore(country:$country,locale:$locale,count:$count,start:$start,category:$category,sortBy:$sortBy,sortDir:$sortDir,allowCountries:$country){elements{title id namespace productSlug urlSlug offerType tags{name groupName} keyImages{type url} catalogNs{mappings(pageType:"productHome"){pageSlug pageType}} offerMappings{pageSlug pageType} price(country:$country){totalPrice{discountPrice originalPrice currencyCode currencyInfo{decimals}}}} paging{count total}}}}`;
