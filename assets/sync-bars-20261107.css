@@ -1,0 +1,7 @@
+.admin-stores .sync-bars{display:grid;gap:6px;margin:8px 0 10px}
+.admin-stores .sync-bar{display:grid;gap:3px}
+.admin-stores .sync-bar small{opacity:.85}
+.admin-stores .sync-bar progress{width:100%;height:8px;border-radius:99px;overflow:hidden;appearance:none;-webkit-appearance:none;border:0;background:rgba(127,127,127,.25);accent-color:#9ed95f}
+.admin-stores .sync-bar progress::-webkit-progress-bar{background:rgba(127,127,127,.25);border-radius:99px}
+.admin-stores .sync-bar progress::-webkit-progress-value{background:#9ed95f;border-radius:99px}
+.admin-stores .sync-bar progress::-moz-progress-bar{background:#9ed95f;border-radius:99px}
