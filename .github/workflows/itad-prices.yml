@@ -1,8 +1,7 @@
 name: ITAD prices (key shops and publisher stores)
 on:
   # Dakikalar Supabase Cron işlerinin (markets :x1/:x6, admin :x2/:x7, enrich :x3/:x8, */3 arama görünümü, genres :07/:37) boş kaldığı dakikalara ve birbirinden ayrı saatlere yerleştirildi.
-  schedule:
-    - cron: '25,55 * * * *'
+  # Scheduled runs moved to the Neon scheduler (marketjobs /job/itad); manual runs stay.
   workflow_dispatch:
 concurrency:
   group: itad-prices
