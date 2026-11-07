@@ -1,0 +1,64 @@
+name: Neon schedules (prices, markets, enrich, genres)
+# Replaces the Supabase Cron jobs that called the refresh-* Edge Functions.
+# Off until the repository variable NEON_SCHEDULES_ON is set to 1 (so Supabase and Neon never write at the same time).
+# Needs the secret NEON_DATABASE_URL (a role limited to what the collectors write). Manual runs always work.
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Which job to run by hand'
+        type: choice
+        options: [ps-prices, markets, enrich, genres]
+        default: ps-prices
+  schedule:
+    - cron: '*/5 * * * *'
+    - cron: '1-59/5 * * * *'
+    - cron: '3-59/5 * * * *'
+    - cron: '7,37 * * * *'
+permissions:
+  contents: read
+env:
+  NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+  SUPABASE_URL: neon
+  SUPABASE_SERVICE_KEY: neon
+jobs:
+  ps-prices:
+    if: (github.event_name == 'workflow_dispatch' && inputs.job == 'ps-prices') || (github.event_name == 'schedule' && github.event.schedule == '*/5 * * * *' && vars.NEON_SCHEDULES_ON == '1')
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    concurrency: { group: neon-ps-prices, cancel-in-progress: false }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: node scripts/update-ps-catalog.mjs
+  markets:
+    if: (github.event_name == 'workflow_dispatch' && inputs.job == 'markets') || (github.event_name == 'schedule' && github.event.schedule == '1-59/5 * * * *' && vars.NEON_SCHEDULES_ON == '1')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency: { group: neon-markets, cancel-in-progress: false }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: node scripts/market-run.mjs
+  enrich:
+    if: (github.event_name == 'workflow_dispatch' && inputs.job == 'enrich') || (github.event_name == 'schedule' && github.event.schedule == '3-59/5 * * * *' && vars.NEON_SCHEDULES_ON == '1')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency: { group: neon-enrich, cancel-in-progress: false }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: node scripts/enrich-run.mjs
+  genres:
+    if: (github.event_name == 'workflow_dispatch' && inputs.job == 'genres') || (github.event_name == 'schedule' && github.event.schedule == '7,37 * * * *' && vars.NEON_SCHEDULES_ON == '1')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency: { group: neon-genres, cancel-in-progress: false }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: node scripts/genres-run.mjs
