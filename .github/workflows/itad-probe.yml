@@ -21,6 +21,7 @@ jobs:
           ITAD_API_KEY: ${{ secrets.ITAD_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
         run: node scripts/${{ inputs.script || 'itad-probe' }}.mjs
       - uses: actions/upload-artifact@v4
         if: always()
