@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090d12">
+<title>Oyun Radarı — Bağlantı yok</title>
+<link rel="icon" href="/oyun-radari-web/icons/icon.svg" type="image/svg+xml">
+<style>
+html,body{height:100%;margin:0;background:#090d12;color:#eef2f6;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:32px 16px;box-sizing:border-box;text-align:center}
+img{width:88px;height:88px;border-radius:20px}
+h1{margin:8px 0 0;font-size:22px}
+p{margin:0;max-width:340px;color:#9aa7b4}
+button{margin-top:16px;padding:12px 22px;border:0;border-radius:12px;background:#c4f85b;color:#090d12;font:inherit;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<main>
+<img src="/oyun-radari-web/icons/icon-192.png" alt="">
+<h1 id="t">İnternet bağlantısı yok</h1>
+<p id="b">Oyun Radarı canlı mağaza fiyatlarını gösterdiği için internete ihtiyaç duyar. Bağlantı gelince tekrar deneyin.</p>
+<button id="r" type="button">Tekrar dene</button>
+</main>
+<script>
+try{if((localStorage.getItem('radar-lang')==='en')){document.documentElement.lang='en';t.textContent='No internet connection';b.textContent='Oyun Radarı shows live store prices, so it needs the internet. Try again once you are back online.';r.textContent='Try again';document.title='Oyun Radarı — Offline'}}catch(e){}
+r.onclick=function(){location.reload()};
+addEventListener('online',function(){location.reload()});
+</script>
+</body>
+</html>
