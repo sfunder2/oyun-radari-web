@@ -1,8 +1,11 @@
 // Supabase PostgREST için küçük istemci (SDK gerekmez).
+// NEON_DATABASE_URL tanımlıysa aynı arayüz Neon Postgres'e doğrudan SQL ile konuşur (scripts/neon-db.mjs); tanımlı değilse hiçbir şey değişmez.
+import {neonDb} from './neon-db.mjs';
 // Geçici sayılan Postgres hataları: 57014 statement timeout (sorgu iptal edilip geri alınır), 40P01 deadlock, 55P03 kilit alınamadı, 53300 bağlantı sınırı.
 const TRANSIENT_PG=/"code"\s*:\s*"(57014|40P01|55P03|53300)"/;
 const TRANSIENT_HTTP=[502,503,504,520,522,524];
 export function supabase(url,key,fetchImpl=fetch,{retries=4,retryDelay=1500,timeoutMs=30000,sleep=ms=>new Promise(ok=>setTimeout(ok,ms)),log=m=>console.log(m)}={}){
+ if(typeof process!=='undefined'&&process.env?.NEON_DATABASE_URL)return neonDb(process.env.NEON_DATABASE_URL,{retries,retryDelay,sleep,log});
  const base=url.replace(/\/$/,'')+'/rest/v1/';
  const headers={apikey:key,Authorization:'Bearer '+key,'Content-Type':'application/json'};
  // Üstel bekleme + rastgele sapma: 1.5 sn, 3 sn, 6 sn, 12 sn (±%25). Aynı anda düşen toplayıcılar aynı saniyede yeniden vurmasın.
