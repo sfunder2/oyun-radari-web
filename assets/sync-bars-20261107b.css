@@ -5,3 +5,4 @@
 .admin-stores .sync-bar progress::-webkit-progress-bar{background:rgba(127,127,127,.25);border-radius:99px}
 .admin-stores .sync-bar progress::-webkit-progress-value{background:#9ed95f;border-radius:99px}
 .admin-stores .sync-bar progress::-moz-progress-bar{background:#9ed95f;border-radius:99px}
+.admin-stores .sync-state{margin:6px 0 0;font-size:12px;font-weight:700;color:var(--muted)}.admin-stores .sync-state.live{color:var(--lime)}.admin-stores .sync-state.stale{color:#f59e0b}

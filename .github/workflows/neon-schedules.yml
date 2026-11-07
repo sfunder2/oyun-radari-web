@@ -11,8 +11,7 @@ on:
         options: [ps-prices, markets, markets-loop, enrich, genres]
         default: ps-prices
   schedule:
-    - cron: '*/5 * * * *'
-    - cron: '1-59/5 * * * *'
+    # ps-prices and markets run on Neon's own scheduler (marketjobs function); manual runs stay available.
     - cron: '3-59/5 * * * *'
     - cron: '7,37 * * * *'
 permissions:
