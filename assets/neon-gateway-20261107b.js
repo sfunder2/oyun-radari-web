@@ -134,13 +134,20 @@ export function install(realFetch = globalThis.fetch) {
     if (url.startsWith(SUPABASE_FN) && neonEnabled()) { const r = functionCall(realFetch, url, init); if (r) return r; }
     if (!url.startsWith(SUPABASE_REST) || !neonEnabled()) return realFetch(input, init);
     const auth = String(init?.headers?.Authorization || '');
-    const anon = !auth || auth === 'Bearer ' + SUPABASE_KEY;
+    // Geçişten önce Supabase'ten alınmış eski oturum jetonu Neon'da "JWK not found" verir; anonim jetona düşülür.
+    let old = false;
+    try { old = String(JSON.parse(atob(auth.slice(7).split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).iss || '').includes('supabase'); } catch {}
+    const anon = !auth || auth === 'Bearer ' + SUPABASE_KEY || old;
     const send = async force => {
       const token = anon ? await anonToken(force) : auth.slice(7);
       return realFetch(...rewrite(url, init, token));
     };
     const r = await send(false);
     if (r.status === 401 && anon) return send(true);
+    if (r.status === 401 && !anon) { // kullanıcı jetonu reddedildi (bilinmeyen anahtar/süre): herkese açık okuma yine çalışsın
+      const t = await anonToken(false);
+      return realFetch(...rewrite(url, init, t));
+    }
     return r;
   };
   wrapped.__neon = true;
