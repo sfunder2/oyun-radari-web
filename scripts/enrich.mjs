@@ -12,9 +12,11 @@ export async function enrichProduct(p,{ocIndex,f=fetch,now=new Date().toISOStrin
  for(const [c,list] of [['steam',steam],['xbox',xbox],['switch',sw]]){
   const hit=list&&pickExact(list,key);storeStatus[c]={status:list===null?'unavailable':hit?'ok':'no_match',checkedAt:now};
   if(hit){offers.push({platform:hit.platform,store_id:hit.store_id,title_key:key,name:hit.name,image:hit.image,price:hit.price,original_price:hit.original_price,discount_percent:hit.discount_percent,currency:hit.currency,url:hit.url,edition:hit.edition,checked_at:now});
-   if(c==='steam')meta=await run('steam ayrıntı',()=>fetchDetails(hit.store_id,key,f));
+   let detailMc=null;
+   if(c==='steam')meta=await run('steam ayrıntı',()=>fetchDetails(hit.store_id,key,f,{onMetacritic:m=>{detailMc=m}}));
    if(c==='steam'&&meta){const n=await run('steam haber',()=>fetchNews(hit.store_id,f));if(n)meta.news=n;}
-   if(c==='steam'&&hit.metascore)metacritic={score:hit.metascore,platform:'PC',url:`https://www.metacritic.com/search/${encodeURIComponent(hit.name)}/?category=13`};}
+   // Arama sonucundaki metascore bazen boş gelir; ayrıntı yanıtındaki puan (ve gerçek Metacritic adresi) yedek olarak kullanılır.
+   if(c==='steam'&&(hit.metascore||detailMc))metacritic={score:hit.metascore||detailMc.score,platform:'PC',url:detailMc?.url||`https://www.metacritic.com/search/${encodeURIComponent(hit.name)}/?category=13`};}
  }
  const oc=ocIndex?.get(key);
  if(oc){try{const r=await openCritic(oc,f);if(r)opencritic={score:r.score,reviews:r.reviews,url:r.url}}catch(e){errors.push('opencritic: '+e.message)}}

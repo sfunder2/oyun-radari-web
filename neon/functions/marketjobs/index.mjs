@@ -5,6 +5,7 @@ import {neonDb} from '../../../scripts/neon-db.mjs';
 import {httpRun} from '../../lib/neon-http.mjs';
 import {runEnrichBatch,loadOcIndex} from '../../../scripts/enrich-batch.mjs';
 import {runGenreSweep} from '../../../scripts/ps-genres.mjs';
+import {runMetacritic} from '../../../scripts/metacritic.mjs';
 // GitHub Actions'ın */5 cron'u geç ya da hiç çalışabildiği için fiyat toplayıcıları Neon'un kendi zamanlayıcısıyla çalışır.
 // Function Trigger (cron) /job/<ad> yoluna POST eder: ps-prices (PlayStation fiyatları) ve markets (Steam, Xbox, Switch, Epic, GOG).
 // Ortam: DATABASE_HOST, DATABASE_URL (radar_jobs yetkili ayrı rol). Aynı işin üst üste binmesini bellekte tek kilit önler.
@@ -14,6 +15,8 @@ const JOBS={
   'enrich':async()=>{const d=sb();const r=await runEnrichBatch({sb:d,batch:60,say:()=>{},deadlineMs:150000,ocIndex:await loadOcIndex(d)});return{status:r.errors?'partial':'ok',stats:r,errors:[]};},
   'genres':async()=>{const r=await runGenreSweep({sb:sb(),deadlineMs:150000,maxPages:1000,restMs:0});return{status:'ok',stats:r&&typeof r==='object'?r:{done:true},errors:[]};},
   'itad':async()=>{const d=sb();const key=await d.rpc('itad_job_key');if(!key)throw new Error('ITAD anahtarı yok');return runMarketBatch({sb:d,pages:{itad:20},itadKey:key,only:['itad'],stateKey:'market_itad',deadlineMs:150000,say:()=>{}});},
+  // Eksik Metacritic puanları: haftada bir Wikidata, her turda en çok 80 Steam oyunu (Steam hız sınırı için 1,5 sn arayla).
+  'metacritic':async()=>{const r=await runMetacritic({sb:sb(),steamLimit:80,gapMs:1500,deadlineMs:150000});return{status:r.wikidataError||r.steam?.stopped?'partial':'ok',stats:{wikidata:r.wikidata,steam:r.steam},errors:r.wikidataError?[r.wikidataError]:[]};},
   'markets':()=>{const n=3;return runMarketBatch({sb:sb(),pages:{steam:60,xbox:100,switch:25,epic:n,gog:40,itad:0},deadlineMs:180000,say:()=>{}});},
 };
 const running=new Set();

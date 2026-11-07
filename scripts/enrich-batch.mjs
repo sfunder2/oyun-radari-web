@@ -5,6 +5,7 @@ import {fetchDetails,fetchNews} from './steam-meta.mjs';
 import {refreshUpcoming} from './upcoming.mjs';
 import {fetchAllNews} from './news.mjs';
 import {fetchAccent} from './color.mjs';
+import {saveScores} from './metacritic.mjs';
 // Zenginleştirme turunun çekirdeği. Hem GitHub Actions (CLI) hem Supabase Edge Function aynı kodu çalıştırır.
 // deadlineMs: Edge Function'ların süre sınırı için zaman bütçesi; dolunca kalan işler sonraki tura bırakılır.
 export async function loadOcIndex(sb){
@@ -71,8 +72,10 @@ if(hasMeta){
    catch(e){if(!/400|PGRST/.test(e.message))throw e;stale=await sb.select('game_meta?select=title_key,steam_appid&requirements=is.null&steam_appid=not.is.null&order=checked_at.asc&limit=25');}
    for(const m of stale)todo.push({title_key:m.title_key,store_id:String(m.steam_appid),refresh:true});
   }catch(e){if(!/400|404|PGRST/.test(e.message))throw e;}
-  for(const o of todo){if(Date.now()>deadline)break;try{const m=await fetchDetails(o.store_id,o.title_key);if(m){try{const n=await fetchNews(o.store_id);if(n.length)m.news=n;}catch{}got.push(m);}}catch(e){console.log('ayrıntı hatası',o.store_id,e.message);}await sleep(500);}
+  const mc=[];
+  for(const o of todo){if(Date.now()>deadline)break;try{const m=await fetchDetails(o.store_id,o.title_key,fetch,{onMetacritic:x=>mc.push({key:o.title_key,score:x.score,platform:'PC',url:x.url})});if(m){try{const n=await fetchNews(o.store_id);if(n.length)m.news=n;}catch{}got.push(m);}}catch(e){console.log('ayrıntı hatası',o.store_id,e.message);}await sleep(500);}
   if(got.length)await sb.upsert('game_meta',got,'title_key');
+  if(mc.length)try{await saveScores(sb,mc);}catch(e){say('Metacritic (ayrıntı) atlandı: '+e.message.slice(0,100));}
   say(`Ayrıntı tamamlama: ${got.length}/${todo.length}`);
  }catch(e){say('Ayrıntı tamamlama atlandı: '+e.message.slice(0,120));}
  // Haber şeridi: 3 saatte bir
