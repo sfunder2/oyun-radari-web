@@ -12,6 +12,10 @@ Arayüz dosyalarının kaynağı oyun-radari deposundaki `live/` klasörüdür (
 
 `android/` klasörü siteyi tam ekran açan küçük bir Android uygulamasıdır (WebView). `android/**` değiştiğinde **Android APK** iş akışı APK'yı derler ve `apk-N` etiketli bir GitHub Release olarak yayımlar. Her sürüm aynı anahtarla imzalanır, bu yüzden yeni APK eskisinin üzerine kurulur.
 
+## iPad / iPhone uygulaması (PWA)
+
+Site kurulabilir bir web uygulamasıdır (`manifest.webmanifest`, `sw.js`, `icons/`). iPad'de Safari ile siteyi açıp **Paylaş → Ana Ekrana Ekle** demek yeterli; uygulama kendi ikonu ve tam ekranla açılır, site güncellendikçe uygulama da güncel kalır. Android tarayıcılarda da aynı şekilde ana ekrana eklenebilir. Service worker hiçbir şeyi önbellekten sunmaz; yalnızca kurulumu sağlar ve internet yokken `offline.html` sayfasını gösterir. iPad, iPhone ve Android tarayıcılarında ilk ziyarette bir kez kurulum ipucu çıkar (`assets/pwa-20261107.js`), kapatılınca bir daha görünmez; Android uygulamasının içinde çıkmaz.
+
 ## Steam hesabı bağlama
 
 Giriş yapan oyuncu Steam hesabını bağlayınca sahip olduğu oyunlar, oynama süreleri ve oyun başına açtığı başarımlar gösterilir. Steam şifresi ya da jetonu hiç alınmaz: oyuncu Steam'in kendi sayfasında onaylar, `steam-account` fonksiyonu dönüşü Steam'e geri sorarak (OpenID 2.0 `check_authentication`) doğrular ve yalnız SteamID'yi saklar.
