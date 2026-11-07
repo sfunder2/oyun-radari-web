@@ -50,3 +50,23 @@ test('xbox: cihazlar mağazanın availableOn listesinden gelir, bilinmeyenler at
  assert.deepEqual(xboxDevices({availableOn:['XboxSeriesX','XboxSeriesS']}),['xbox_series']);
  assert.deepEqual(xboxDevices({}),[]);
 });
+
+test('switch: catalog splits into parts under the 1000-hit limit and pages through them',async()=>{
+ const {planSwitch,fetchSwitchPage}=await import('../scripts/market-catalog.mjs');
+ // Sahte dizin: 2500 ürün; hasDlc ile 1500/1000'e ayrılır, 1500'lük kısım içerik derecesiyle 900/600'e bölünür.
+ const fake=async u=>{
+  const q=new URL(u).searchParams,fl=q.get('filters')||'',pg=Number(q.get('page')||0),big=fl.includes('price.finalPrice:1 TO 1.49');
+  let n=big?2500:0;
+  if(big&&fl.includes('hasDlc:true'))n=1500;else if(big&&fl.includes('hasDlc:false'))n=1000;
+  if(big&&fl.includes('contentRatingCode:"T"'))n=600;else if(big&&fl.includes('NOT contentRatingCode:"E"'))n=600;else if(big&&fl.includes('contentRatingCode:"E"'))n=900;
+  const facets=q.get('facets');let fc;
+  if(facets==='hasDlc')fc={hasDlc:{true:1500,false:1000}};if(facets==='contentRatingCode')fc={contentRatingCode:{E:900,T:600}};
+  const hits=q.get('hitsPerPage')==='0'?[]:Array.from({length:Math.min(100,Math.max(0,n-pg*100))},(_,i)=>({objectID:fl+pg+i,urlKey:'k'+fl.length+'-'+pg+'-'+i,title:'T',price:{finalPrice:1}}));
+  return{ok:true,json:async()=>({nbHits:n,facets:fc,page:pg,nbPages:Math.ceil(n/100),hits})};
+ };
+ const plan=await planSwitch(fake);
+ assert.equal(plan.length,9+6+10);// 900 -> 9, 600 -> 6, 1000 -> 10 sayfa
+ const last=await fetchSwitchPage(plan.length-1,fake,plan);assert.equal(last.hasMore,false);
+ const first=await fetchSwitchPage(0,fake,plan);assert.equal(first.hasMore,true);assert.equal(first.rows.length,100);
+ assert.equal((await fetchSwitchPage(plan.length,fake,plan)).rows.length,0);
+});
