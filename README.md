@@ -168,8 +168,10 @@ Zenginleştirme Metacritic puanını yalnız Steam arama sonucundaki `metascore`
 
 - `scripts/metacritic.mjs`: iki açık kaynak, yalnız puanı eksik olan oyunlara yazar, OpenCritic alanlarına dokunmaz.
   - Wikidata (CC0): Metacritic eleştirmen puanı (P444, "review score by" Metacritic) ve Metacritic kimliği (P1712). Haftada bir tek SPARQL sorgusu. Eşleşme önce Steam uygulama kimliğiyle (P1733), sonra başlık anahtarıyla; aynı oyunda birden çok platform puanı varsa PS5, PS4, PC sırası.
+  - İngilizce Wikipedia "Video game reviews" tablosunun `MC` alanı (`scripts/wikipedia-mc.mjs`): Wikidata'nın tutmadığı yeni büyük oyunlar için. Yalnız puanı eksik ve OpenCritic ya da IGDB eleştirmen puanı olan oyunlar sorulur. Makale adı mağaza adından denenir ("Ad (YIL video game)", "Ad (video game)", "Ad", büyük harfli adların düzeltilmiş hâli); makalede "Infobox video game" olmalı ve yönlendirme sonrası başlığın anahtarı oyununkiyle aynı olmalı. İmleç `ps_state.metacritic_wikipedia`, tur bitince 7 gün beklenir.
   - Steam appdetails `metacritic` alanı: `game_meta`'daki Steam oyunları sırayla (imleç `ps_state.metacritic_steam`), puanı olan oyunlar sorulmaz. 429'da tur durur, imleç aynı oyunda kalır.
 - Zenginleştirme de artık arama sonucunda `metascore` boşsa Steam ayrıntı yanıtındaki puanı ve gerçek Metacritic adresini kullanır.
-- Zamanlama: `marketjobs` Neon fonksiyonunda `/job/metacritic` (10 dakikada bir, en çok 80 Steam oyunu). Toplu doldurma için Actions'ta "Neon schedules" iş akışı, `metacritic` seçeneği (54 dakika, Wikidata'yı beklemeden yeniden okur).
+- Zamanlama: Actions'ta "Neon schedules" iş akışının `metacritic` işi 3 saatte bir 20 dakika çalışır; el ile `metacritic` seçeneği 54 dakikalık toplu doldurmadır (Wikidata'yı beklemeden yeniden okur). `marketjobs` Neon fonksiyonunda da `/job/metacritic` hazırdır (60 Wikipedia + 60 Steam oyunu); fonksiyon yeniden yayımlanıp zamanlayıcı eklenirse Actions turuna gerek kalmaz.
+- Arayüz: Metacritic yoksa "Efektif puan" OpenCritic ile hesaplanır, vitrin metni OpenCritic'i yazar. Metacritic etiketleri artık sabit "PC · Steam" yerine kaydın platformunu gösterir. Sıralama zaten Metacritic ve OpenCritic'in büyüğünü kullanıyordu.
 - `tests/metacritic.test.mjs` ile sınanır.
 
