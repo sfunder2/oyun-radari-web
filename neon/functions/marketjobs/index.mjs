@@ -9,7 +9,7 @@ import {httpRun} from '../../lib/neon-http.mjs';
 const sb=()=>neonDb('',{retries:3,run:httpRun({host:process.env.DATABASE_HOST,connectionString:process.env.DATABASE_URL})});
 const JOBS={
   'ps-prices':()=>runPsBatch({sb:sb(),fetchGrid,fetchConcepts,fetchConceptProducts,fetchEndTime}),
-  'markets':()=>{const n=3;return runMarketBatch({sb:sb(),pages:{steam:n,xbox:n,switch:25,epic:n,gog:n,itad:0},deadlineMs:200000,say:()=>{}});},
+  'markets':()=>{const n=3;return runMarketBatch({sb:sb(),pages:{steam:30,xbox:40,switch:25,epic:n,gog:30,itad:0},deadlineMs:120000,say:()=>{}});},
 };
 const running=new Set();
 export default{
