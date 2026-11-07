@@ -161,3 +161,15 @@ Elimizdeki Steam oyunları için ITAD'den Türkiye (TL) fiyatları okunur ve `st
 - Seçim ölçümle yapıldı (`scripts/itad-probe-all.mjs`, **ITAD probe** iş akışı `script=itad-probe-all`, yalnız okur): ITAD'in TR listesindeki her mağaza için kapsam, para birimi ve mevcut en ucuzu kaç oyunda geçtiği. Microsoft Store, Xbox Store TR toplayıcısıyla aynı kataloğu getirdiği için eklenmedi; EA Store, Nuuvem, JoyBuggy ve Newegg Türkiye'de oyun listelemiyor.
 - Yeni bir mağaza eklemek: `ITAD_SHOPS`'a kimliği ekle, v47 gibi bir şema dosyasıyla platform kısıtını ve `search_market_r/_d/_s` listelerini genişlet, arayüzdeki mağaza adı haritalarına ekle.
 - `.github/workflows/itad-prices.yml` 30 dakikada bir çalışır (`ITAD_API_KEY` gizli anahtarı gerekir).
+
+## Metacritic puanı tamamlama
+
+Zenginleştirme Metacritic puanını yalnız Steam arama sonucundaki `metascore` alanından alıyordu ve bunu yalnız PlayStation ürünü Steam'de birebir adla ve fiyatla bulunduğunda yapıyordu. PlayStation'a özel oyunlar (Astro Bot, The Last of Us Part II), Steam'de adı farklı ya da ücretsiz olan oyunlar ve Steam mağaza sayfasında puan göstermeyen oyunlar (Starfield, Doom Eternal) bu yüzden puansız kalıyordu.
+
+- `scripts/metacritic.mjs`: iki açık kaynak, yalnız puanı eksik olan oyunlara yazar, OpenCritic alanlarına dokunmaz.
+  - Wikidata (CC0): Metacritic eleştirmen puanı (P444, "review score by" Metacritic) ve Metacritic kimliği (P1712). Haftada bir tek SPARQL sorgusu. Eşleşme önce Steam uygulama kimliğiyle (P1733), sonra başlık anahtarıyla; aynı oyunda birden çok platform puanı varsa PS5, PS4, PC sırası.
+  - Steam appdetails `metacritic` alanı: `game_meta`'daki Steam oyunları sırayla (imleç `ps_state.metacritic_steam`), puanı olan oyunlar sorulmaz. 429'da tur durur, imleç aynı oyunda kalır.
+- Zenginleştirme de artık arama sonucunda `metascore` boşsa Steam ayrıntı yanıtındaki puanı ve gerçek Metacritic adresini kullanır.
+- Zamanlama: `marketjobs` Neon fonksiyonunda `/job/metacritic` (10 dakikada bir, en çok 80 Steam oyunu). Toplu doldurma için Actions'ta "Neon schedules" iş akışı, `metacritic` seçeneği (54 dakika, Wikidata'yı beklemeden yeniden okur).
+- `tests/metacritic.test.mjs` ile sınanır.
+

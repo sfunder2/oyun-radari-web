@@ -1,4 +1,5 @@
 // Steam'den: yaklaşan oyunlar listesi ve oyun ayrıntıları (tür, çıkış tarihi, geliştirici, yaş sınırı, Türkçe desteği)
+import {parseSteamMetacritic} from './metacritic.mjs';
 const UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
 const MONTHS={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
 export const GENRE_TR={Action:'Aksiyon',Adventure:'Macera',RPG:'RPG',Strategy:'Strateji',Simulation:'Simülasyon',Sports:'Spor',Racing:'Yarış',Indie:'Bağımsız',Casual:'Rahat','Massively Multiplayer':'MMO','Free To Play':'Ücretsiz','Early Access':'Erken Erişim'};
@@ -95,10 +96,12 @@ export function parseDetails(d,titleKey,now=new Date().toISOString()){
   requirements:(()=>{const r=d.pc_requirements;if(!r||Array.isArray(r))return null;const min=parseRequirements(r.minimum),rec=parseRequirements(r.recommended);return min.length||rec.length?{min,rec}:null;})(),
   dlc_count:Array.isArray(d.dlc)?d.dlc.length:0,checked_at:now};
 }
-export async function fetchDetails(appid,titleKey,f=fetch){
+// onMetacritic: appdetails yanıtındaki Metacritic puanı ({score,url}) game_meta'ya yazılmaz, isteyen çağırana verilir.
+export async function fetchDetails(appid,titleKey,f=fetch,{onMetacritic}={}){
  const r=await f(`https://store.steampowered.com/api/appdetails?appids=${appid}&cc=tr&l=english`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(25000)});
  if(!r.ok)throw new Error('Steam ayrıntı HTTP '+r.status);
  const j=await r.json();const e=j[appid];if(!e?.success)return null;const meta=parseDetails(e.data,titleKey);if(!meta)return null;
+ if(onMetacritic){const mc=parseSteamMetacritic(e);if(mc)onMetacritic(mc);}
  try{const page=await f(`https://store.steampowered.com/app/${appid}/?l=english`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(8000)});if(page.ok){const html=await page.text();const tags=[...new Set([...html.matchAll(/<a[^>]*class="app_tag"[^>]*>([\s\S]*?)<\/a>/g)].map(m=>strip(m[1])).filter(Boolean))].slice(0,30);if(tags.length)meta.tags=tags;}}catch{}
  return meta;
 }
