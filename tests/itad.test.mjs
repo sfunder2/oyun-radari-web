@@ -38,7 +38,7 @@ test('market batch: itad job keeps its own state key, wraps and removes stale of
  const r=await runMarketBatch({sb,pages:3,say:()=>{},stateKey:'market_itad',only:['itad'],fetchers:{steam:async()=>{throw new Error('çalışmamalı')},itad}});
  assert.deepEqual(seen,[400]);assert.equal(r.status,'ok');assert.equal(r.stats.itad,2);
  assert.ok(sb.calls.select.some(p=>p.includes('platform=eq.humble'))&&sb.calls.select.some(p=>p.includes('platform=eq.gmg')));  // platform başına kayıtlı hâl
- assert.equal(sb.calls.del.length,1);assert.match(sb.calls.del[0],new RegExp(`platform=in\\.\\(${ITAD_PLATFORMS.join(',')}\\)&checked_at=lt\\.`));
+ assert.equal(sb.calls.del.length,1);assert.match(sb.calls.del[0],new RegExp(`platform=in\\.\\(${ITAD_PLATFORMS.filter(p=>p!=='epic').join(',')}\\)&checked_at=lt\\.`));
  const st=sb.calls.upsert.find(u=>u.t==='ps_state').rows[0];assert.equal(st.key,'market_itad');assert.equal(st.value.cursors.itad,0);
 });
 test('itad v47: new key shops and publisher stores map to their own platforms',()=>{
