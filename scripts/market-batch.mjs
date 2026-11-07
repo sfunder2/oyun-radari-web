@@ -15,7 +15,7 @@ export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,st
  const jobs={ // wrapped: katalog bitti, imleç başa döndü; bu tur o mağaza için tamam
   steam:async()=>{const r=await fetchers.steam(cur.steam),wrapped=!(r.hasMore&&r.rows.length);cur.steam=wrapped?0:cur.steam+1;return{rows:r.rows,wrapped}},
   xbox:async()=>{const r=await fetchers.xbox(cur.xbox),wrapped=!r.hasMore;cur.xbox=wrapped?'':r.next;return{rows:r.rows,wrapped}},
-  switch:async()=>{const r=await fetchers.switch(cur.switch),wrapped=!(r.hasMore&&r.rows.length);cur.switch=wrapped?0:cur.switch+1;return{rows:r.rows,wrapped}},
+  switch:async()=>{const r=await fetchers.switch(cur.switch),wrapped=!r.hasMore;cur.switch=wrapped?0:cur.switch+1;return{rows:r.rows,wrapped}},
   epic:async()=>{const r=await fetchers.epic(cur.epic),wrapped=!(r.hasMore&&r.rows.length);cur.epic=wrapped?0:cur.epic+1;return{rows:r.rows,wrapped}},
   gog:async()=>{const r=await fetchers.gog(cur.gog),wrapped=!(r.hasMore&&r.rows.length);cur.gog=wrapped?0:cur.gog+1;return{rows:r.rows,wrapped}},
   // ITAD sayfası Steam satırlarının bir dilimidir; dilimde hiç teklif çıkmasa da tur sürer (hasMore).
