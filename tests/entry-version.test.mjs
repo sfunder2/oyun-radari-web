@@ -8,7 +8,8 @@ import {readFileSync} from 'node:fs';
 test('import map and entry script load the same bundle URL', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const map = JSON.parse(html.match(/<script type="importmap">([^<]*)<\/script>/)[1]).imports;
-  const src = html.match(/<script type="module"[^>]*src="([^"]+)"/)[1];
+  // The Neon gateway script loads first on purpose; the entry bundle is the index-*.js module.
+  const src = html.match(/<script type="module"[^>]*src="([^"]*\/assets\/index-[^"]+)"/)[1];
   const base = src.split('?')[0];
   assert.ok(map[base], 'import map must cover the entry bundle');
   assert.equal(map[base], src);
