@@ -6,6 +6,7 @@
 //     Haftada bir tek SPARQL sorgusu. Eşleştirme önce Steam uygulama kimliğiyle (P1733), sonra başlık anahtarıyla.
 //  2) Steam appdetails "metacritic" alanı: game_meta'daki Steam oyunları sırayla, her turda sınırlı sayıda (Steam hız sınırı).
 import {titleKey} from './titles.mjs';
+import {lookupGames,WIKIPEDIA_DAYS} from './wikipedia-mc.mjs';
 export const WIKIDATA_DAYS=7,METACRITIC_ITEM='Q150248';
 const UA='OyunRadari/1.0 (https://github.com/sfunder2/oyun-radari-web; metacritic score sync)';
 const BROWSER_UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
@@ -150,12 +151,48 @@ export async function sweepSteam({sb,f=fetch,limit=80,gapMs=1500,deadline=Infini
  say(`Steam: ${checked} oyun soruldu · Metacritic puanı bulunan: ${added}${stopped?' · durdu: '+stopped:''} · imleç: ${after}`);
  return{checked,added,after,stopped};
 }
-export async function runMetacritic({sb,f=fetch,say=()=>{},deadlineMs=0,steamLimit=80,gapMs=1500,forceWikidata=false,now=new Date()}){
+/** Wikipedia için adaylar: puanı eksik, sitede olan ve eleştirmen puanı (OpenCritic ya da IGDB) olan oyunlar, anahtar sırasıyla. */
+export async function wikipediaCandidates(sb){
+ const keys=new Set();
+ for(const r of await sb.selectAll('game_scores?select=title_key,metacritic,opencritic&opencritic=gt.0'))if(!(r.metacritic>0))keys.add(r.title_key);
+ try{for(const r of await sb.selectAll('game_igdb_score?select=title_key&critic_votes=gt.0'))keys.add(r.title_key);}catch(e){if(!/404|PGRST|does not exist/.test(e.message))throw e;}
+ const list=[...keys].sort();const {have}=await existing(sb,list);
+ return list.filter(k=>!have.has(k));
+}
+/** Anahtarlar -> [{key,name,year}]: ad önce Steam, sonra PlayStation, sonra diğer mağazalardan; yıl game_meta'dan. */
+async function namesFor(sb,keys){
+ const names=new Map(),years=new Map();
+ for(let i=0;i<keys.length;i+=200){
+  const list=keys.slice(i,i+200).map(quote).join(',');if(!list)continue;
+  const offers=await sb.select(`store_offers?select=title_key,name,platform&title_key=in.(${list})`);
+  for(const o of offers.filter(o=>o.platform==='steam'))if(!names.has(o.title_key))names.set(o.title_key,o.name);
+  for(const p of await sb.select(`ps_products?select=title_key,name&title_key=in.(${list})`))if(!names.has(p.title_key))names.set(p.title_key,p.name);
+  for(const o of offers)if(!names.has(o.title_key))names.set(o.title_key,o.name);
+  for(const m of await sb.select(`game_meta?select=title_key,release_date&title_key=in.(${list})`))if(m.release_date)years.set(m.title_key,String(m.release_date).slice(0,4));
+ }
+ return keys.filter(k=>names.has(k)).map(k=>({key:k,name:names.get(k),year:years.get(k)||null}));
+}
+/** Wikipedia turu: imleç ps_state.metacritic_wikipedia'da; tur bitince WIKIPEDIA_DAYS gün beklenir. */
+export async function syncWikipedia({sb,f=fetch,say=()=>{},limit=400,gapMs=1000,deadline=Infinity,now=new Date(),sleep}){
+ const iso=now.toISOString(),st=(await sb.select('ps_state?select=value&key=eq.metacritic_wikipedia'))?.[0]?.value||{};
+ if(!st.after&&st.at&&now.getTime()-Date.parse(st.at)<WIKIPEDIA_DAYS*864e5)return{skipped:true};
+ const all=await wikipediaCandidates(sb),todo=all.filter(k=>!st.after||k>st.after).slice(0,limit);
+ const games=await namesFor(sb,todo);
+ const r=await lookupGames(games,{f,gapMs,deadline,...(sleep?{sleep}:{})});
+ const added=await saveScores(sb,r.found,iso);
+ const finished=r.done>=games.length&&todo.length<limit||(todo.length===0);
+ const after=finished?null:(r.last||st.after||null);
+ await sb.upsert('ps_state',[{key:'metacritic_wikipedia',value:{after,at:finished?iso:(st.at||null),asked:r.asked,added,candidates:all.length,checked_at:iso}}],'key');
+ say(`Wikipedia: ${all.length} aday · bu turda sorulan: ${r.asked} · Metacritic puanı bulunan: ${added}${finished?' · tur tamamlandı':''}`);
+ return{candidates:all.length,asked:r.asked,added,finished};
+}
+export async function runMetacritic({sb,f=fetch,say=()=>{},deadlineMs=0,steamLimit=80,gapMs=1500,wikipediaLimit=400,forceWikidata=false,now=new Date()}){
  const deadline=deadlineMs?Date.now()+deadlineMs:Infinity,iso=now.toISOString(),out={};
  const last=(await sb.select('ps_state?select=value&key=eq.metacritic_wikidata'))?.[0]?.value?.at;
  if(forceWikidata||!last||now.getTime()-Date.parse(last)>WIKIDATA_DAYS*864e5){
   try{out.wikidata=await syncWikidata({sb,f,say,now:iso});}catch(e){say('Wikidata atlandı: '+String(e.message).slice(0,160));out.wikidataError=String(e.message).slice(0,160);}
  }
+ if(wikipediaLimit>0){try{out.wikipedia=await syncWikipedia({sb,f,say,limit:wikipediaLimit,deadline,now});}catch(e){say('Wikipedia atlandı: '+String(e.message).slice(0,160));out.wikipediaError=String(e.message).slice(0,160);}}
  if(steamLimit>0)out.steam=await sweepSteam({sb,f,limit:steamLimit,gapMs,deadline,say,now:iso});
  return out;
 }
