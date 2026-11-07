@@ -53,7 +53,7 @@ export function parseSwitch(j,now=new Date().toISOString()){
 // Nintendo'nun tarayıcı paketindeki herkese açık, yalnız arama yapabilen anahtar (yönetici anahtarı değildir).
 const NA='U3B6GR4UA3',NK='a29c6927638bfd8cee23993e51e721c9';
 export async function fetchSwitchPage(page,f=fetch){
- const p=new URLSearchParams({'x-algolia-application-id':NA,'x-algolia-api-key':NK,hitsPerPage:'100',page:String(page),query:'',filters:'platform:"Nintendo Switch"'});
+ const p=new URLSearchParams({'x-algolia-application-id':NA,'x-algolia-api-key':NK,hitsPerPage:'100',page:String(page),query:'',filters:'platform:"Nintendo Switch" OR platform:"Nintendo Switch 2"'});
  const r=await f(`https://${NA.toLowerCase()}-dsn.algolia.net/1/indexes/store_game_en_us?${p}`,{headers:{'User-Agent':UA},signal:AbortSignal.timeout(25000)});
  if(!r.ok)throw new Error('Nintendo katalog HTTP '+r.status);const out=parseSwitch(await r.json());return{...out,hasMore:out.page+1<out.pages};
 }
