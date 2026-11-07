@@ -1,6 +1,6 @@
 import {fetchSteamPage,fetchXboxPage,fetchSwitchPage,fetchEpicPage,fetchGogPage} from './market-catalog.mjs';
 import {changedOffers,existingQuery} from './offer-diff.mjs';
-import {makeItadFetcher,ITAD_PLATFORMS} from './itad.mjs';
+import {makeItadFetcher,ITAD_PLATFORMS,ITAD_KEEP_PLATFORMS} from './itad.mjs';
 export const ITAD_STALE_MS=3*24*3600e3; // tur boyunca yeniden görülmeyen ITAD teklifleri (mağaza satıştan kaldırdı) silinir
 // Her turda mağazaların (Steam, Xbox, Switch, Epic, GOG; isteğe bağlı ITAD) katalogundan birkaç sayfa okunur; imleçler ps_state.market içinde saklanır, tur bitince başa dönülür.
 // GitHub Actions (CLI) ve Supabase Edge Function aynı çekirdeği çalıştırır.
@@ -37,7 +37,7 @@ export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,st
     if(fresh.length)await sb.upsert('store_offers',fresh,'platform,store_id');stats[market]+=uniq.length;written[market]=(written[market]||0)+fresh.length;
     say(`${market} sayfa ${i+1}: ${uniq.length} kayıt, ${fresh.length} yazıldı`);
    }catch(e){errors.push({source:market,error:e.message});say(`${market} hata: ${e.message}`);break;}
-   if(wrapped&&market==='itad'){try{await sb.del(`store_offers?platform=in.(${ITAD_PLATFORMS.join(',')})&checked_at=lt.${new Date(Date.now()-ITAD_STALE_MS).toISOString()}`)}catch(e){errors.push({source:market,error:'eski teklifler silinemedi: '+e.message})}}
+   if(wrapped&&market==='itad'){try{await sb.del(`store_offers?platform=in.(${ITAD_PLATFORMS.filter(p=>!ITAD_KEEP_PLATFORMS.has(p)).join(',')})&checked_at=lt.${new Date(Date.now()-ITAD_STALE_MS).toISOString()}`)}catch(e){errors.push({source:market,error:'eski teklifler silinemedi: '+e.message})}}
    if(wrapped)break;
    await sleep(market==='xbox'?800:1200);
   }

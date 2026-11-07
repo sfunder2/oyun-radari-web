@@ -12,11 +12,13 @@ export const ITAD_API='https://api.isthereanydeal.com';
 // mağazası ve iki resmî yayıncı mağazası (Ubisoft Store, Blizzard/Battle.net). Microsoft Store eklenmez: Xbox Store TR
 // toplayıcısı aynı kataloğu ve aynı TL fiyatlarını zaten getiriyor.
 export const ITAD_SHOPS={6:'fanatical',37:'humble',36:'gmg',64:'wingamestore',26:'gamesplanet',27:'gamesplanet',28:'gamesplanet',29:'gamesplanet',
- 20:'gamebillet',15:'dreamgame',2:'allyouplay',24:'gamersgate',42:'indiegala',73:'planetplay',70:'playsum',74:'playerland',62:'ubisoft',4:'blizzard'};
+ 20:'gamebillet',15:'dreamgame',2:'allyouplay',24:'gamersgate',42:'indiegala',73:'planetplay',70:'playsum',74:'playerland',62:'ubisoft',4:'blizzard',16:'epic'};
 export const ITAD_PLATFORMS=[...new Set(Object.values(ITAD_SHOPS))];
 const STEAM_SHOP=61;
 // Yayıncının kendi mağazası: satış anahtar değil, hesaba doğrudan eklenir; sürüm etiketi yazılmaz.
-export const PUBLISHER_STORES=new Set(['ubisoft','blizzard']);
+export const PUBLISHER_STORES=new Set(['ubisoft','blizzard','epic']);
+// Epic'in kendi toplayıcısı (store.epicgames.com) bulut IP'lerinde 403 verdiği için fiyatlar ITAD'den gelir; ITAD'de olmayan Epic satırları silinmez.
+export const ITAD_KEEP_PLATFORMS=new Set(['epic']);
 export const LOOKUP_TTL_MS=30*24*3600e3; // eşleşmeyen oyunlar 30 günde bir yeniden sorulur
 
 export function itadEdition(drm){
