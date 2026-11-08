@@ -17,7 +17,7 @@ const NEON_FUNCTIONS = {
   'radar-services': { url: SUPABASE_FN + 'radar-services', user: false, supabase: true },
   'regional-prices': { url: SUPABASE_FN + 'regional-prices', user: false, supabase: true },
   'steam-account': { url: fnHost('steamaccount'), user: true },
-  'admin-price-refresh': { url: fnHost('adminprice'), user: true },
+  'admin-price-refresh': { url: SUPABASE_FN + 'admin-price-refresh', user: true, supabase: true },
 };
 
 export function neonEnabled() {
@@ -84,7 +84,7 @@ function functionCall(realFetch, url, init) {
   const headers = { ...(init?.headers || {}) };
   delete headers.apikey;
   if (!fn.user) delete headers.Authorization;
-  if (fn.supabase) { headers.apikey = SUPABASE_KEY; headers.Authorization = 'Bearer ' + SUPABASE_KEY; }
+  if (fn.supabase && !fn.user) { headers.apikey = SUPABASE_KEY; headers.Authorization = 'Bearer ' + SUPABASE_KEY; }
   return realFetch(fn.url.replace(/\/$/, '') + m[2], { ...init, headers, credentials: 'omit' });
 }
 
