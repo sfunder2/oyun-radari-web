@@ -4,7 +4,12 @@ name: Neon schedules (prices, markets, enrich, genres, metacritic)
 # Needs the secret NEON_DATABASE_URL (a role limited to what the collectors write). Manual runs always work.
 on:
   schedule:
-    - cron: '43 */3 * * *'   # metacritic (kısa tur)
+    # Neon Functions kotası dolu olduğu sürece (sıfırlanma: 1 Aralık) toplayıcılar yeniden GitHub zamanlayıcısıyla çalışır.
+    - cron: '*/5 * * * *'      # ps-prices
+    - cron: '1-59/5 * * * *'   # markets
+    - cron: '3-59/5 * * * *'   # enrich
+    - cron: '7,37 * * * *'     # genres
+    - cron: '43 */3 * * *'     # metacritic (kısa tur)
   workflow_dispatch:
     inputs:
       job:
