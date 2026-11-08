@@ -6,15 +6,16 @@ const SUPABASE_AUTH = 'https://dsosckshigzijnsxmlwh.supabase.co/auth/v1/';
 const SUPABASE_REST = 'https://dsosckshigzijnsxmlwh.supabase.co/rest/v1/';
 const SUPABASE_KEY = 'sb_publishable_SjkjwIlJ_HFqd5hWhILF5g_6QJThaNO';
 export const NEON_API = 'https://ep-dry-tree-b90vvy12.apirest.c-7.eu-central-1.aws.neon.tech/neondb/rest/v1/';
-export const NEON_TOKEN_URL = 'https://br-noisy-river-b98v9a79-anontoken.compute.c-7.eu-central-1.aws.neon.tech/';
-export const NEON_AUTH_URL = 'https://br-noisy-river-b98v9a79-authproxy.compute.c-7.eu-central-1.aws.neon.tech/';
+// Neon Functions ücretsiz kotası dolduğu için jeton Supabase Edge Function'dan gelir (aynı Neon Auth, aynı Data API).
+export const NEON_TOKEN_URL = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/anon-token';
+export const NEON_AUTH_URL = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/auth-proxy/';
 export const NEON_DEFAULT_ON = true;
 const SUPABASE_FN = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/';
 const fnHost = slug => `https://br-noisy-river-b98v9a79-${slug}.compute.c-7.eu-central-1.aws.neon.tech/`;
 // Supabase Edge Function adı -> Neon Function adresi (herkese açık olanlar jeton istemez; Supabase anahtarı gönderilmez).
 const NEON_FUNCTIONS = {
-  'radar-services': { url: fnHost('radarservices'), user: false },
-  'regional-prices': { url: fnHost('regionalprices'), user: false },
+  'radar-services': { url: SUPABASE_FN + 'radar-services', user: false, supabase: true },
+  'regional-prices': { url: SUPABASE_FN + 'regional-prices', user: false, supabase: true },
   'steam-account': { url: fnHost('steamaccount'), user: true },
   'admin-price-refresh': { url: fnHost('adminprice'), user: true },
 };
@@ -83,6 +84,7 @@ function functionCall(realFetch, url, init) {
   const headers = { ...(init?.headers || {}) };
   delete headers.apikey;
   if (!fn.user) delete headers.Authorization;
+  if (fn.supabase) { headers.apikey = SUPABASE_KEY; headers.Authorization = 'Bearer ' + SUPABASE_KEY; }
   return realFetch(fn.url.replace(/\/$/, '') + m[2], { ...init, headers, credentials: 'omit' });
 }
 
