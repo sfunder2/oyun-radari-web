@@ -133,6 +133,26 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Hesaba senkron | Favoriler, oyuncu alanı, günlük ve XP `radar_user_data` satırına yazılır (RLS: yalnız sahibi). İlk eşleşmede cihaz ve hesap kayıpsız birleşir; sonra hesaptaki daha yeni kayıt esas alınır. Zen, ses, renk modu gibi cihaz tercihleri senkronlanmaz. |
 | Steam hesabı bağlama | Oyuncu alanı · Steam kütüphanem. Steam'in kendi giriş sayfasıyla (OpenID) bağlanır, şifre alınmaz; `steam-account` fonksiyonu dönüşü Steam'e doğrulatır ve yalnız SteamID'yi `linked_accounts` satırına yazar (RLS: yalnız sahibi okur ve siler). Oyunlar, süreler ve oyun başına açılan başarımlar Steam Web API'den okunur, veritabanına yazılmaz. Steam'de "Oyun ayrıntıları" gizliyse uyarı gösterilir. Xbox ve PlayStation resmî kütüphane API'si sunmadığı için yok. |
 
+## Canlılık katmanı (vivid)
+
+`assets/vivid-20261108.js` ve `.css`. Klasik görünüm doygun renk ve parıltı, Sade görünüm aynı yapının sönük, ölçülü hâlidir. Tüm hareketler `prefers-reduced-motion` ya da sitenin "hareketi azalt" ayarında kapanır; renkler kalır.
+
+| Özellik | Davranış |
+|---|---|
+| Kart hover | Kart 4 px yükselir, kapağın baskın rengi (`accent_color`) ve türün rengiyle parlar; kapak yavaşça yakınlaşır. Yalnız fareli cihazlarda. Liste satırında renkli sol şerit ve küçük resim yakınlaşması. |
+| Aşamalı belirme | Kartlar ve satırlar görünür alana girince 55 ms arayla (en çok 9 adım) yukarıdan süzülür. |
+| Fiyat sayacı | Belirirken indirimli fiyat eski fiyattan yeni fiyata, diğerleri %18 yukarıdan iner (650 ms). React metni değiştirirse sayaç hemen bırakır. |
+| İndirim rozeti | %1–24 mavi, 25–49 yeşil, 50–74 turuncu, 75+ kırmızı-pembe. 25+ rozet halka nabzı atar (50+ dört kez, 75+ sürekli). Sade'de aynı renkler açık zeminde sönük. |
+| Tür renkleri | Kartta üst şerit, çerçeve ve tür etiketi; satırda sol şerit. 15 tür (aksiyon, macera, RPG, strateji, simülasyon, spor, yarış, bağımsız, korku, rahat, nişancı, dövüş, bulmaca, platform, MMO). |
+| Fiyat sıcaklığı | Soğuk buz mavisi, ılık amber, sıcak kırmızı (parıltılı); ayrıntıdaki ölçek şeridi mavi-yeşil-sarı-turuncu-kırmızı. |
+| Favori patlaması | Favoriye eklenince (çıkarılınca değil) kalpten küçük konfeti. |
+| Başarım kutlaması | Başarım ve seviye bildirimi gelince konfeti, halka dalgası; destansı ve efsanevi başarımda ikinci bir patlama. |
+| Sayfa geçişi | Sekme değişimi, ayrıntı penceresi ve Sade/Klasik geçişi yumuşak belirir. |
+| Parıltılı iskeletler | Liste yükleme satırları ve kart iskeletleri ışık süpürür. |
+| Gradyanlar | Klasik'te üst çubuk çizgisi, logo, ana düğme ve seçili sekme gradyan. |
+| Ayrıntıda kapak rengi | Oyun ayrıntısı kapağın baskın renginden üst şerit ve yumuşak ışık alır. |
+| Sade/Klasik değiştirici | Masaüstünde üst çubukta, mobilde ve açılış sayfasında yüzen bir düğme olarak her zaman görünür; menüye girmek gerekmez. `radar:ui-set` olayıyla paketin kendi mod durumunu değiştirir ve `?gorunum=` parametresini adresten siler ki seçim yenilemede kalsın. |
+
 ## Dağıtım ve doğrulama
 
 - Kaynak: `sfunder2/oyun-radari`, yayın ve toplayıcılar: `sfunder2/oyun-radari-web`.
