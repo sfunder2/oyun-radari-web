@@ -1,0 +1,166 @@
+/* Canlılık katmanı (vivid-20261108.js ile birlikte).
+   Klasik: doygun renk, parıltı, hareket. Sade: aynı yapı, sönük ve ölçülü palet.
+   Her hareket prefers-reduced-motion ya da sitenin "hareketi azalt" ayarında kapanır; renkler kalır. */
+
+/* ---------- Tür renkleri (kart ve satırda --ga olarak kullanılır) ---------- */
+[data-genre=action]{--gc:#ff5a4d}[data-genre=adventure]{--gc:#f5a623}[data-genre=rpg]{--gc:#a46bff}
+[data-genre=strategy]{--gc:#3aa0ff}[data-genre=sim]{--gc:#2ec4b6}[data-genre=sports]{--gc:#4cd964}
+[data-genre=racing]{--gc:#ff7a1a}[data-genre=indie]{--gc:#ff5fa2}[data-genre=horror]{--gc:#d62b4a}
+[data-genre=casual]{--gc:#ffd23f}[data-genre=shooter]{--gc:#ff6b3d}[data-genre=fighting]{--gc:#f0414f}
+[data-genre=puzzle]{--gc:#5ee0ff}[data-genre=platform]{--gc:#7bd53a}[data-genre=mmo]{--gc:#8a7bff}
+[data-genre]{--ga:var(--gc)}
+:root[data-ui=sade] [data-genre]{--ga:color-mix(in srgb,var(--gc) 44%,#8a84a6)}
+
+/* ---------- İndirim yüzdesi renk ölçeği: 1 serin, 2 yeşil, 3 turuncu, 4 sıcak ---------- */
+[data-dc="1"]{--dc:#38bdf8;--dc2:#2f7cf6;--dct:#041423}
+[data-dc="2"]{--dc:#5ee08a;--dc2:#16a34a;--dct:#04210f}
+[data-dc="3"]{--dc:#ffcb47;--dc2:#f97316;--dct:#2b1400}
+[data-dc="4"]{--dc:#ff6b95;--dc2:#e11d48;--dct:#fff}
+
+:root .discountbadge[data-dc]{background:linear-gradient(135deg,var(--dc),var(--dc2));color:var(--dct);border:0;font-weight:800;letter-spacing:.1px;box-shadow:0 6px 18px -8px var(--dc2)}
+:root .deal-discount>b[data-dc]{display:inline-block;padding:3px 8px;border-radius:999px;background:linear-gradient(135deg,var(--dc),var(--dc2));color:var(--dct);border:0;font-weight:800}
+:root[data-ui=sade] .discountbadge[data-dc],:root[data-ui=sade] .deal-discount>b[data-dc]{background:color-mix(in srgb,var(--dc2) 13%,#fff);color:color-mix(in srgb,var(--dc2) 78%,#1a1425);border:1px solid color-mix(in srgb,var(--dc2) 32%,transparent);box-shadow:none}
+
+/* ---------- Fiyat sıcaklığı: soğuk buz mavisi, ılık amber, sıcak kırmızı ---------- */
+.priceheat{--heat:#8d9bad}
+.priceheat.cold,.heatpanel.cold{--heat:#4cc2ff}
+.priceheat.warm,.heatpanel.warm{--heat:#ffc43d}
+.priceheat.hot,.heatpanel.hot{--heat:#ff4d3a}
+.priceheat:not(.collecting):not(.long){padding:2px 9px 2px 5px;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--heat) 20%,transparent),transparent 92%)}
+:root[data-ui=sade] .priceheat:not(.collecting):not(.long){background:linear-gradient(90deg,color-mix(in srgb,var(--heat) 14%,transparent),transparent 92%)}
+.priceheat.hot .thermo-bulb,.priceheat.hot .thermo-fill{filter:drop-shadow(0 0 4px var(--heat))}
+.heattrack{background:linear-gradient(90deg,#38bdf8,#5ee08a 34%,#ffc43d 62%,#ff8a3d 80%,#ff4d3a)}
+:root[data-ui=sade] .heattrack{background:linear-gradient(90deg,#8fcdf0,#a6dcb8 34%,#f0d98a 62%,#f1b98a 80%,#ee9a90)}
+
+/* ---------- Kart: tür çerçevesi, rozet, hover ---------- */
+.gamecard{position:relative}
+.gamecard[data-genre]{border-color:color-mix(in srgb,var(--ga) 42%,var(--line))}
+.gamecard[data-genre]::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;z-index:6;pointer-events:none;background:linear-gradient(90deg,var(--ga),color-mix(in srgb,var(--ga) 30%,transparent))}
+:root[data-ui=sade] .gamecard[data-genre]{border-color:color-mix(in srgb,var(--ga) 30%,#efeafb)}
+:root[data-ui=sade] .gamecard[data-genre]::before{height:2px;opacity:.7}
+.vv-genre{display:inline-block;align-self:flex-start;width:fit-content;max-width:100%;margin:0 0 7px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.3px;line-height:1.3;color:var(--ga);background:color-mix(in srgb,var(--ga) 17%,transparent);border:1px solid color-mix(in srgb,var(--ga) 48%,transparent)}
+:root[data-ui=sade] .vv-genre{color:color-mix(in srgb,var(--ga) 52%,#241f33);background:color-mix(in srgb,var(--ga) 14%,#fff);border-color:color-mix(in srgb,var(--ga) 30%,transparent);font-weight:700}
+.vv-genre+h3{margin-top:2px}
+.gamecard .art{overflow:hidden}
+.gamecard .art>img{transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
+ .gamecard{transition:translate .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .25s}
+ .gamecard:hover{translate:0 -4px;border-color:color-mix(in srgb,var(--ga,var(--cv,var(--lime))) 70%,var(--line));box-shadow:0 20px 44px -16px color-mix(in srgb,var(--cv,var(--ga,var(--lime))) 60%,transparent),0 0 26px -6px color-mix(in srgb,var(--ga,var(--cv,var(--lime))) 38%,transparent)}
+ .gamecard:hover .art>img{transform:scale(1.08)}
+ :root[data-ui=sade] .gamecard:hover{box-shadow:0 16px 34px -18px color-mix(in srgb,var(--cv,var(--ga,#8a84a6)) 40%,transparent)}
+ .deal-list-row{transition:background-color .25s,box-shadow .25s}
+ .deal-list-row:hover{background:color-mix(in srgb,var(--cv,var(--ga,var(--lime))) 9%,transparent);box-shadow:inset 3px 0 0 var(--ga,var(--cv,var(--lime)))}
+ .deal-game img{transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+ .deal-list-row:hover .deal-game img{transform:scale(1.1)}
+}
+.deal-list-row[data-genre]{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--ga) 80%,transparent)}
+:root[data-ui=sade] .deal-list-row[data-genre]{box-shadow:inset 3px 0 0 color-mix(in srgb,var(--ga) 55%,transparent)}
+.deal-game img{border-radius:6px}
+
+/* ---------- Giriş: aşamalı belirme ---------- */
+[data-vv=pre]{opacity:0;translate:0 22px}
+.deal-list-row[data-vv=pre]{translate:0 10px}
+[data-vv=in]{animation:vv-rise .6s cubic-bezier(.2,.8,.2,1) var(--vv-d,0ms) backwards}
+.deal-list-row[data-vv=in]{animation-name:vv-rise-row;animation-duration:.45s}
+@keyframes vv-rise{from{opacity:0;translate:0 22px;scale:.97}}
+@keyframes vv-rise-row{from{opacity:0;translate:0 10px}}
+
+/* ---------- İndirim rozeti nabzı ---------- */
+.discountbadge[data-dc],.deal-discount>b[data-dc]{position:relative}
+.discountbadge[data-dc]{position:absolute}
+@media (prefers-reduced-motion:no-preference){
+ :root:not([data-reduce-motion=true]) .discountbadge[data-dc="2"]::after,
+ :root:not([data-reduce-motion=true]) .discountbadge[data-dc="3"]::after,
+ :root:not([data-reduce-motion=true]) .discountbadge[data-dc="4"]::after,
+ :root:not([data-reduce-motion=true]) .deal-discount>b[data-dc="3"]::after,
+ :root:not([data-reduce-motion=true]) .deal-discount>b[data-dc="4"]::after{content:"";position:absolute;inset:-2px;border-radius:inherit;border:2px solid var(--dc);opacity:0;pointer-events:none;animation:vv-ring 1.9s ease-out 2}
+ :root:not([data-reduce-motion=true]) [data-dc="3"]::after{animation-iteration-count:4!important}
+ :root:not([data-reduce-motion=true]) [data-dc="4"]::after{animation-iteration-count:infinite!important}
+ :root:not([data-reduce-motion=true]) .discountbadge[data-dc="4"]{animation:vv-bob 1.9s ease-in-out infinite}
+}
+@keyframes vv-ring{0%{opacity:.85;transform:scale(1)}100%{opacity:0;transform:scale(1.35,1.8)}}
+@keyframes vv-bob{0%,100%{scale:1}50%{scale:1.07}}
+
+/* ---------- Favori patlaması ve konfeti ---------- */
+.vv-burst{position:fixed;z-index:500;width:0;height:0;pointer-events:none}
+.vv-burst i{position:absolute;left:0;top:0;width:var(--s,7px);height:calc(var(--s,7px)*1.6);margin:-3px 0 0 -3px;background:var(--c,#ff5d8f);border-radius:2px;animation:vv-pop .85s cubic-bezier(.15,.8,.3,1) forwards}
+.vv-burst i.vv-dot{height:var(--s,7px);border-radius:50%}
+@keyframes vv-pop{0%{opacity:1;transform:translate(0,0) rotate(0) scale(.4)}60%{opacity:1}100%{opacity:0;transform:translate(var(--tx),calc(var(--ty) + 26px)) rotate(var(--rot)) scale(1)}}
+.heart[data-vv-love] svg{animation:vv-love .6s cubic-bezier(.2,1.6,.4,1)}
+@keyframes vv-love{0%{transform:scale(1)}35%{transform:scale(1.55)}100%{transform:scale(1)}}
+
+/* ---------- Başarım kutlaması ---------- */
+.sfx-toast.vv-celebrate::before{content:"";position:absolute;inset:-2px;border-radius:inherit;pointer-events:none;border:2px solid var(--tc);opacity:0;animation:vv-toast-ring 1.5s ease-out .2s 2}
+@keyframes vv-toast-ring{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.12,1.5)}}
+
+/* ---------- Yumuşak sayfa geçişi ---------- */
+/* fill-mode backwards: bitince translate kalmaz (kalsaydı position:fixed çocuklar için kapsayıcı blok oluşurdu) */
+main>*{animation:vv-page .42s cubic-bezier(.2,.8,.2,1) backwards}
+.overlay{animation:vv-fade .25s ease backwards}
+.overlay>.modal{animation:vv-modal .38s cubic-bezier(.2,.9,.25,1) backwards}
+@keyframes vv-page{from{opacity:0;translate:0 12px}}
+@keyframes vv-fade{from{opacity:0}}
+@keyframes vv-modal{from{opacity:0;translate:0 18px;scale:.975}}
+@media (max-width:700px){.overlay>.modal{animation-name:vv-sheet}}
+@keyframes vv-sheet{from{opacity:.4;translate:0 40px}}
+html.vv-modeswap body{animation:vv-modeswap .5s ease backwards}
+@keyframes vv-modeswap{from{opacity:.35;filter:saturate(1.6)}}
+
+/* ---------- Parıltılı yükleme iskeletleri ---------- */
+body .catalog-row-skeleton{animation:none}
+body .catalog-row-skeleton i,body .catalog-row-skeleton span,body .catalog-row-skeleton b{background:linear-gradient(100deg,#293647 30%,#3a4b60 50%,#293647 70%) 0 0/300% 100%;animation:vv-shimmer 1.4s linear infinite}
+:root[data-ui=sade] body .catalog-row-skeleton i,:root[data-ui=sade] body .catalog-row-skeleton span,:root[data-ui=sade] body .catalog-row-skeleton b{background:linear-gradient(100deg,#e4e0f2 30%,#f6f4fd 50%,#e4e0f2 70%) 0 0/300% 100%}
+@keyframes vv-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+.skeleton{background:linear-gradient(100deg,var(--panel) 30%,color-mix(in srgb,var(--lime) 12%,var(--panel2,var(--panel))) 50%,var(--panel) 70%);background-size:300% 100%}
+
+/* ---------- Üst çubuk ve düğmeler: Klasik'te gradyan ---------- */
+:root:not([data-ui=sade]) header{background:linear-gradient(180deg,color-mix(in srgb,#a46bff 12%,transparent),transparent)}
+:root:not([data-ui=sade]) header::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;pointer-events:none;background:linear-gradient(90deg,#9bd763,#38bdf8,#a46bff,#ff5d8f,#ffc94d,#9bd763);background-size:200% 100%;opacity:.85}
+:root:not([data-ui=sade]) .brand span{background:linear-gradient(90deg,#b6f25b,#5fd68a 60%,#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+:root:not([data-ui=sade]) .csearch-go,:root:not([data-ui=sade]) .linkbtn.primary{background:linear-gradient(135deg,#c4f85b,#5fd68a 70%);box-shadow:0 8px 22px -10px #7be16a}
+:root:not([data-ui=sade]) header nav>button.active{background:linear-gradient(135deg,color-mix(in srgb,#a46bff 40%,transparent),color-mix(in srgb,#38bdf8 28%,transparent));box-shadow:inset 0 0 0 1px #ffffff1f}
+:root:not([data-ui=sade]) .filterpanel[open]>summary,:root:not([data-ui=sade]) .libactions button[aria-pressed=true]{background:linear-gradient(135deg,color-mix(in srgb,#a46bff 28%,transparent),color-mix(in srgb,#38bdf8 18%,transparent))}
+@media (prefers-reduced-motion:no-preference){
+ :root:not([data-ui=sade]):not([data-reduce-motion=true]) header::after{animation:vv-flow 16s linear infinite}
+ .csearch-go{transition:transform .2s,box-shadow .25s,filter .2s}
+ .csearch-go:hover{transform:translateY(-1px);filter:saturate(1.15)}
+}
+@keyframes vv-flow{to{background-position:200% 0}}
+
+/* ---------- Oyun ayrıntısı: kapağın baskın rengi (--lime = kapak rengi) ---------- */
+.modal.game-detail{border-top:3px solid var(--lime);background-image:radial-gradient(120% 55% at 12% -6%,color-mix(in srgb,var(--lime) 20%,transparent),transparent 62%),radial-gradient(90% 45% at 100% 0%,color-mix(in srgb,var(--lime) 11%,transparent),transparent 70%)}
+:root[data-ui=sade] .modal.game-detail{background-image:radial-gradient(120% 50% at 12% -6%,color-mix(in srgb,var(--lime) 11%,transparent),transparent 62%)}
+.modal.game-detail .close{box-shadow:0 0 0 1px color-mix(in srgb,var(--lime) 45%,transparent)}
+.modal.game-detail .vv-genre{color:var(--lime);border-color:color-mix(in srgb,var(--lime) 55%,transparent);background:color-mix(in srgb,var(--lime) 14%,transparent)}
+:root[data-ui=sade] .modal.game-detail .vv-genre{color:color-mix(in srgb,var(--lime) 55%,#241f33)}
+
+/* ---------- Sade / Klasik değiştirici ---------- */
+.vv-modeswitch{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 85%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);flex:none;white-space:nowrap}
+.vv-modeswitch button{appearance:none;border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:700;line-height:1;padding:8px 13px;min-height:34px;border-radius:999px;cursor:pointer;transition:background-color .25s,color .25s,box-shadow .25s}
+.vv-modeswitch button:hover{color:var(--ink)}
+.vv-modeswitch button[aria-pressed=true]{color:#fff;background:linear-gradient(135deg,#a46bff,#ec4899);box-shadow:0 6px 16px -8px #a46bff}
+.vv-modeswitch[data-ui=klasik] button[aria-pressed=true]{color:#0c1404;background:linear-gradient(135deg,#c4f85b,#5fd68a);box-shadow:0 6px 16px -8px #7be16a}
+.vv-modeswitch button:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.vv-modeswitch.is-float{position:fixed;z-index:60;right:14px;bottom:calc(86px + env(safe-area-inset-bottom,0px));box-shadow:0 10px 30px -10px #000a}
+:root[data-ui=sade] .vv-modeswitch{background:#ffffffd9;border-color:#d9d3ee}
+@media (min-width:701px){.vv-modeswitch.is-float{bottom:20px;right:20px}}
+@media (max-width:420px){.vv-modeswitch button{padding:8px 11px;font-size:12px}}
+@media (min-width:701px) and (max-width:1100px){.vv-modeswitch button{padding:7px 9px;font-size:12px}}
+
+/* ---------- Hareket azaltma: yalnızca renkler kalır ---------- */
+@media (prefers-reduced-motion:reduce){
+ [data-vv]{opacity:1!important;translate:none!important;animation:none!important}
+ main>*,.overlay,.overlay>.modal,html.vv-modeswap body,.vv-burst i,.heart[data-vv-love] svg,.discountbadge::after,.deal-discount>b::after,header::after,.discountbadge,.priceheat *,.sfx-toast.vv-celebrate::before,body .catalog-row-skeleton *{animation:none!important}
+ .gamecard,.gamecard .art>img,.deal-game img,.csearch-go{transition:none!important}
+ .gamecard:hover,.gamecard:hover .art>img,.deal-list-row:hover .deal-game img{translate:none!important;transform:none!important}
+}
+html[data-reduce-motion=true] [data-vv]{opacity:1!important;translate:none!important;animation:none!important}
+html[data-reduce-motion=true] :is(main>*,.overlay,.overlay>.modal,.vv-burst i,.discountbadge,.discountbadge::after,.deal-discount>b::after,header::after,.sfx-toast.vv-celebrate::before,body .catalog-row-skeleton *){animation:none!important}
+html[data-reduce-motion=true] :is(.gamecard,.gamecard .art>img,.deal-game img){transition:none!important}
+html[data-reduce-motion=true] :is(.gamecard:hover,.gamecard:hover .art>img,.deal-list-row:hover .deal-game img){translate:none!important;transform:none!important}
+
+/* ---------- İngilizce mobil düzeltmesi: gezinme etiketi çevrilince "Ana gezinme" seçicisi tutmuyor, üst gezinme mobilde taşıyordu ---------- */
+@media (max-width:700px){body header .topbar>nav{display:none!important}}
+
+/* Yüzen değiştirici, ayrıntı ya da menü açıkken kapanan katmanların üstünde durmasın */
+body:has(.overlay,.menu-overlay) .vv-modeswitch.is-float{display:none}
