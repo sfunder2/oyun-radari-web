@@ -88,10 +88,10 @@ export async function steamMetacritic(appid,f=fetch){
 const quote=k=>'"'+String(k).replaceAll('"','').replaceAll('\\','')+'"';
 /** Verilen anahtarlardan puanı olanları ve satırı olanları döner. */
 async function existing(sb,keys){
- const have=new Set(),rows=new Set();
+ const have=new Set(),rows=new Map();
  for(let i=0;i<keys.length;i+=300){
   const part=keys.slice(i,i+300);if(!part.length)continue;
-  for(const r of await sb.select(`game_scores?select=title_key,metacritic&title_key=in.(${part.map(quote).join(',')})`)){rows.add(r.title_key);if(r.metacritic>0)have.add(r.title_key);}
+  for(const r of await sb.select(`game_scores?select=title_key,metacritic,checked_at&title_key=in.(${part.map(quote).join(',')})`)){rows.set(r.title_key,r.checked_at);if(r.metacritic>0)have.add(r.title_key);}
  }
  return{have,rows};
 }
@@ -103,8 +103,9 @@ async function knownKeys(sb,keys){
  }
  return out;
 }
+// checked_at NOT NULL: INSERT ... ON CONFLICT önce eklenecek satırı sınar, bu yüzden var olan satırda da eski değeriyle gönderilir.
 function scoreRows(found,rows,now){
- return found.map(x=>({title_key:x.key,metacritic:x.score,metacritic_platform:x.platform||null,metacritic_url:x.url||null,metacritic_checked_at:now,...(rows.has(x.key)?{}:{checked_at:now})}));
+ return found.map(x=>({title_key:x.key,metacritic:x.score,metacritic_platform:x.platform||null,metacritic_url:x.url||null,metacritic_checked_at:now,checked_at:rows.get(x.key)||now}));
 }
 /** [{key,score,platform,url}] -> game_scores. Yalnız Metacritic sütunları yazılır; OpenCritic alanlarına dokunulmaz. */
 export async function saveScores(sb,found,now=new Date().toISOString()){
