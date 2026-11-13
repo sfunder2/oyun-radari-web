@@ -1,7 +1,7 @@
 name: Neon schedules (prices, markets, enrich, genres, metacritic)
 # Replaces the Supabase Cron jobs that called the refresh-* Edge Functions.
 # On since the move to Neon (the Supabase Cron jobs stay as the old copy's rollback path).
-# Needs the secret NEON_DATABASE_URL (a role limited to what the collectors write). Manual runs always work.
+# Needs the secrets SUPABASE_URL and SUPABASE_SERVICE_KEY. Manual runs always work.
 on:
   schedule:
     # Neon Functions kotası dolu olduğu sürece (sıfırlanma: 1 Aralık) toplayıcılar yeniden GitHub zamanlayıcısıyla çalışır.
@@ -20,9 +20,9 @@ on:
 permissions:
   contents: read
 env:
-  NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
-  SUPABASE_URL: neon
-  SUPABASE_SERVICE_KEY: neon
+  # Neon kotası doldu: toplayıcılar yeniden Supabase'e yazar (NEON_DATABASE_URL bilerek verilmiyor).
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
 jobs:
   ps-prices:
     if: (github.event_name == 'workflow_dispatch' && inputs.job == 'ps-prices') || (github.event_name == 'schedule' && github.event.schedule == '*/5 * * * *')
