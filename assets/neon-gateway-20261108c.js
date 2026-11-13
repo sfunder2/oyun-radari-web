@@ -9,7 +9,7 @@ export const NEON_API = 'https://ep-dry-tree-b90vvy12.apirest.c-7.eu-central-1.a
 // Neon Functions ücretsiz kotası dolduğu için jeton Supabase Edge Function'dan gelir (aynı Neon Auth, aynı Data API).
 export const NEON_TOKEN_URL = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/anon-token';
 export const NEON_AUTH_URL = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/auth-proxy/';
-export const NEON_DEFAULT_ON = true;
+export const NEON_DEFAULT_ON = false;
 const SUPABASE_FN = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/';
 const fnHost = slug => `https://br-noisy-river-b98v9a79-${slug}.compute.c-7.eu-central-1.aws.neon.tech/`;
 // Supabase Edge Function adı -> Neon Function adresi (herkese açık olanlar jeton istemez; Supabase anahtarı gönderilmez).
