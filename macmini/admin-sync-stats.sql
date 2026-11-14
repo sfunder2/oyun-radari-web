@@ -12,14 +12,18 @@ begin
    'fresh24h',count(*) filter (where checked_at>now()-interval '24 hours'),
    'new24h',count(*) filter (where first_seen>now()-interval '24 hours'),
    'discounted',count(*) filter (where discount_percent>0),
-   'lastChecked',max(checked_at)) as s from ps_products
+   -- PlayStation: tetikleyici fiyatı değişmeyen satırın checked_at'ini 6 saate kadar yazmaz; son kontrol olarak toplayıcının son BAŞARILI bitiş saati esas alınır.
+   'lastChecked',greatest(max(checked_at),(select (value->>'finishedAt')::timestamptz from ps_state where key='batch' and value->>'status' in ('ok','partial'))),
+   'lastRunAt',(select (value->>'finishedAt')::timestamptz from ps_state where key='batch')) as s from ps_products
   union all
   select jsonb_build_object('platform',platform,'total',count(*),
    'fresh1h',count(*) filter (where checked_at>now()-interval '1 hour'),
    'fresh24h',count(*) filter (where checked_at>now()-interval '24 hours'),
    'new24h',count(*) filter (where first_seen>now()-interval '24 hours'),
    'discounted',count(*) filter (where discount_percent>0),
-   'lastChecked',max(checked_at)) from store_offers group by platform
+   'lastChecked',max(checked_at),
+   -- Toplayıcı başına tek bitiş saati tutulur: market (steam, gog, xbox, switch, epic) ve market_itad (diğer mağazalar).
+   'lastRunAt',(select (value->>'finishedAt')::timestamptz from ps_state where key=case when platform in ('steam','gog','xbox','switch','epic') then 'market' else 'market_itad' end)) from store_offers group by platform
  ) t;
  begin
   select coalesce(jsonb_object_agg(key,value - 'cursors'),'{}'::jsonb) into st
