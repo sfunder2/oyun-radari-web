@@ -14,11 +14,14 @@ export const NEON_DEFAULT_ON = false;
 // Yalnızca HERKESE AÇIK OKUMALAR (anonim GET/HEAD + search_games/search_market/search_market_v2/title_bundle RPC'leri) buraya gider.
 // Giriş yapmış kullanıcı çağrıları, yazmalar, admin RPC'leri, auth ve edge function'lar Supabase'te kalır.
 // Tek bayrak: MACMINI_DEFAULT_ON. Geri almak için false yap (ya da bu dosyadaki bloğu sil). Test: ?macmini=1 / ?macmini=0.
-export const MACMINI_API = 'https://arif-mac-mini.tail34cd8a.ts.net/'; // PostgREST kökü; yol öneki varsa (örn. /rest/v1/) buraya ekle.
-// >>> BURAYA Mac mini PostgREST'in SALT-OKUNUR (anon) JWT anahtarı yapıştırılacak. Değer 'REPLACE_WITH_MACMINI_ANON_KEY' kaldığı sürece bayrak ne olursa olsun Mac mini KULLANILMAZ.
-export const MACMINI_ANON_KEY = 'REPLACE_WITH_MACMINI_ANON_KEY';
+export const MACMINI_API = 'https://arif-mac-mini.tail34cd8a.ts.net/rest/v1/';
+// Mac mini PostgREST'in herkese açık, SALT-OKUNUR (role=anon) JWT'si; tarayıcıda görünmesi tasarım gereği. Yalnızca Authorization: Bearer gerekir.
+// 'REPLACE_' ile başlayan bir değer konursa bayrak ne olursa olsun Mac mini KULLANILMAZ.
+export const MACMINI_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6Im95dW5yYWRhci1tYWMiLCJpYXQiOjE3OTQ2MTkzMDAsImV4cCI6NDEwMjQ0NDgwMH0.xIfIiPU80KEPCPGeptc1KjKRMwxGlne7z3bebUzgOLA';
 export const MACMINI_DEFAULT_ON = false;
-const MACMINI_READ_RPC = new Set(['search_games', 'search_market', 'search_market_v2', 'title_bundle']);
+const MACMINI_READ_RPC = new Set(['search_games', 'search_market', 'search_market_v2', 'search_suggestions', 'title_bundle'])
+// Kullanıcıların Supabase'e yazdığı sosyal tablolar Mac mini'de bayat kalır; radar_follows ise Supabase'te özeldir (yalnızca sahibi okur) ama Mac anon rolüyle okunabiliyor. Hepsi Supabase'te kalır.
+const MACMINI_SKIP_TABLE = /^radar_/;
 const SUPABASE_FN = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/';
 const fnHost = slug => `https://br-noisy-river-b98v9a79-${slug}.compute.c-7.eu-central-1.aws.neon.tech/`;
 // Supabase Edge Function adı -> Neon Function adresi (herkese açık olanlar jeton istemez; Supabase anahtarı gönderilmez).
@@ -62,13 +65,15 @@ function macminiEligible(url, init) {
   const auth = String(init?.headers?.Authorization || '');
   if (auth && auth !== 'Bearer ' + SUPABASE_KEY) return false;
   const method = (init?.method || 'GET').toUpperCase();
-  if (method === 'GET' || method === 'HEAD') return !url.slice(SUPABASE_REST.length).startsWith('rpc/');
-  const m = method === 'POST' && url.slice(SUPABASE_REST.length).match(/^rpc\/([a-z_0-9]+)(?:\?|$)/);
+  const rest = url.slice(SUPABASE_REST.length);
+  if (method === 'GET' || method === 'HEAD') return !rest.startsWith('rpc/') && !MACMINI_SKIP_TABLE.test(rest);
+  const m = method === 'POST' && rest.match(/^rpc\/([a-z_0-9]+)(?:\?|$)/);
   return !!m && MACMINI_READ_RPC.has(m[1]);
 }
 
 async function macminiCall(realFetch, input, url, init) {
-  const headers = { ...(init?.headers || {}), apikey: MACMINI_ANON_KEY, Authorization: 'Bearer ' + MACMINI_ANON_KEY };
+  const headers = { ...(init?.headers || {}), Authorization: 'Bearer ' + MACMINI_ANON_KEY };
+  delete headers.apikey; // Supabase anahtarı Mac mini'ye gönderilmez
   try {
     const r = await realFetch(MACMINI_API + url.slice(SUPABASE_REST.length), { ...init, headers, credentials: 'omit' });
     if (r.status < 500 && r.status !== 401) return r;
