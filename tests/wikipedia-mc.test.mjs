@@ -47,7 +47,7 @@ test('Wikipedia turu: yalnız eksik olanlar, imleç ve tur bitişi',async()=>{
  const inList=q=>{const m=q.match(/title_key=in\.\(([^)]*)\)/);return m?m[1].split(',').map(s=>s.replace(/^"|"$/g,'')):null;};
  const sb={async select(q){const [n]=q.split('?');let rows=t[n]||[];const k=q.match(/key=eq\.(\w+)/);if(k)rows=rows.filter(r=>r.key===k[1]);const l=inList(q);if(l)rows=rows.filter(r=>l.includes(r.title_key));return rows;},
   async selectAll(q){const [n]=q.split('?');let rows=t[n]||[];if(/opencritic=gt\.0/.test(q))rows=rows.filter(r=>r.opencritic>0);return rows;},
-  async upsert(n,rows,c){for(const r of rows){const i=t[n].findIndex(x=>x[c]===r[c]);if(i<0)t[n].push({...r});else t[n][i]={...t[n][i],...r};}}};
+  async upsert(n,rows,c){if(n==='game_scores'&&rows.some(r=>r.checked_at==null))throw new Error('checked_at not null');for(const r of rows){const i=t[n].findIndex(x=>x[c]===r[c]);if(i<0)t[n].push({...r});else t[n][i]={...t[n][i],...r};}}};
  const r=await syncWikipedia({sb,f:wiki({'Astro Bot (2024 video game)':{content:ARTICLE,title:'Astro Bot'}}),gapMs:0,now:new Date('2026-11-07T00:00:00Z')});
  assert.deepEqual(r,{candidates:1,asked:1,added:1,finished:true});
  assert.equal(t.game_scores[0].metacritic,94);assert.equal(t.game_scores[0].opencritic,94);
