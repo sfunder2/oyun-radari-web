@@ -177,3 +177,5 @@ Zenginleştirme Metacritic puanını yalnız Steam arama sonucundaki `metascore`
 - Arayüz: Metacritic yoksa "Efektif puan" OpenCritic ile hesaplanır, vitrin metni OpenCritic'i yazar. Metacritic etiketleri artık sabit "PC · Steam" yerine kaydın platformunu gösterir. Sıralama zaten Metacritic ve OpenCritic'in büyüğünü kullanıyordu.
 - `tests/metacritic.test.mjs` ile sınanır.
 
+
+Admin mağaza tazeliği (v50): toplayıcılar Mac mini'ye yazdığı için Supabase'ten hesaplanan "Durmuş görünüyor" uyarısı yanlıştı. Mac mini `scripts/push-admin-stats.mjs` ile kendi `collect_sync_stats()` özetini `push_admin_snapshot` ile Supabase önbelleğine yazar; panel yine yönetici girişiyle `admin_sync_stats()` okur. Mac özeti 30 dakikadan eskiyse Supabase kendi hesabına döner. Kurulum için `supabase/schema-v50-admin-harici-ozet.sql`.
