@@ -22,6 +22,9 @@ export const MACMINI_DEFAULT_ON = true;
 const MACMINI_READ_RPC = new Set(['search_games', 'search_market', 'search_market_v2', 'search_suggestions', 'title_bundle'])
 // Kullanıcıların Supabase'e yazdığı sosyal tablolar Mac mini'de bayat kalır; radar_follows ise Supabase'te özeldir (yalnızca sahibi okur) ama Mac anon rolüyle okunabiliyor. Hepsi Supabase'te kalır.
 const MACMINI_SKIP_TABLE = /^radar_/;
+// Admin sağlık kartları (mağaza sayıları, güncellik %'leri) doğrudan Mac mini'den gelir. Yalnızca toplu sayı döner, bu yüzden anon anahtarla okunur.
+// Supabase'te dondurulmuş yedek veri yanlış "durmuş" uyarısı verdiği için Mac mini ulaşılamazsa Supabase'e DÜŞÜLMEZ, hata gösterilir.
+const MACMINI_ADMIN_RPC = /^rpc\/admin_(?:sync_stats|operational_health)(?:\?|$)/;
 const SUPABASE_FN = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/';
 const fnHost = slug => `https://br-noisy-river-b98v9a79-${slug}.compute.c-7.eu-central-1.aws.neon.tech/`;
 // Supabase Edge Function adı -> Neon Function adresi (herkese açık olanlar jeton istemez; Supabase anahtarı gönderilmez).
@@ -60,8 +63,12 @@ export function macminiEnabled() {
 }
 
 // Mac mini'ye gidebilir mi? Yalnızca anonim okuma. Kullanıcı jetonlu (Supabase oturumlu) çağrılar Supabase'te kalır.
+function macminiAdminRpc(url, init) {
+  return url.startsWith(SUPABASE_REST) && (init?.method || 'GET').toUpperCase() === 'POST' && MACMINI_ADMIN_RPC.test(url.slice(SUPABASE_REST.length));
+}
 function macminiEligible(url, init) {
   if (!url.startsWith(SUPABASE_REST)) return false;
+  if (macminiAdminRpc(url, init)) return true;
   const auth = String(init?.headers?.Authorization || '');
   if (auth && auth !== 'Bearer ' + SUPABASE_KEY) return false;
   const method = (init?.method || 'GET').toUpperCase();
@@ -180,7 +187,12 @@ export function install(realFetch = globalThis.fetch) {
   if (!realFetch || realFetch.__neon) return;
   const wrapped = async (input, init) => {
     const url = typeof input === 'string' ? input : '';
-    if (macminiEnabled() && macminiEligible(url, init)) { const r = await macminiCall(realFetch, input, url, init); if (r) return r; return realFetch(input, init); }
+    if (macminiEnabled() && macminiEligible(url, init)) {
+      const r = await macminiCall(realFetch, input, url, init);
+      if (r) return r;
+      if (macminiAdminRpc(url, init)) return new Response(JSON.stringify({ message: 'Mac mini sağlık verisi alınamadı.' }), { status: 503, headers: { 'Content-Type': 'application/json' } });
+      return realFetch(input, init);
+    }
     if (url.startsWith(SUPABASE_AUTH) && neonEnabled()) return authCall(realFetch, url, init);
     if (url.startsWith(SUPABASE_FN) && neonEnabled()) { const r = functionCall(realFetch, url, init); if (r) return r; }
     if (!url.startsWith(SUPABASE_REST) || !neonEnabled()) return realFetch(input, init);
