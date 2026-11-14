@@ -39,7 +39,7 @@ export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,st
    }catch(e){errors.push({source:market,error:e.message});say(`${market} hata: ${e.message}`);break;}
    if(wrapped&&market==='itad'){try{await sb.del(`store_offers?platform=in.(${ITAD_PLATFORMS.filter(p=>!ITAD_KEEP_PLATFORMS.has(p)).join(',')})&checked_at=lt.${new Date(Date.now()-ITAD_STALE_MS).toISOString()}`)}catch(e){errors.push({source:market,error:'eski teklifler silinemedi: '+e.message})}}
    if(wrapped)break;
-   await sleep(market==='xbox'?800:1200);
+   await sleep(market==='xbox'?Number(process.env.MARKET_XBOX_SLEEP_MS||400):Number(process.env.MARKET_SLEEP_MS||600));
   }
  }));
  const finishedAt=new Date().toISOString(),total=Object.values(stats).reduce((a,b)=>a+b,0);
@@ -50,6 +50,8 @@ export async function runMarketBatch({sb,pages=3,say=console.log,deadlineMs=0,st
 // Kayıtlı hâl platform başına ve 100'erli parçalarla okunur (ITAD sayfası birden çok platform içerir, kimlikler uzun).
 async function existingOffers(sb,rows){
  const out=[],by=new Map();for(const r of rows){if(!by.has(r.platform))by.set(r.platform,[]);by.get(r.platform).push(r);}
- for(const g of by.values())for(let i=0;i<g.length;i+=100)out.push(...(await sb.select(existingQuery(g.slice(i,i+100)))||[]));
+ const chunks=[];for(const g of by.values())for(let i=0;i<g.length;i+=100)chunks.push(g.slice(i,i+100));
+ // 4 parça aynı anda okunur (Funnel sınırı 30 istek/sn; 5 mağaza paralel çalışsa da bu çok altında kalır).
+ for(let i=0;i<chunks.length;i+=4)for(const rows of await Promise.all(chunks.slice(i,i+4).map(c=>sb.select(existingQuery(c)))))out.push(...(rows||[]));
  return out;
 }

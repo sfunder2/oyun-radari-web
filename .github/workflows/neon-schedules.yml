@@ -4,11 +4,11 @@ name: Neon schedules (prices, markets, enrich, genres, metacritic)
 # Needs the secrets SUPABASE_URL and SUPABASE_SERVICE_KEY. Manual runs always work.
 on:
   schedule:
-    # Neon Functions kotası dolu olduğu sürece (sıfırlanma: 1 Aralık) toplayıcılar yeniden GitHub zamanlayıcısıyla çalışır.
+    # Veritabanı artık Mac mini üzerindeki Postgres + PostgREST; eski ücretsiz kota sınırları yok. GitHub cron alt sınırı 5 dakikadır.
     - cron: '*/5 * * * *'      # ps-prices
     - cron: '1-59/5 * * * *'   # markets
     - cron: '3-59/5 * * * *'   # enrich
-    - cron: '7,37 * * * *'     # genres
+    - cron: '7-59/10 * * * *'     # genres
     - cron: '43 */3 * * *'     # metacritic (kısa tur)
   workflow_dispatch:
     inputs:
@@ -20,7 +20,7 @@ on:
 permissions:
   contents: read
 env:
-  # Neon kotası doldu: toplayıcılar yeniden Supabase'e yazar (NEON_DATABASE_URL bilerek verilmiyor).
+  # Toplayıcılar kendi PostgREST sunucusuna yazar (NEON_DATABASE_URL bilerek verilmiyor).
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
   SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
 jobs:
@@ -37,7 +37,7 @@ jobs:
   markets:
     if: (github.event_name == 'workflow_dispatch' && inputs.job == 'markets') || (github.event_name == 'schedule' && github.event.schedule == '1-59/5 * * * *')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     concurrency: { group: neon-markets, cancel-in-progress: false }
     steps:
       - uses: actions/checkout@v4
@@ -69,7 +69,7 @@ jobs:
         with: { node-version: '22' }
       - run: node scripts/enrich-run.mjs
   genres:
-    if: (github.event_name == 'workflow_dispatch' && inputs.job == 'genres') || (github.event_name == 'schedule' && github.event.schedule == '7,37 * * * *')
+    if: (github.event_name == 'workflow_dispatch' && inputs.job == 'genres') || (github.event_name == 'schedule' && github.event.schedule == '7-59/10 * * * *')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     concurrency: { group: neon-genres, cancel-in-progress: false }
