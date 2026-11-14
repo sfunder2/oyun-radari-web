@@ -62,7 +62,7 @@ begin
 
  return jsonb_build_object(
   'generatedAt',now(),
-  'database',jsonb_build_object('bytes',pg_database_size(current_database()),'limitBytes',500*1024*1024,'tables',tables),
+  'database',jsonb_build_object('bytes',pg_database_size(current_database()),'limitBytes',250::bigint*1024*1024*1024,'tables',tables),
   'users',users,
   'priceWrites',prices,
   'cron24h',cron,
