@@ -33,7 +33,7 @@ export function supabase(url,key,fetchImpl=fetch,{retries=4,retryDelay=1500,time
   const out=[];
   for(let off=0;;off+=size){const rows=await req('GET',`${path}${path.includes('?')?'&':'?'}limit=${size}&offset=${off}`);out.push(...rows);if(rows.length<size)return out;}
  }
- async function upsert(table,rows,conflict,size=200){
+ async function upsert(table,rows,conflict,size=500){
   // SQL şeması henüz güncellenmemişse bilinmeyen sütunlar atılıp yeniden denenir
   let data=rows;
   for(let attempt=0;;attempt++){

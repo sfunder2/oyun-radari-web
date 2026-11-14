@@ -4,7 +4,7 @@ import {runEnrichBatch,loadOcIndex} from './enrich-batch.mjs';
 import {appendFile} from 'node:fs/promises';
 const {SUPABASE_URL,SUPABASE_SERVICE_KEY}=process.env;
 if(!SUPABASE_URL||!SUPABASE_SERVICE_KEY){console.error('SUPABASE_URL ve SUPABASE_SERVICE_KEY gerekli');process.exit(2)}
-const sb=supabase(SUPABASE_URL,SUPABASE_SERVICE_KEY),BATCH=Number(process.env.ENRICH_BATCH||60),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const sb=supabase(SUPABASE_URL,SUPABASE_SERVICE_KEY),BATCH=Number(process.env.ENRICH_BATCH||150),sleep=ms=>new Promise(r=>setTimeout(r,ms));
 try{await sb.select('oc_index?select=id&limit=1')}catch(e){if(/404|PGRST205/.test(e.message)){console.log('supabase/schema-v2.sql henüz çalıştırılmamış; zenginleştirme atlandı.');process.exit(0)}throw e}
 const UA={'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36'};
 const log=[];const say=m=>{console.log(m);log.push(m)};
@@ -21,7 +21,7 @@ async function buildOcIndex(){
  say(`OpenCritic dizini: ${rows.size} oyun`);
 }
 await buildOcIndex();
-const result=await runEnrichBatch({sb,batch:BATCH,say,ocIndex:await loadOcIndex(sb)});
+const result=await runEnrichBatch({sb,batch:BATCH,say,ocIndex:await loadOcIndex(sb),deadlineMs:Number(process.env.ENRICH_DEADLINE_MS||240000),concurrency:Number(process.env.ENRICH_CONCURRENCY||4)});
 say(`Ürün: ${result.products} · mağaza teklifi: ${result.offers} · puan kaydı: ${result.scores} · kaynak hatası: ${result.errors}`);
 if(process.env.GITHUB_STEP_SUMMARY)await appendFile(process.env.GITHUB_STEP_SUMMARY,'### Zenginleştirme\n\n'+log.map(l=>'- '+l).join('\n')+'\n');
 

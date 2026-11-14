@@ -39,7 +39,7 @@ for(let i=0;i<products.length;i+=concurrency){
   offers.push(...r.offers);if(r.scores)scores.set(r.key,r.scores);if(r.meta)metas.set(r.key,r.meta);if(r.accent)accents.set(p.id,r.accent);errN+=r.errors.length;
   if(r.errors.length)console.log(p.name,'->',r.errors.join(' | '));
  }));
- await sleep(500);
+ await sleep(250);
 }
 // yinelenen anahtarlar tek kayıt olsun
 const uniq=new Map(offers.map(o=>[o.platform+':'+o.store_id,o]));
@@ -49,8 +49,8 @@ await sb.upsert('game_scores',[...scores.values()].map(row=>mergeScores(oldScore
 if(hasMeta&&metas.size)await sb.upsert('game_meta',[...metas.values()],'title_key');
 const missing=new Map(products.filter(p=>!p.title_key).map(p=>[p.id,true]));
 for(let i=0;i<done.length;i+=50){const chunk=done.slice(i,i+50);
- for(const c of chunk)await sb.patch('ps_products?id=eq.'+encodeURIComponent(c.id),{enriched_at:now,store_status:c.store_status,enrichment_status:c.enrichment_status});
- for(const c of chunk)if(c.key&&missing.has(c.id))await sb.patch(`ps_products?id=eq.${encodeURIComponent(c.id)}`,{title_key:c.key});}
+ await Promise.all(chunk.map(c=>sb.patch('ps_products?id=eq.'+encodeURIComponent(c.id),{enriched_at:now,store_status:c.store_status,enrichment_status:c.enrichment_status})));
+ await Promise.all(chunk.filter(c=>c.key&&missing.has(c.id)).map(c=>sb.patch(`ps_products?id=eq.${encodeURIComponent(c.id)}`,{title_key:c.key})));}
 offersN=uniq.size;scoresN=scores.size;
 // Baskın vurgu rengi (v7 sütunu varsa): bu turdaki ürünler + rengi eksik olan en çok 60 ürün
 try{

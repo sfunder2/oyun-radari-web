@@ -4,9 +4,9 @@ import {fromGrid,money,norm,tr} from '../scripts/ps-store.mjs';
 function server(handler){return new Promise(res=>{const s=http.createServer(handler).listen(0,()=>res({s,url:'http://127.0.0.1:'+s.address().port}))})}
 test('upsert sends merge-duplicates, auth headers, chunks',async()=>{
  const seen=[];const {s,url}=await server((q,r)=>{let b='';q.on('data',d=>b+=d);q.on('end',()=>{seen.push({m:q.method,u:q.url,h:q.headers,b:JSON.parse(b)});r.writeHead(201);r.end()})});
- const sb=supabase(url,'KEY');await sb.upsert('ps_products',Array.from({length:450},(_,i)=>({id:'x'+i})),'id');s.close();
+ const sb=supabase(url,'KEY');await sb.upsert('ps_products',Array.from({length:1050},(_,i)=>({id:'x'+i})),'id');s.close();
  assert.equal(seen.length,3);assert.equal(seen[0].m,'POST');assert.equal(seen[0].u,'/rest/v1/ps_products?on_conflict=id');
- assert.equal(seen[0].h.apikey,'KEY');assert.equal(seen[0].h.authorization,'Bearer KEY');assert.match(seen[0].h.prefer,/merge-duplicates/);assert.equal(seen[2].b.length,50);
+ assert.equal(seen[0].h.apikey,'KEY');assert.equal(seen[0].h.authorization,'Bearer KEY');assert.match(seen[0].h.prefer,/merge-duplicates/);assert.equal(seen[0].b.length,500);assert.equal(seen[2].b.length,50);
 });
 test('selectAll pages until a short page',async()=>{
  const {s,url}=await server((q,r)=>{const off=Number(new URL(q.url,'http://x').searchParams.get('offset'));r.writeHead(200,{'content-type':'application/json'});r.end(JSON.stringify(Array.from({length:off>=2?1:2},(_,i)=>({i:off+i}))))});
