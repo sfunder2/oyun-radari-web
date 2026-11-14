@@ -31,3 +31,11 @@ test('other admin RPCs stay on Supabase', async () => {
   await w(REST + 'rpc/admin_site_health', { method: 'POST', headers: { Authorization: 'Bearer u' } });
   assert.ok(calls[0].startsWith(REST));
 });
+
+test('admin_operational_health also goes to Mac mini', async () => {
+  const calls = [];
+  const fake = async (u) => { calls.push(u); return new Response('{}'); };
+  const g = globalThis.fetch; globalThis.fetch = fake; install(fake); const w = globalThis.fetch; globalThis.fetch = g;
+  await w(REST + 'rpc/admin_operational_health', { method: 'POST', headers: { Authorization: 'Bearer u' } });
+  assert.match(calls[0], /mac-mini/);
+});

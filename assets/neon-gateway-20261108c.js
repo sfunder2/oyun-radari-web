@@ -24,7 +24,7 @@ const MACMINI_READ_RPC = new Set(['search_games', 'search_market', 'search_marke
 const MACMINI_SKIP_TABLE = /^radar_/;
 // Admin sağlık kartları (mağaza sayıları, güncellik %'leri) doğrudan Mac mini'den gelir. Yalnızca toplu sayı döner, bu yüzden anon anahtarla okunur.
 // Supabase'te dondurulmuş yedek veri yanlış "durmuş" uyarısı verdiği için Mac mini ulaşılamazsa Supabase'e DÜŞÜLMEZ, hata gösterilir.
-const MACMINI_ADMIN_RPC = /^rpc\/admin_sync_stats(?:\?|$)/;
+const MACMINI_ADMIN_RPC = /^rpc\/admin_(?:sync_stats|operational_health)(?:\?|$)/;
 const SUPABASE_FN = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/';
 const fnHost = slug => `https://br-noisy-river-b98v9a79-${slug}.compute.c-7.eu-central-1.aws.neon.tech/`;
 // Supabase Edge Function adı -> Neon Function adresi (herkese açık olanlar jeton istemez; Supabase anahtarı gönderilmez).
