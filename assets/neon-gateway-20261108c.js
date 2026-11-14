@@ -10,6 +10,18 @@ export const NEON_API = 'https://ep-dry-tree-b90vvy12.apirest.c-7.eu-central-1.a
 export const NEON_TOKEN_URL = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/anon-token';
 export const NEON_AUTH_URL = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/auth-proxy/';
 export const NEON_DEFAULT_ON = false;
+// ---- Mac mini (Postgres + PostgREST, Tailscale Funnel) ----
+// Yalnızca HERKESE AÇIK OKUMALAR (anonim GET/HEAD + search_games/search_market/search_market_v2/title_bundle RPC'leri) buraya gider.
+// Giriş yapmış kullanıcı çağrıları, yazmalar, admin RPC'leri, auth ve edge function'lar Supabase'te kalır.
+// Tek bayrak: MACMINI_DEFAULT_ON. Geri almak için false yap (ya da bu dosyadaki bloğu sil). Test: ?macmini=1 / ?macmini=0.
+export const MACMINI_API = 'https://arif-mac-mini.tail34cd8a.ts.net/rest/v1/';
+// Mac mini PostgREST'in herkese açık, SALT-OKUNUR (role=anon) JWT'si; tarayıcıda görünmesi tasarım gereği. Yalnızca Authorization: Bearer gerekir.
+// 'REPLACE_' ile başlayan bir değer konursa bayrak ne olursa olsun Mac mini KULLANILMAZ.
+export const MACMINI_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6Im95dW5yYWRhci1tYWMiLCJpYXQiOjE3OTQ2MTkzMDAsImV4cCI6NDEwMjQ0NDgwMH0.xIfIiPU80KEPCPGeptc1KjKRMwxGlne7z3bebUzgOLA';
+export const MACMINI_DEFAULT_ON = false;
+const MACMINI_READ_RPC = new Set(['search_games', 'search_market', 'search_market_v2', 'search_suggestions', 'title_bundle'])
+// Kullanıcıların Supabase'e yazdığı sosyal tablolar Mac mini'de bayat kalır; radar_follows ise Supabase'te özeldir (yalnızca sahibi okur) ama Mac anon rolüyle okunabiliyor. Hepsi Supabase'te kalır.
+const MACMINI_SKIP_TABLE = /^radar_/;
 const SUPABASE_FN = 'https://dsosckshigzijnsxmlwh.supabase.co/functions/v1/';
 const fnHost = slug => `https://br-noisy-river-b98v9a79-${slug}.compute.c-7.eu-central-1.aws.neon.tech/`;
 // Supabase Edge Function adı -> Neon Function adresi (herkese açık olanlar jeton istemez; Supabase anahtarı gönderilmez).
@@ -31,6 +43,42 @@ export function neonEnabled() {
     if (v === '0') return false;
   } catch {}
   return NEON_DEFAULT_ON;
+}
+
+export function macminiEnabled() {
+  if (!MACMINI_ANON_KEY || MACMINI_ANON_KEY.startsWith('REPLACE_')) return false;
+  try {
+    if (typeof location !== 'undefined') {
+      const q = new URLSearchParams(location.search).get('macmini');
+      if (q === '1' || q === '0') localStorage.setItem('macmini', q);
+    }
+    const v = typeof localStorage !== 'undefined' ? localStorage.getItem('macmini') : null;
+    if (v === '1') return true;
+    if (v === '0') return false;
+  } catch {}
+  return MACMINI_DEFAULT_ON;
+}
+
+// Mac mini'ye gidebilir mi? Yalnızca anonim okuma. Kullanıcı jetonlu (Supabase oturumlu) çağrılar Supabase'te kalır.
+function macminiEligible(url, init) {
+  if (!url.startsWith(SUPABASE_REST)) return false;
+  const auth = String(init?.headers?.Authorization || '');
+  if (auth && auth !== 'Bearer ' + SUPABASE_KEY) return false;
+  const method = (init?.method || 'GET').toUpperCase();
+  const rest = url.slice(SUPABASE_REST.length);
+  if (method === 'GET' || method === 'HEAD') return !rest.startsWith('rpc/') && !MACMINI_SKIP_TABLE.test(rest);
+  const m = method === 'POST' && rest.match(/^rpc\/([a-z_0-9]+)(?:\?|$)/);
+  return !!m && MACMINI_READ_RPC.has(m[1]);
+}
+
+async function macminiCall(realFetch, input, url, init) {
+  const headers = { ...(init?.headers || {}), Authorization: 'Bearer ' + MACMINI_ANON_KEY };
+  delete headers.apikey; // Supabase anahtarı Mac mini'ye gönderilmez
+  try {
+    const r = await realFetch(MACMINI_API + url.slice(SUPABASE_REST.length), { ...init, headers, credentials: 'omit' });
+    if (r.status < 500 && r.status !== 401) return r;
+  } catch (e) { if (init?.signal?.aborted) throw e; }
+  return null; // Mac mini ulaşılamıyor / anahtar reddedildi: Supabase'e düş
 }
 
 let cache = { token: '', exp: 0 }, inflight = null;
@@ -132,6 +180,7 @@ export function install(realFetch = globalThis.fetch) {
   if (!realFetch || realFetch.__neon) return;
   const wrapped = async (input, init) => {
     const url = typeof input === 'string' ? input : '';
+    if (macminiEnabled() && macminiEligible(url, init)) { const r = await macminiCall(realFetch, input, url, init); if (r) return r; return realFetch(input, init); }
     if (url.startsWith(SUPABASE_AUTH) && neonEnabled()) return authCall(realFetch, url, init);
     if (url.startsWith(SUPABASE_FN) && neonEnabled()) { const r = functionCall(realFetch, url, init); if (r) return r; }
     if (!url.startsWith(SUPABASE_REST) || !neonEnabled()) return realFetch(input, init);
