@@ -24,24 +24,34 @@ function clean(e) {
 	};
 }
 async function fetchKeys(e, t = globalThis.fetch) {
-	let n = /* @__PURE__ */ new Map();
-	for (let r = 0; r < e.length; r += 100) {
-		let i = e.slice(r, r + 100), a = await t(SB + "/rest/v1/game_igdb_info?select=" + SELECT + "&igdb_id=not.is.null&title_key=in.(" + encodeURIComponent(i.map((e) => "\"" + e + "\"").join(",")) + ")", {
-			headers: {
-				apikey: KEY,
-				Authorization: "Bearer " + KEY
-			},
-			credentials: "omit",
-			signal: AbortSignal.timeout(8e3)
-		});
-		if (a.status === 404) {
-			off = !0;
-			for (let t of e) cache.set(t, null);
-			return n;
+	let n = /* @__PURE__ */ new Map(), batches = [];
+	for (let r = 0; r < e.length; r += 100) batches.push(e.slice(r, r + 100));
+	let missing = !1, next = 0;
+	// Batches run six at a time: the data now sits behind a slower home connection, and 30 sequential
+	// round trips kept the release calendar on its loading screen for over half a minute.
+	let worker = async () => {
+		for (; next < batches.length && !missing;) {
+			let i = batches[next++], a = await t(SB + "/rest/v1/game_igdb_info?select=" + SELECT + "&igdb_id=not.is.null&title_key=in.(" + encodeURIComponent(i.map((e) => "\"" + e + "\"").join(",")) + ")", {
+				headers: {
+					apikey: KEY,
+					Authorization: "Bearer " + KEY
+				},
+				credentials: "omit",
+				signal: AbortSignal.timeout(8e3)
+			});
+			if (a.status === 404) {
+				missing = !0;
+				return;
+			}
+			if (!a.ok) throw Error("HTTP " + a.status);
+			for (let e of await a.json()) n.set(e.title_key, clean(e));
+			for (let e of i) cache.set(e, n.get(e) || null);
 		}
-		if (!a.ok) throw Error("HTTP " + a.status);
-		for (let e of await a.json()) n.set(e.title_key, clean(e));
-		for (let e of i) cache.set(e, n.get(e) || null);
+	};
+	await Promise.all(Array.from({ length: Math.min(6, batches.length) }, worker));
+	if (missing) {
+		off = !0;
+		for (let t of e) cache.set(t, null);
 	}
 	return n;
 }
