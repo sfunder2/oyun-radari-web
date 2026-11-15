@@ -22,6 +22,7 @@ export const MACMINI_DEFAULT_ON = true;
 const MACMINI_READ_RPC = new Set(['search_games', 'search_market', 'search_market_v2', 'search_suggestions', 'title_bundle'])
 // Kullanıcıların Supabase'e yazdığı sosyal tablolar Mac mini'de bayat kalır; radar_follows ise Supabase'te özeldir (yalnızca sahibi okur) ama Mac anon rolüyle okunabiliyor. Hepsi Supabase'te kalır.
 const MACMINI_SKIP_TABLE = /^radar_/;
+const MACMINI_PUBLIC_TABLE = /^(?:search_keys|game_meta|store_offers|ps_products|offer_price_history|ps_price_history|catalog_deal_starts|game_family|game_similar|game_igdb_info|game_igdb_score|game_modes|game_ttb|game_scores|itad_games|upcoming_games|oc_index|search_cache|twitch_top_games|price_change_daily|bundle_parts)(?:\?|$)/;
 // Admin sağlık kartları (mağaza sayıları, güncellik %'leri) doğrudan Mac mini'den gelir. Yalnızca toplu sayı döner, bu yüzden anon anahtarla okunur.
 // Supabase'te dondurulmuş yedek veri yanlış "durmuş" uyarısı verdiği için Mac mini ulaşılamazsa Supabase'e DÜŞÜLMEZ, hata gösterilir.
 const MACMINI_ADMIN_RPC = /^rpc\/admin_(?:sync_stats|operational_health)(?:\?|$)/;
@@ -70,9 +71,11 @@ function macminiEligible(url, init) {
   if (!url.startsWith(SUPABASE_REST)) return false;
   if (macminiAdminRpc(url, init)) return true;
   const auth = String(init?.headers?.Authorization || '');
-  if (auth && auth !== 'Bearer ' + SUPABASE_KEY) return false;
+  const loggedIn = !!auth && auth !== 'Bearer ' + SUPABASE_KEY;
   const method = (init?.method || 'GET').toUpperCase();
   const rest = url.slice(SUPABASE_REST.length);
+  // Girişli kullanıcıların herkese açık katalog okumaları da Mac mini'ye gider (Supabase yükünü azaltır). Kullanıcı jetonu Mac mini'ye gönderilmez (macminiCall anon anahtarı koyar). Kullanıcıya özel tablolar listede olmadığı için Supabase'te kalır.
+  if (loggedIn && (method === 'GET' || method === 'HEAD') && !MACMINI_PUBLIC_TABLE.test(rest)) return false;
   if (method === 'GET' || method === 'HEAD') return !rest.startsWith('rpc/') && !MACMINI_SKIP_TABLE.test(rest);
   const m = method === 'POST' && rest.match(/^rpc\/([a-z_0-9]+)(?:\?|$)/);
   return !!m && MACMINI_READ_RPC.has(m[1]);
