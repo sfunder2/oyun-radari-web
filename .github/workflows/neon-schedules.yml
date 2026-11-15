@@ -3,13 +3,14 @@ name: Neon schedules (prices, markets, enrich, genres, metacritic)
 # On since the move to Neon (the Supabase Cron jobs stay as the old copy's rollback path).
 # Needs the secrets SUPABASE_URL and SUPABASE_SERVICE_KEY. Manual runs always work.
 on:
-  schedule:
-    # Veritabanı artık Mac mini üzerindeki Postgres + PostgREST; eski ücretsiz kota sınırları yok. GitHub cron alt sınırı 5 dakikadır.
-    - cron: '*/5 * * * *'      # ps-prices
-    - cron: '1-59/5 * * * *'   # markets
-    - cron: '3-59/5 * * * *'   # enrich
-    - cron: '7-59/10 * * * *'     # genres
-    - cron: '43 */3 * * *'     # metacritic (kısa tur)
+  # Zamanlama kapatıldı: bu işler artık Mac mini üzerinde launchd ile çalışıyor (cron satırları yorumda; el ile çalıştırma açık).
+  # schedule:
+  #   # Veritabanı artık Mac mini üzerindeki Postgres + PostgREST; eski ücretsiz kota sınırları yok. GitHub cron alt sınırı 5 dakikadır.
+  #   - cron: '*/5 * * * *'      # ps-prices
+  #   - cron: '1-59/5 * * * *'   # markets
+  #   - cron: '3-59/5 * * * *'   # enrich
+  #   - cron: '7-59/10 * * * *'     # genres
+  #   - cron: '43 */3 * * *'     # metacritic (kısa tur)
   workflow_dispatch:
     inputs:
       job:
