@@ -153,6 +153,23 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Ayrıntıda kapak rengi | Oyun ayrıntısı kapağın baskın renginden üst şerit ve yumuşak ışık alır. |
 | Sade/Klasik değiştirici | Masaüstünde üst çubukta, mobilde ve açılış sayfasında yüzen bir düğme olarak her zaman görünür; menüye girmek gerekmez. `radar:ui-set` olayıyla paketin kendi mod durumunu değiştirir ve `?gorunum=` parametresini adresten siler ki seçim yenilemede kalsın. |
 
+## Tasarım yenilikleri (17 Kasım 2026)
+
+`assets/tasarim-20261117.js` ve `.css`. Tercihler (yoğunluk, yazı boyutu, modül düzeni) yalnız bu cihazda tutulur, hesaba senkronlanmaz. Hareketler azaltılmış harekette kapanır.
+
+| Özellik | Davranış |
+|---|---|
+| Fiyat grafiğinde dönemler | Grafikte mağazaların her yıl genelde indirim yaptığı haftalar (Bahar, Days of Play, Yaz, Kara Cuma, Yılbaşı) gölgeli ve "yaklaşık" diye anılır. Seçili dönemin en düşük fiyatı yeşil kesikli bantla, şu an en düşükteyse "Şu an gördüğümüz en düşükte" yazısıyla gösterilir. Grafiğin altında sıradaki büyük indirime kaç gün kaldığı yazar. |
+| Kart yoğunluğu | Liste araçlarında ve menüde Kompakt / Rahat / Büyük. Kompakt mobilde 3 sütun, Büyük mobilde tek sütun. |
+| Kapak rengine boyanan ayrıntı | Oyun ayrıntısında çerçeve, başlıklar, bölüm zeminleri, en ucuz mağaza satırı ve odak halkası kapağın baskın rengini alır. Sade'de aynı renk sönük. |
+| Mobil filtre çekmecesi | 700 px altında "Diğer filtreler" alttan açılan çekmecede açılır; tutamaçtan aşağı çekince, arka plana dokununca, Escape ya da "Bitti" ile kapanır. |
+| Kıyas radarı | İki oyun kıyasında Metacritic, OpenCritic, fiyat avantajı (aynı para biriminde), indirim ve yenilik eksenli radar; her oyunun önde olduğu eksenler işaretlenir. Bilinmeyen eksen tahmin edilmez. |
+| Paylaşım kartı | Oyun ayrıntısında "Paylaşım kartı": 1080×1350 PNG cihazda canvas ile üretilir, destekleyen cihazda paylaşılır, diğerlerinde indirilir. Kapak görseli izin vermezse baş harf kullanılır. |
+| Dip–normal şeridi | Fırsat satırında ve kartta, en az 14 günlük PlayStation fiyat geçmişi varsa fiyatın gördüğümüz en düşük ile normal fiyat arasındaki yeri. |
+| Mikro etkileşimler | Üst menü, alt menü, çıkış sekmeleri, grafik dönemi ve yoğunluk düğmelerinde kayan seçim göstergesi; düğmelerde basma tepkisi; açılan ayrıntılarda yumuşak belirme. |
+| Keşfet modül düzeni | Her modülde boyut (Geniş / Yarım / Daraltılmış; yarım yalnız geniş ekranda) ve gizle düğmesi. Gizlenenler "Gizli modüller" satırından geri açılır. |
+| Yazı boyutu | Menü > Görünüm'de %90–%130 kaydırıcısı ve Sıfırla. |
+
 ## Dağıtım ve doğrulama
 
 - Kaynak: `sfunder2/oyun-radari`, yayın ve toplayıcılar: `sfunder2/oyun-radari-web`.

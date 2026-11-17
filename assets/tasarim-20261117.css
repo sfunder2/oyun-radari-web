@@ -1,0 +1,204 @@
+/* Tasarım yenilikleri (tasarim-20261117.js ile birlikte). Klasik: koyu ve parlak, Sade: açık ve ölçülü. */
+
+/* ---------- 1. Fiyat grafiği: tipik indirim dönemleri ve en düşük bandı ---------- */
+.tz-season rect{fill:#c38bff;opacity:.11}
+.tz-season.tz-s-autumn rect,.tz-season.tz-s-winter rect{fill:#ff8a4c}
+.tz-season.tz-s-summer rect{fill:#ffc94d}
+.tz-season.tz-s-dop rect{fill:#6fb6ff}
+.tz-season text{font:700 10px Manrope,system-ui,sans-serif;fill:#c9d2de;opacity:.85}
+.tz-lowband rect{fill:#5ee08a;opacity:.1}
+.tz-lowband line{stroke:#5ee08a;stroke-width:1.2;stroke-dasharray:3 4;opacity:.75}
+.tz-lowband text{font:700 11px Manrope,system-ui,sans-serif;fill:#5ee08a}
+.tz-marks.is-low .tz-lowband rect{opacity:.22}
+.tz-marks.is-low .tz-lowband text{font-size:12px}
+:root[data-ui=sade] .tz-season rect{opacity:.13}
+:root[data-ui=sade] .tz-season text{fill:#4c4766}
+:root[data-ui=sade] .tz-lowband line{stroke:#15803d}
+:root[data-ui=sade] .tz-lowband text{fill:#15803d}
+:root[data-ui=sade] .tz-lowband rect{fill:#16a34a}
+
+/* ---------- 2. Kart yoğunluğu ---------- */
+.tz-density{display:inline-flex;align-items:center;gap:2px;padding:3px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--panel,#141b25) 70%,transparent);position:relative;flex:none;height:max-content}
+.tz-density button{position:relative;z-index:1;display:inline-flex;align-items:center;gap:6px;min-width:36px;min-height:36px;justify-content:center;padding:6px 8px;border:0;border-radius:9px;background:transparent;color:var(--muted);cursor:pointer;font:inherit;font-size:12px;font-weight:700}
+.tz-density button span{display:none}
+.tz-density.with-text button span{display:inline}
+.tz-density button[aria-pressed=true]{color:var(--ink)}
+.tz-density:not(.tz-has-ink) button[aria-pressed=true]{background:color-mix(in srgb,var(--lime) 18%,transparent)}
+.tz-density button:focus-visible{outline:2px solid var(--lime);outline-offset:1px}
+.libtools>.tz-density{order:1}
+
+:root[data-density=compact] body .cataloggrid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+:root[data-density=compact] .cataloggrid .cardbody{padding:9px!important}
+:root[data-density=compact] .cataloggrid .cardbody h3{font-size:13px;line-height:1.25}
+:root[data-density=compact] .cataloggrid .storeprices,:root[data-density=compact] .cataloggrid .igdbchips,:root[data-density=compact] .cataloggrid .scorechips>span:not(:first-child){display:none}
+:root[data-density=compact] body .deal-list-row{min-height:58px;padding-top:7px;padding-bottom:7px}
+:root[data-density=compact] .deal-game img,:root[data-density=compact] .deal-cover-placeholder{width:34px!important;height:44px!important}
+:root[data-density=compact] .deal-game .igdbchips,:root[data-density=compact] .deal-game .ux-row-meta{display:none}
+:root[data-density=compact] .deal-coverage,:root[data-density=compact] .deal-checked{display:none}
+:root[data-density=compact] .release-rail>li{min-width:150px;width:150px}
+
+:root[data-density=large] body .cataloggrid{grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:22px}
+:root[data-density=large] .cataloggrid .cardbody h3{font-size:19px}
+:root[data-density=large] body .deal-list-row{min-height:118px;padding-top:16px;padding-bottom:16px}
+:root[data-density=large] .deal-game img,:root[data-density=large] .deal-cover-placeholder{width:72px!important;height:96px!important}
+:root[data-density=large] .deal-game b{font-size:16px}
+:root[data-density=large] .deal-best-price strong{font-size:19px}
+@media(max-width:700px){
+  :root[data-density=compact] body .cataloggrid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px}
+  :root[data-density=large] body .cataloggrid{grid-template-columns:minmax(0,1fr)!important}
+  .libtools>.tz-density{order:-1}
+}
+
+/* ---------- 3. Ayrıntı sayfası kapak rengine boyanır (--lime kapağın baskın rengidir) ---------- */
+.game-detail{--tz-a:var(--lime);border-color:color-mix(in srgb,var(--tz-a) 38%,var(--line2,#3b4a39))!important;box-shadow:0 30px 80px -40px color-mix(in srgb,var(--tz-a) 55%,transparent),0 0 0 1px color-mix(in srgb,var(--tz-a) 14%,transparent);scrollbar-color:color-mix(in srgb,var(--tz-a) 55%,transparent) transparent}
+.game-detail::selection,.game-detail ::selection{background:color-mix(in srgb,var(--tz-a) 40%,transparent)}
+.game-detail>.eyebrow{color:var(--tz-a)}
+.game-detail h3{color:color-mix(in srgb,var(--tz-a) 34%,var(--ink))}
+.game-detail section.pricecompare,.game-detail .steamdb-panel,.game-detail .ttbpanel,.game-detail .gmpanel,.game-detail .scorepanel,.game-detail .price-predict,.game-detail .detail-disclosure{border-color:color-mix(in srgb,var(--tz-a) 26%,var(--line,#2b3543))!important;background-image:linear-gradient(180deg,color-mix(in srgb,var(--tz-a) 7%,transparent),transparent 70%)}
+.game-detail .pc-row.best{border-color:color-mix(in srgb,var(--tz-a) 60%,transparent)!important;background:color-mix(in srgb,var(--tz-a) 12%,transparent)!important}
+.game-detail .metachip{border-color:color-mix(in srgb,var(--tz-a) 30%,var(--line,#2b3543))}
+.game-detail summary::marker{color:var(--tz-a)}
+.game-detail .phrange button.on,.game-detail .phrange button[aria-pressed=true]{color:var(--ink)}
+.game-detail .phrange:not(.tz-has-ink) button.on{background:color-mix(in srgb,var(--tz-a) 22%,transparent);border-color:var(--tz-a)}
+.game-detail :focus-visible{outline-color:var(--tz-a)}
+.game-detail .close:hover{border-color:var(--tz-a);color:var(--tz-a)}
+:root[data-ui=sade] .game-detail{--tz-a:color-mix(in srgb,var(--lime) 70%,#3a2f5c);box-shadow:0 24px 60px -36px color-mix(in srgb,var(--lime) 40%,transparent)}
+:root[data-ui=sade] .game-detail section.pricecompare,:root[data-ui=sade] .game-detail .steamdb-panel,:root[data-ui=sade] .game-detail .ttbpanel,:root[data-ui=sade] .game-detail .gmpanel,:root[data-ui=sade] .game-detail .scorepanel,:root[data-ui=sade] .game-detail .price-predict,:root[data-ui=sade] .game-detail .detail-disclosure{background-image:linear-gradient(180deg,color-mix(in srgb,var(--lime) 6%,transparent),transparent 70%)}
+
+/* ---------- 4. Mobil filtre çekmecesi ---------- */
+@media(max-width:700px){
+  .libtools .filterpanel[open]>.filtergrid{position:fixed;left:0;right:0;bottom:0;z-index:310;display:grid!important;grid-template-columns:1fr 1fr!important;gap:10px;max-height:82dvh;overflow:auto;margin:0;padding:0 16px calc(18px + env(safe-area-inset-bottom,0px));background:var(--panel,#141b25);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;box-shadow:0 -20px 60px #0008;animation:tz-sheet-up .28s cubic-bezier(.2,.9,.25,1);overscroll-behavior:contain;transition:transform .2s}
+  .libtools .filterpanel[open]>.filtergrid.tz-dragging{transition:none}
+  .libtools .filterpanel[open]>.filtergrid>label,.libtools .filterpanel[open]>.filtergrid>details{min-width:0}
+  .libtools .filterpanel[open]>.filtergrid>details{grid-column:1/-1}
+  .tz-sheet-head{grid-column:1/-1;position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 -16px;padding:18px 16px 10px;background:inherit;border-radius:22px 22px 0 0;touch-action:none}
+  .tz-sheet-head b{font-size:16px}
+  .tz-sheet-head button{min-height:40px;padding:8px 18px;border:0;border-radius:999px;background:var(--lime);color:#0b1118;font:inherit;font-weight:800}
+  .tz-grip{position:absolute;left:50%;top:7px;width:42px;height:5px;margin-left:-21px;border-radius:9px;background:var(--line2,#3b4a39)}
+  .tz-sheet-backdrop{position:fixed;inset:0;z-index:300;background:#05080fa8;backdrop-filter:blur(3px);animation:tz-fade .2s}
+  :root.tz-sheet-open body{overflow:hidden}
+  :root[data-ui=sade] .libtools .filterpanel[open]>.filtergrid{background:#fff;box-shadow:0 -16px 50px #2a1f5533}
+  :root[data-ui=sade] .tz-sheet-head button{color:#fff}
+  :root[data-ui=sade] .tz-sheet-backdrop{background:#1c163066}
+}
+@media(min-width:701px){.tz-sheet-head,.tz-sheet-backdrop{display:none}}
+@keyframes tz-sheet-up{from{transform:translateY(100%)}to{transform:none}}
+@keyframes tz-fade{from{opacity:0}}
+
+/* ---------- 5. Kıyas radarı ---------- */
+.tz-versus{display:grid;grid-template-columns:minmax(220px,340px) minmax(0,1fr);gap:18px;align-items:center;margin:16px 0 20px;padding:16px;border:1px solid var(--line);border-radius:18px;background:color-mix(in srgb,var(--panel,#141b25) 80%,transparent)}
+.tz-versus svg{width:100%;height:auto;overflow:visible}
+.tz-vgrid{fill:none;stroke:var(--line);stroke-width:1}
+.tz-vaxis{stroke:var(--line);stroke-width:1}
+.tz-vlabel{font:700 11px Manrope,system-ui,sans-serif;fill:var(--muted)}
+.tz-vpoly{stroke-width:2.2;stroke-linejoin:round}
+.tz-vpoly.a{fill:#ff5d8f33;stroke:#ff5d8f}
+.tz-vpoly.b{fill:#6fb6ff33;stroke:#6fb6ff}
+.tz-vside{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tz-vside>.phnote{grid-column:1/-1;margin:0}
+.tz-vgame{padding:12px;border-radius:14px;border:1px solid var(--line);border-top:4px solid}
+.tz-vgame.a{border-top-color:#ff5d8f}.tz-vgame.b{border-top-color:#6fb6ff}
+.tz-vgame>b{display:block;margin-bottom:8px;font-size:14px;line-height:1.3}
+.tz-vgame ul{margin:0;padding:0;list-style:none;display:grid;gap:4px}
+.tz-vgame li{display:flex;justify-content:space-between;gap:8px;padding:4px 8px;border-radius:8px;font-size:12px;color:var(--muted)}
+.tz-vgame li em{font-style:normal;font-weight:800;color:var(--ink)}
+.tz-vgame.a li.win{background:#ff5d8f22;color:var(--ink)}
+.tz-vgame.b li.win{background:#6fb6ff22;color:var(--ink)}
+.tz-vgame li.win em::after{content:" ▲";font-size:9px}
+:root[data-ui=sade] .tz-versus{background:#fff}
+:root[data-ui=sade] .tz-vpoly.a{fill:#e11d4826;stroke:#e11d48}
+:root[data-ui=sade] .tz-vpoly.b{fill:#2563eb26;stroke:#2563eb}
+:root[data-ui=sade] .tz-vgame.a{border-top-color:#e11d48}:root[data-ui=sade] .tz-vgame.b{border-top-color:#2563eb}
+@media(max-width:700px){.tz-versus{grid-template-columns:1fr;padding:12px}.tz-versus svg{max-width:300px;margin:0 auto}.tz-vside{grid-template-columns:1fr 1fr;gap:8px}}
+
+/* ---------- 6. Paylaşım kartı ---------- */
+.tz-sharebtn{display:inline-flex;align-items:center;gap:8px;min-height:40px;margin:4px 0 12px;padding:8px 14px;border:1px solid color-mix(in srgb,var(--lime) 50%,var(--line));border-radius:999px;background:color-mix(in srgb,var(--lime) 10%,transparent);color:var(--ink);font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.tz-sharebtn:hover{background:color-mix(in srgb,var(--lime) 20%,transparent)}
+.tz-sharebtn:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.tz-share{position:fixed;inset:0;z-index:400;display:grid;place-items:center;padding:16px;background:#05080fd0;backdrop-filter:blur(6px);animation:tz-fade .2s}
+.tz-share-card{width:min(100%,420px);max-height:calc(100dvh - 32px);overflow:auto;padding:16px;border:1px solid var(--line2,#3b4a39);border-radius:22px;background:var(--panel,#141b25);color:var(--ink)}
+.tz-share-card img{display:block;width:100%;height:auto;border-radius:14px;box-shadow:0 20px 50px -20px #000a}
+.tz-share-wait{margin:40px 0;text-align:center;color:var(--muted)}
+.tz-share-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tz-share-actions button{flex:1;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-weight:700;cursor:pointer}
+.tz-share-actions button.primary{background:var(--lime);border-color:var(--lime);color:#0b1118}
+.tz-share-actions button:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.tz-share-note{margin:10px 0 0;font-size:12px;color:var(--muted)}
+:root[data-ui=sade] .tz-share{background:#1c163088}
+:root[data-ui=sade] .tz-share-card{background:#fff}
+:root[data-ui=sade] .tz-share-actions button.primary{color:#fff}
+
+/* ---------- 7. Dip–normal fiyat şeridi ---------- */
+.tz-range{display:inline-flex;align-items:center;gap:5px;margin-top:4px;font-size:10px;color:var(--muted);line-height:1}
+.tz-range>i{position:relative;display:block;width:58px;height:6px;border-radius:9px;background:linear-gradient(90deg,#5ee08a,#ffcb47 55%,#ff6b6b)}
+.tz-range>i>u{position:absolute;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#fff;border:2px solid #0b1118;box-shadow:0 0 0 2px #fff4}
+.tz-range.low>i>u{box-shadow:0 0 0 3px #5ee08a66}
+.tz-range small{font-size:10px}
+.deal-best-price .tz-range{display:flex}
+.catalogprice+.tz-range{margin:2px 0 6px}
+:root[data-ui=sade] .tz-range>i{background:linear-gradient(90deg,#16a34a,#d97706 55%,#dc2626);opacity:.75}
+:root[data-ui=sade] .tz-range>i>u{border-color:#fff;background:#100e16}
+:root[data-density=compact] .tz-range small{display:none}
+
+/* ---------- 8. Mikro etkileşimler ---------- */
+.tz-has-ink{position:relative;isolation:isolate}
+.tz-ink{position:absolute;left:0;top:0;z-index:-1;border-radius:10px;background:color-mix(in srgb,var(--lime) 20%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--lime) 45%,transparent);pointer-events:none;transition:transform .32s cubic-bezier(.3,1.3,.5,1),width .32s cubic-bezier(.3,1.3,.5,1),height .2s,opacity .2s}
+header .topbar>nav.tz-has-ink>button.active,.bottom-nav.tz-has-ink>button.active,.release-tabs.tz-has-ink>button.on,.release-tabs.tz-has-ink>button[aria-pressed=true],.phrange.tz-has-ink>button.on,.phrange.tz-has-ink>button[aria-pressed=true]{background:transparent!important;border-color:transparent!important;box-shadow:none!important}
+.release-tabs.tz-has-ink>button.on,.release-tabs.tz-has-ink>button[aria-pressed=true]{color:var(--ink)!important}
+.release-tabs.tz-has-ink .tz-ink{background:var(--lime);box-shadow:none}
+.release-tabs.tz-has-ink>button.on,.release-tabs.tz-has-ink>button[aria-pressed=true]{color:#0b1118!important}
+.bottom-nav .tz-ink{border-radius:14px}
+:root[data-ui=sade] .tz-ink{background:color-mix(in srgb,var(--lime) 13%,transparent)}
+:root[data-ui=sade] .release-tabs.tz-has-ink .tz-ink{background:var(--lime)}
+:root[data-ui=sade] .release-tabs.tz-has-ink>button.on,:root[data-ui=sade] .release-tabs.tz-has-ink>button[aria-pressed=true]{color:#fff!important}
+@media(prefers-reduced-motion:no-preference){
+  :root:not([data-reduce-motion=true]) :is(button,.chip,summary):not(:disabled){transition:transform .12s ease,background-color .2s,border-color .2s,color .2s}
+  :root:not([data-reduce-motion=true]) :is(button,summary):not(:disabled):active{transform:scale(.96)}
+  :root:not([data-reduce-motion=true]) .heart:active{transform:scale(.82)}
+  :root:not([data-reduce-motion=true]) .metachip,:root:not([data-reduce-motion=true]) .gmtag{transition:transform .15s,border-color .2s}
+  :root:not([data-reduce-motion=true]) .metachip:hover,:root:not([data-reduce-motion=true]) .gmtag:hover{transform:translateY(-1px)}
+  :root:not([data-reduce-motion=true]) details[open]>:not(summary){animation:tz-open .22s ease-out}
+}
+@keyframes tz-open{from{opacity:0;transform:translateY(-4px)}}
+@media(max-width:700px){.libtools .filterpanel[open]>.filtergrid{animation:tz-sheet-up .28s cubic-bezier(.2,.9,.25,1)!important}}
+
+/* ---------- 9. Keşfet modül düzeni ---------- */
+@media(min-width:901px){
+  .discovery-dashboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:22px}
+  .discovery-dashboard>*{grid-column:1/-1}
+  .discovery-dashboard>.dashboard-widget[data-tz-size=half]{grid-column:auto;min-width:0}
+}
+.dashboard-widget[data-tz-hidden]{display:none!important}
+.dashboard-widget[data-tz-size=mini]{max-height:64px;overflow:hidden;cursor:default}
+.dashboard-widget[data-tz-size=mini]>:not(.widget-controls){visibility:hidden}
+.dashboard-widget[data-tz-size=mini]::before{content:attr(data-tz-name);position:absolute;left:22px;top:20px;font-weight:800;font-size:15px;color:var(--ink)}
+.dashboard-widget[data-tz-size=mini]::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 0 1px var(--line)}
+.widget-controls .tz-wsize,.widget-controls .tz-whide{min-height:28px;padding:3px 9px;border:1px solid var(--line);border-radius:999px;background:color-mix(in srgb,var(--bg,#090d12) 70%,transparent);color:var(--muted);font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.widget-controls .tz-wsize{width:auto!important;height:28px!important;min-width:0;border-radius:999px!important;display:inline-flex!important;align-items:center}
+.widget-controls .tz-whide{display:inline-grid!important;place-items:center;width:28px!important;height:28px!important;padding:0}
+@media (pointer:coarse),(width<=820px){.widget-controls .tz-wsize,.widget-controls .tz-whide{min-height:36px!important;height:36px!important}.widget-controls .tz-whide{width:36px!important}}
+.widget-controls .tz-wsize:hover,.widget-controls .tz-whide:hover{color:var(--ink);border-color:var(--lime)}
+.tz-hiddenbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px;font-size:12px;color:var(--muted)}
+.tz-hiddenbar button{min-height:32px;padding:5px 12px;border:1px dashed var(--line2,var(--line));border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:12px;cursor:pointer}
+.tz-hiddenbar button:hover{border-color:var(--lime);border-style:solid}
+:root[data-ui=sade] .widget-controls .tz-wsize,:root[data-ui=sade] .widget-controls .tz-whide{background:#fff}
+
+/* ---------- 10. Yazı boyutu (yalnız içerik ölçeklenir) ---------- */
+:root[data-text-scale] #root{zoom:var(--tz-scale,1)}
+.tz-menu-view{margin-top:12px}
+.tz-menu-view h3{margin:0 0 10px}
+.tz-scale{display:grid;gap:8px;font-size:13px;font-weight:700}
+.tz-scale>span:first-child{display:flex;justify-content:space-between}
+.tz-scale output{color:var(--lime);font-weight:800}
+.tz-scale-row{display:flex;align-items:center;gap:10px}
+.tz-scale-row small{font-size:12px;color:var(--muted)}
+.tz-scale-row b{font-size:20px;color:var(--muted)}
+.tz-scale input{flex:1;accent-color:var(--lime);min-height:32px}
+.tz-scale-reset{min-height:34px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);font:inherit;font-size:12px;cursor:pointer}
+.tz-menu-dens{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:13px;font-weight:700}
+.tz-chartnote .tz-next{display:flex;flex-wrap:wrap;gap:2px 6px;align-items:center;width:fit-content;max-width:100%;margin:0 0 6px;padding:4px 12px;border-radius:12px;background:#ff8a4c1f;color:var(--ink);font-size:12px}
+.tz-chartnote .tz-next b{color:#ffb27a}
+.tz-chartnote .tz-next.now{background:#5ee08a22}.tz-chartnote .tz-next.now b{color:#5ee08a}
+:root[data-ui=sade] .tz-chartnote .tz-next{background:#f9731618}
+:root[data-ui=sade] .tz-chartnote .tz-next b{color:#c2410c}
+:root[data-ui=sade] .tz-chartnote .tz-next.now b{color:#15803d}
