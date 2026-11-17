@@ -29,7 +29,7 @@ function group(el) {
   const c = el.classList;
   if (el.dataset.dtOwn) return null;
   if (c.contains("close")) return "close";
-  if (c.contains("eyebrow") || el.tagName === "H2" || c.contains("ux-detail-meta") || c.contains("life-countdown") || c.contains("metarow")) return "head";
+  if (c.contains("eyebrow") || el.tagName === "H2" || c.contains("ux-detail-meta") || c.contains("life-countdown") || c.contains("metarow") || c.contains("tz-sharebtn")) return "head";
   if (c.contains("pricecompare")) return "price";
   if (c.contains("priceheat")) return "heat";
   if (c.contains("catalognotice")) return "note";
