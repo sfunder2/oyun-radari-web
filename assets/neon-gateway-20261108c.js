@@ -18,7 +18,7 @@ export const MACMINI_API = 'https://arif-mac-mini.tail34cd8a.ts.net/rest/v1/';
 // Mac mini PostgREST'in herkese açık, SALT-OKUNUR (role=anon) JWT'si; tarayıcıda görünmesi tasarım gereği. Yalnızca Authorization: Bearer gerekir.
 // 'REPLACE_' ile başlayan bir değer konursa bayrak ne olursa olsun Mac mini KULLANILMAZ.
 export const MACMINI_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6Im95dW5yYWRhci1tYWMiLCJpYXQiOjE3OTQ2MTkzMDAsImV4cCI6NDEwMjQ0NDgwMH0.xIfIiPU80KEPCPGeptc1KjKRMwxGlne7z3bebUzgOLA';
-export const MACMINI_DEFAULT_ON = true;
+export const MACMINI_DEFAULT_ON = false;
 const MACMINI_READ_RPC = new Set(['search_games', 'search_market', 'search_market_v2', 'search_suggestions', 'title_bundle'])
 // Kullanıcıların Supabase'e yazdığı sosyal tablolar Mac mini'de bayat kalır; radar_follows ise Supabase'te özeldir (yalnızca sahibi okur) ama Mac anon rolüyle okunabiliyor. Hepsi Supabase'te kalır.
 const MACMINI_SKIP_TABLE = /^radar_/;
