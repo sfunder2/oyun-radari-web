@@ -170,6 +170,21 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Keşfet modül düzeni | Her modülde boyut (Geniş / Yarım / Daraltılmış; yarım yalnız geniş ekranda) ve gizle düğmesi. Gizlenenler "Gizli modüller" satırından geri açılır. |
 | Yazı boyutu | Menü > Görünüm'de %90–%130 kaydırıcısı ve Sıfırla. |
 
+## Fırsat merkezi (21 Kasım 2026)
+
+`assets/hub-20261121.js` ve `.css`; sol altta zil düğmesi (mobilde alt menünün üstünde). Sade/Klasik, TR/EN, masaüstü/mobil. Mevcut alarm mantığı (favoride hedef fiyat, site açıkken 5 dakikalık kontrol) aynen çalışır; merkez onun üstüne ek bakış ve sunucu tarafı ekler. Hiçbir sekme veri uydurmaz: veri yoksa "veri az" ya da "bitiş saati bilinmiyor" yazar.
+
+| Özellik | Davranış |
+|---|---|
+| Alarmlar | Hedef koyduğun favoriler: Hedefte / Yaklaştı (%15 içinde) / Bekliyor / Fiyat yok (24 saatten eski ya da para birimi farklı). Son uyarılar, tarayıcı bildirimi izni. Zil rozeti hedefe inenleri ve süresi dolmak üzere ücretsiz oyunları sayar. |
+| Al / bekle | Favori başına fiyat geçmişinden Şimdi al (kayıtlı dibin %8 içinde), Makul, Bekle (dibin %25 üstü ya da 21 gün içinde büyük indirim haftası). En az 14 gün ve 5 kayıt yoksa "Veri az". Gerekçe cümleleri yazılır ve "fiyat tahmini değildir" der. |
+| Paylaşım kartı | Al/bekle satırında "Paylaş": tasarım modülünün cihazda ürettiği 1080×1350 PNG'si (`openShare`). |
+| Ücretsiz oyunlar | Epic gerçek bitişle (`radar-services?action=epic`), Steam/Xbox/GOG'da fiyatı 0 ve orijinal fiyatı olan, son 24 saatte doğrulanmış teklifler. Bitişi bilinmeyen oyunda süre yazılmaz. Epic için 24 sa ve 2 sa kala bildirim (site açıkken, izinle). |
+| Bölge | Favori başına `regional-prices`; başka ülke TR'den en az %15 ve 20 TL ucuzsa gösterilir (eski kur ve hatalı satırlar atılır). Kart komisyonu ve ülke kısıtı dahil değildir. |
+| Özet | Giriş yapmış kullanıcı için haftalık e-posta özeti ve site kapalıyken telefona bildirim (ntfy). Tercihler `radar_digest` tablosunda; e-posta adresini istemci seçemez (tetikleyici `auth.users`'tan alır). |
+
+Sunucu tarafı (`scripts/digest.mjs`, çalıştırıcı `scripts/digest-run.mjs`): `--weekly` günde bir çalıştırılır ve bir kullanıcıya 6,5 günden sık göndermez; haber yoksa e-posta yollamaz. `--push` yarım saatte bir çalıştırılır; hedefe inen favoriyi günde bir kez, Epic ücretsiz oyununu 24 sa / 2 sa eşiğinde bir kez yollar. `--dry` hiçbir şey göndermez. Gerekli kurulum için README "Fırsat merkezi" bölümüne bak.
+
 ## Dağıtım ve doğrulama
 
 - Kaynak: `sfunder2/oyun-radari`, yayın ve toplayıcılar: `sfunder2/oyun-radari-web`.

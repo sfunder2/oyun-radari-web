@@ -345,7 +345,7 @@ async function drawShare(item, accent) {
   return new Promise(res => c.toBlob(b => res({ blob: b, url: c.toDataURL('image/png') }), 'image/png'));
 }
 let shareOpen = null;
-async function openShare(item, from) {
+export async function openShare(item, from) {
   if (shareOpen) shareOpen.remove();
   const en = isEn();
   const wrap = document.createElement('div');
