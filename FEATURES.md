@@ -192,3 +192,14 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Tüm zamanların en düşüğü | Fiyat radarın kayıtlarındaki en düşükse ayrıntıda büyük, kartta kısa altın rozet. Yalnız ≥14 günlük kayıtta. |
 
 Kod: `assets/charts-20261121.js/.css`, testler: `tests/charts.test.mjs`.
+
+## Katalog araçları (21 Kasım 2026)
+
+Menüdeki "Katalog araçları" bölümünden (ya da `?arac=dlc|sezon|gereksinim|seri` adresiyle) açılan tek pencerede dört araç. Kaynak: `assets/catalog-tools-20261121.js` ve `.css`; yeni tablo ya da SQL gerekmez. Kişisel kayıtlar yalnız bu cihazda tutulur.
+
+| Araç | Veri | Eksik / sınır |
+|---|---|---|
+| Ek paket ve DLC takibi | `game_family.dlcs` (IGDB) + `library`/`store_offers` fiyatları; PlayStation `edition` metni ("Eklenti", "Oyun Paketi", "Premium Sürüm") ek paketi ve tam sürüm paketini ayırır. Takip listesi `radar-tools-track-v1`, eklerkenki fiyata göre değişimi gösterir. İndirimdeki ek paketler akışı. | IGDB'nin listelediği DLC'lerin yaklaşık %6'sının katalogda fiyatı var (7.630 DLC anahtarından ~470 PlayStation, ~680 diğer mağaza). Paketin içeriği bilinmediği için "paket daha ucuz" karşılaştırması gösterge niteliğindedir. Ek paket indirim akışı yalnız PlayStation. |
+| İndirim takvimi ve hazırlık listesi | Tasarım modülündeki yaklaşık sezon tarihleri (`SALE_SEASONS`); istek listesi `radar-fav-v3`; PlayStation kayıtları için güncel fiyat. Liste ve bütçe `radar-tools-prep-v1`. | Tarihler her yıl aynı haftalar varsayılarak yaklaşıktır; kesin gün mağazalardan gelmez. Geçmiş sezonlardaki gerçek dip oranı henüz hesaplanmıyor. |
+| Bilgisayarım çalıştırır mı? | `library.requirements` (Steam; ~22.700 oyunda var). RAM, depolama ve işletim sistemi kesin; işlemci ve ekran kartı yerleşik yaklaşık skor tablosuyla (~). Sistem `radar-tools-sys-v1`. | Tablo dışı ya da çok yeni modeller "doğrulanamadı" çıkar, karar bunlarla yükseltilmez. Yalnız Steam eşleşmesi olan oyunlar. |
+| Oyun serisi sayfası | `game_family.series_name/series` (IGDB, ~4.500 oyunda seri var) + katalogdaki en ucuz TRY fiyat. | Toplam yalnız TRY fiyatlı oyunları sayar; Steam/Switch fiyatları dolar olduğu için toplama girmez, ayrıca belirtilir. Katalogda olmayan oyun "Fiyat yok" görünür. |
