@@ -87,6 +87,25 @@ function s(e) {
 			className: "thermo-bulb"
 		}));
 	}
+	// Ayrıntı panelinde ibreli kadran: soğuk (mavi) soldan sıcak (kırmızı) sağa; ibre açılışta yerine sallanarak oturur.
+	function dial({ fill: e, collecting: c }) {
+		let f = c ? 0 : Math.min(1, Math.max(0, e)), ang = -90 + f * 180;
+		let arc = (a0, a1) => {
+			let p = (a) => [60 + 46 * Math.cos((a - 90) * Math.PI / 180), 62 + 46 * Math.sin((a - 90) * Math.PI / 180)];
+			let [x0, y0] = p(a0), [x1, y1] = p(a1);
+			return `M${x0.toFixed(1)} ${y0.toFixed(1)} A46 46 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+		};
+		return /* @__PURE__ */ t("svg", {
+			className: "heatdial" + (c ? " off" : ""),
+			viewBox: "0 0 120 76",
+			width: 112,
+			height: 71,
+			"aria-hidden": "true"
+		}, /* @__PURE__ */ t("path", { d: arc(-90, -30), className: "hd-arc cold" }), /* @__PURE__ */ t("path", { d: arc(-28, 28), className: "hd-arc warm" }), /* @__PURE__ */ t("path", { d: arc(30, 90), className: "hd-arc hot" }), /* @__PURE__ */ t("g", {
+			className: "hd-needle",
+			style: { "--a": ang + "deg" }
+		}, /* @__PURE__ */ t("line", { x1: 60, y1: 62, x2: 60, y2: 24 }), /* @__PURE__ */ t("circle", { cx: 60, cy: 62, r: 5 })));
+	}
 	function s({ heat: e, currency: n = "TRY", detail: s = !1, long: c = !1 }) {
 		if (!e) return null;
 		let l = r[e.level], u = o(e, n);
@@ -94,9 +113,9 @@ function s(e) {
 			className: "heatpanel " + e.level,
 			role: "group",
 			"aria-label": "Fiyat sıcaklığı"
-		}, /* @__PURE__ */ t(i, {
-			fill: e.level === "collecting" ? 0 : e.fill,
-			size: 44
+		}, /* @__PURE__ */ t(dial, {
+			fill: e.fill,
+			collecting: e.level === "collecting"
 		}), /* @__PURE__ */ t("div", { className: "heatbody" }, /* @__PURE__ */ t("small", null, "Fiyat sıcaklığı"), /* @__PURE__ */ t("strong", null, l), /* @__PURE__ */ t("p", null, u), e.level !== "collecting" && /* @__PURE__ */ t("div", { className: "heatscale" }, /* @__PURE__ */ t("div", { className: "heattrack" }, [
 			["cold", "Soğuk"],
 			["warm", "Ilık"],
