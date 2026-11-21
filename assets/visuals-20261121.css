@@ -1,0 +1,199 @@
+/* Görsel panolar ve zaman çizgileri (visuals-20261121.js ile birlikte). Klasik: koyu, Sade: açık. Renkler uygulamanın --ink/--muted/--line/--lime değişkenlerinden gelir. */
+:root{--vz-bg:color-mix(in srgb,var(--ink,#e8edf4) 5%,transparent);--vz-line:var(--line,#ffffff1f);--vz-good:#5ee08a;--vz-warn:#ffb454;--vz-hot:#ff8a4c;--vz-crit:#ff5c70}
+:root[data-ui=sade]{--vz-bg:color-mix(in srgb,var(--ink,#1d1533) 5%,transparent);--vz-good:#15803d;--vz-warn:#b45309;--vz-hot:#c2410c;--vz-crit:#be123c}
+.vz-note{margin:10px 0 0;font-size:12px;line-height:1.5;color:var(--muted)}
+.vz-link{padding:0;border:0;background:none;color:var(--lime);font:inherit;text-decoration:underline;cursor:pointer}
+.vz-skel{display:grid;place-items:center;min-height:90px;color:var(--muted);font-size:13px}
+.vz-skel span{animation:vz-pulse 1.4s ease-in-out infinite}
+@keyframes vz-pulse{50%{opacity:.45}}
+
+/* ---------- 1. Cüzdan koçu halkası ---------- */
+.life-budget:has(.vz-wallet) .wallet-meter{display:none}
+.vz-wallet{display:grid;grid-template-columns:auto minmax(0,460px);justify-content:start;align-items:center;gap:18px 24px;margin:14px 0;padding:16px;border:1px solid var(--vz-line);border-radius:16px;background:var(--vz-bg)}
+.vz-donut-wrap{position:relative;width:170px;height:170px}
+.vz-donut{width:100%;height:100%;display:block}
+.vz-track{stroke:color-mix(in srgb,var(--ink,#e8edf4) 12%,transparent)}
+.vz-seg{stroke-linecap:butt;transition:stroke-width .2s}
+.vz-seg:hover{stroke-width:19}
+.vz-seg.remain{stroke:color-mix(in srgb,var(--ink,#e8edf4) 24%,transparent)}
+.vz-over-ring{stroke:var(--vz-crit);stroke-dasharray:3 4}
+.vz-donut-center{position:absolute;inset:0;display:grid;place-content:center;gap:2px;text-align:center;padding:0 34px}
+.vz-donut-center strong{font-size:22px;font-weight:800;color:var(--ink);line-height:1.1}
+.vz-donut-center small{font-size:11px;color:var(--muted);line-height:1.25}
+.vz-legend{display:grid;gap:7px;margin:0;padding:0;list-style:none}
+.vz-legend li{display:grid;grid-template-columns:12px minmax(0,1fr) auto;align-items:center;gap:8px;font-size:13px;color:var(--ink)}
+.vz-legend i{width:12px;height:12px;border-radius:4px}
+.vz-legend .remain i{background:color-mix(in srgb,var(--ink,#e8edf4) 24%,transparent)}
+.vz-legend span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vz-legend b{font-variant-numeric:tabular-nums}
+@media(max-width:560px){.vz-wallet{grid-template-columns:minmax(0,1fr);justify-items:center}.vz-legend{width:100%}}
+@media(prefers-reduced-motion:no-preference){
+:root:not([data-reduce-motion=true]) .vz-seg{animation:vz-seg .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*90ms)}
+}
+@keyframes vz-seg{from{stroke-dasharray:0 400}}
+
+/* ---------- 5. Tasarruf sayacı ---------- */
+.wallet-hero:has(.vz-saved)>small{display:none}
+.vz-saved{position:relative;display:grid;gap:4px;margin:12px 0 0;padding:12px 14px;width:100%;max-width:420px;border:1px solid color-mix(in srgb,var(--vz-good) 45%,transparent);border-radius:14px;background:color-mix(in srgb,var(--vz-good) 9%,transparent);color:var(--ink);text-align:left;cursor:pointer;font:inherit}
+.vz-saved:hover{background:color-mix(in srgb,var(--vz-good) 15%,transparent)}
+.vz-saved:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.vz-saved-eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;color:var(--muted)}
+.vz-saved-num{font-size:28px;font-weight:800;line-height:1.1;color:var(--vz-good);font-variant-numeric:tabular-nums}
+.vz-saved-bar{display:block;height:6px;border-radius:6px;background:color-mix(in srgb,var(--ink,#e8edf4) 12%,transparent);overflow:hidden}
+.vz-saved-bar i{display:block;height:100%;border-radius:6px;background:var(--vz-good);transition:width .8s ease}
+.vz-saved small{font-size:12px;color:var(--muted)}
+.vz-saved-new{position:absolute;right:12px;top:10px;padding:2px 8px;border-radius:20px;background:var(--vz-good);color:#07140c;font-size:12px;font-weight:800}
+:root[data-ui=sade] .vz-saved-new{color:#fff}
+.vz-confetti{position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;pointer-events:none}
+@media(prefers-reduced-motion:no-preference){
+:root:not([data-reduce-motion=true]) .vz-saved.is-new{animation:vz-pop .6s cubic-bezier(.2,1.4,.4,1)}
+}
+@keyframes vz-pop{0%{transform:scale(.96)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+
+/* ---------- 2. DNA radarı ---------- */
+.vz-radar .vz-radar-svg{width:100%;max-width:440px;height:auto;display:block;margin:6px auto 0;overflow:visible}
+.vz-grid{fill:none;stroke:var(--vz-line);stroke-width:1}
+.vz-spoke{stroke:var(--vz-line);stroke-width:1}
+.vz-area{fill:color-mix(in srgb,var(--lime,#9bd763) 28%,transparent);stroke:var(--lime,#9bd763);stroke-width:2;stroke-linejoin:round}
+.vz-dot{fill:var(--lime,#9bd763);stroke:var(--bg,#0c1119);stroke-width:2}
+.vz-axis{font:700 11px Manrope,system-ui,sans-serif;fill:var(--ink)}
+@media(prefers-reduced-motion:no-preference){
+:root:not([data-reduce-motion=true]) .vz-shape{transform-origin:180px 150px;animation:vz-grow .8s cubic-bezier(.2,.8,.2,1) both}
+}
+@keyframes vz-grow{from{transform:scale(.05);opacity:0}}
+
+/* ---------- 7. Geri sayım halkası ---------- */
+.vz-ring{flex:none;width:20px;height:20px;margin-right:2px;vertical-align:-5px}
+.dealexpires:has(> .vz-ring)>svg:not(.vz-ring){display:none}
+.vz-ring-track{stroke:color-mix(in srgb,var(--ink,#e8edf4) 16%,transparent)}
+.vz-ring-prog{stroke:var(--vz-good);transition:stroke-dasharray .6s ease}
+.vz-ring[data-tone=warn] .vz-ring-prog{stroke:var(--vz-warn)}
+.vz-ring[data-tone=hot] .vz-ring-prog{stroke:var(--vz-hot)}
+.vz-ring[data-tone=crit] .vz-ring-prog{stroke:var(--vz-crit)}
+@media(prefers-reduced-motion:no-preference){
+:root:not([data-reduce-motion=true]) .vz-ring[data-tone=crit]{animation:vz-beat 1.2s ease-in-out infinite}
+}
+@keyframes vz-beat{50%{transform:scale(1.18)}}
+
+/* ---------- panel kabuğu (Fırsatlar) ---------- */
+.vz-dealtools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 0 12px}
+.vz-panel{border:1px solid var(--vz-line);border-radius:14px;background:var(--vz-bg);min-width:0}
+.vz-panel[open]{grid-column:1/-1}
+.vz-panel>summary{display:grid;gap:2px;padding:11px 14px;cursor:pointer;list-style:none}
+.vz-panel>summary::-webkit-details-marker{display:none}
+.vz-panel>summary:focus-visible{outline:2px solid var(--lime);outline-offset:2px;border-radius:14px}
+.vz-panel-title{font-size:14px;font-weight:700;color:var(--ink)}
+.vz-panel>summary small{font-size:12px;color:var(--muted)}
+.vz-panel-body{padding:2px 14px 14px}
+@media(max-width:700px){.vz-dealtools{grid-template-columns:1fr}}
+
+/* ---------- 3. Isı haritası ---------- */
+.vz-heat-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.vz-heat-rows{display:grid;grid-template-rows:18px repeat(7,26px);gap:3px;font-size:10px;color:var(--muted);flex:none}
+.vz-heat-rows span{display:flex;align-items:center}
+.vz-heat-main{flex:1;min-width:0}
+.vz-heat-months{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(26px,1fr);gap:3px;height:18px;font-size:10px;color:var(--muted)}
+.vz-heat-cols{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(26px,1fr);gap:3px}
+.vz-heat-col{display:grid;grid-template-rows:repeat(7,26px);gap:3px}
+.vz-cell{display:block;width:100%;height:26px;padding:0;border:0;border-radius:6px;background:color-mix(in srgb,var(--ink,#e8edf4) 8%,transparent);cursor:pointer}
+.vz-cell.l1{background:color-mix(in srgb,var(--lime,#9bd763) 28%,transparent)}
+.vz-cell.l2{background:color-mix(in srgb,var(--lime,#9bd763) 50%,transparent)}
+.vz-cell.l3{background:color-mix(in srgb,var(--lime,#9bd763) 75%,transparent)}
+.vz-cell.l4{background:var(--lime,#9bd763)}
+.vz-cell.past{opacity:.38}
+.vz-cell.today{outline:2px solid var(--ink);outline-offset:1px}
+.vz-cell:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.vz-heat-legend{display:flex;align-items:center;gap:5px;margin-top:10px;font-size:11px;color:var(--muted)}
+.vz-heat-legend .vz-cell{width:16px;height:16px;border-radius:4px;cursor:default}
+.vz-heat-info{margin:10px 0 0;min-height:20px;font-size:13px;font-weight:600;color:var(--ink)}
+@media(prefers-reduced-motion:no-preference){
+:root:not([data-reduce-motion=true]) .vz-heat-col .vz-cell{animation:vz-fade .5s ease both;animation-delay:var(--d,0ms)}
+}
+@keyframes vz-fade{from{opacity:0;transform:scale(.6)}}
+
+/* ---------- 8. Balon haritası ---------- */
+.vz-bubbles svg{width:100%;height:auto;max-height:380px;display:block}
+.vz-bubble{cursor:pointer;outline:none}
+.vz-bubble circle{stroke:var(--bg,#0c1119);stroke-width:3;opacity:.92;transition:opacity .2s,stroke-width .2s}
+.vz-bubble:hover circle,.vz-bubble:focus-visible circle{opacity:1;stroke:var(--ink);stroke-width:3}
+.vz-bubble text{pointer-events:none;font:800 12px Manrope,system-ui,sans-serif;fill:#0b1118}
+.vz-bubble .vz-bubble-pct{font-weight:700;font-size:11px;opacity:.8}
+@media(prefers-reduced-motion:no-preference){
+:root:not([data-reduce-motion=true]) .vz-bubble{animation:vz-bub .7s cubic-bezier(.2,1.3,.4,1) both;animation-delay:calc(var(--i,0)*70ms)}
+}
+@keyframes vz-bub{from{transform:scale(0);opacity:0}}
+
+/* ---------- 4. Fiyat düşüşü şelalesi ---------- */
+.vz-fall{width:min(620px,100%);margin:28px auto 0}
+.vz-fall h2{display:flex;align-items:center;gap:8px;margin:0;font-size:16px;font-weight:800;color:var(--ink)}
+.vz-live{width:8px;height:8px;border-radius:50%;background:var(--vz-good)}
+.vz-fall-sub{margin:2px 0 12px;font-size:12px;color:var(--muted)}
+.vz-fall-list{display:grid;gap:8px;position:relative}
+.vz-drop{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:8px 12px 8px 8px;border:1px solid var(--vz-line);border-radius:14px;background:var(--vz-bg);color:var(--ink);text-decoration:none;margin-left:calc(var(--i,0)*7px);transition:transform .2s,border-color .2s}
+a.vz-drop:hover{border-color:var(--lime);transform:translateX(2px)}
+a.vz-drop:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.vz-drop img,.vz-drop-ph{width:44px;height:44px;border-radius:10px;object-fit:cover;background:color-mix(in srgb,var(--ink,#e8edf4) 10%,transparent)}
+.vz-drop-text{display:grid;min-width:0}
+.vz-drop-text b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+.vz-drop-text small{font-size:11px;color:var(--muted)}
+.vz-drop-price{display:grid;justify-items:end;line-height:1.2}
+.vz-drop-price del{font-size:11px;color:var(--muted)}
+.vz-drop-price strong{font-size:15px;font-variant-numeric:tabular-nums}
+.vz-drop-pct{padding:3px 8px;border-radius:20px;background:color-mix(in srgb,var(--vz-good) 18%,transparent);color:var(--vz-good);font-size:12px;font-weight:800;white-space:nowrap}
+@media(max-width:560px){.vz-drop{grid-template-columns:44px minmax(0,1fr) auto;margin-left:calc(var(--i,0)*3px)}.vz-drop-pct{grid-column:3;grid-row:1;justify-self:end}.vz-drop-price{grid-column:3;grid-row:2}.vz-drop-text{grid-row:1/3}}
+@media(prefers-reduced-motion:no-preference){
+:root:not([data-reduce-motion=true]) .vz-drop{animation:vz-fall .6s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(var(--i,0)*110ms)}
+:root:not([data-reduce-motion=true]) .vz-live{animation:vz-pulse 1.6s ease-in-out infinite}
+}
+@keyframes vz-fall{from{opacity:0;transform:translateY(-22px)}}
+
+/* ---------- 6. Çıkış zaman çizgisi ---------- */
+.vz-timeline{margin:12px 0 16px;padding:14px;border:1px solid var(--vz-line);border-radius:16px;background:var(--vz-bg);min-width:0}
+.vz-tl-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:10px}
+.vz-tl-head h2{margin:0;font-size:16px;font-weight:800;color:var(--ink)}
+.vz-tl-head small{font-size:12px;color:var(--muted)}
+.vz-tl-body{overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;padding:4px 2px 12px}
+.vz-tl-track{display:flex;align-items:flex-start;gap:0;margin:0;padding:22px 0 0;list-style:none;position:relative;width:max-content;min-width:100%}
+.vz-tl-track::before{content:"";position:absolute;left:0;right:0;top:27px;height:2px;background:linear-gradient(90deg,var(--lime),color-mix(in srgb,var(--lime) 15%,transparent))}
+.vz-tl-month{align-self:flex-start;width:0;overflow:visible;margin:-22px 0 0 4px;position:relative;z-index:2;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.vz-tl-day{position:relative;display:grid;gap:6px;width:176px;padding:0 10px 0 4px;scroll-snap-align:start}
+.vz-tl-dot{width:12px;height:12px;border-radius:50%;background:var(--bg,#0c1119);border:3px solid var(--lime);position:relative;z-index:1;margin-top:0}
+.vz-tl-day.now .vz-tl-dot{background:var(--lime);box-shadow:0 0 0 4px color-mix(in srgb,var(--lime) 28%,transparent)}
+.vz-tl-day time{display:flex;align-items:baseline;gap:6px;margin-top:4px}
+.vz-tl-day time b{font-size:14px;color:var(--ink)}
+.vz-tl-day time small{font-size:11px;color:var(--muted)}
+.vz-tl-games{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.vz-tl-games li{display:grid;grid-template-columns:44px minmax(0,1fr);align-items:center;gap:8px;padding:5px;border:1px solid var(--vz-line);border-radius:10px;background:color-mix(in srgb,var(--ink,#e8edf4) 4%,transparent)}
+.vz-tl-games img,.vz-tl-ph{width:44px;height:30px;border-radius:6px;object-fit:cover;background:color-mix(in srgb,var(--ink,#e8edf4) 10%,transparent)}
+.vz-tl-games span{display:grid;min-width:0}
+.vz-tl-games b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--ink)}
+.vz-tl-games small{font-size:10px;color:var(--muted)}
+.vz-tl-games .vz-tl-more{display:block;border-style:dashed;font-size:11px;color:var(--muted);text-align:center}
+@media(max-width:700px){.vz-timeline{padding:12px 10px}.vz-tl-day{width:156px}}
+@media(prefers-reduced-motion:no-preference){
+:root:not([data-reduce-motion=true]) .vz-tl-day{animation:vz-in .5s ease both;animation-delay:calc(var(--i,0)*40ms)}
+}
+@keyframes vz-in{from{opacity:0;transform:translateX(16px)}}
+
+/* ---------- 9. Kütüphane değeri ---------- */
+.vz-lib{margin:14px 0;padding:16px;border:1px solid var(--vz-line);border-radius:16px;background:var(--vz-bg)}
+.vz-lib-head{display:flex;flex-wrap:wrap;gap:14px 28px;margin-bottom:12px}
+.vz-lib-head>div{display:grid;gap:2px;min-width:0}
+.vz-lib-head strong{font-size:26px;font-weight:800;color:var(--ink);line-height:1.1}
+.vz-lib-head b{font-size:18px;color:var(--ink)}
+.vz-lib-head small{font-size:12px;color:var(--muted)}
+.vz-lib-unplayed b{color:var(--vz-warn)}
+.vz-lib-best b{color:var(--vz-good)}
+.vz-lib-list{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.vz-lib-list li{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.6fr) auto 92px;align-items:center;gap:10px;font-size:13px;color:var(--ink)}
+.vz-lib-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vz-lib-bar{display:block;height:10px;border-radius:6px;background:color-mix(in srgb,var(--ink,#e8edf4) 10%,transparent);overflow:hidden}
+.vz-lib-bar i{display:block;height:100%;border-radius:6px}
+.vz-lib-list b{font-variant-numeric:tabular-nums;text-align:right}
+.vz-lib-list small{font-size:11px;color:var(--muted);text-align:right}
+.vz-lib-wait{margin:14px 0}
+@media(max-width:620px){.vz-lib-list li{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n p" "b s"}.vz-lib-name{grid-area:n}.vz-lib-list b{grid-area:p}.vz-lib-bar{grid-area:b}.vz-lib-list small{grid-area:s}}
+@media(prefers-reduced-motion:no-preference){
+:root:not([data-reduce-motion=true]) .vz-lib-bar i{animation:vz-bar .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*70ms);transform-origin:left}
+}
+@keyframes vz-bar{from{transform:scaleX(0)}}
