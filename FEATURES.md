@@ -170,6 +170,21 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Keşfet modül düzeni | Her modülde boyut (Geniş / Yarım / Daraltılmış; yarım yalnız geniş ekranda) ve gizle düğmesi. Gizlenenler "Gizli modüller" satırından geri açılır. |
 | Yazı boyutu | Menü > Görünüm'de %90–%130 kaydırıcısı ve Sıfırla. |
 
+## Hareket cilası (21 Kasım 2026)
+
+`assets/motion-20261121.js` ve `.css`. Paketin React koduna dokunmaz; DOM'u izler. Sistemin ya da sitenin "hareketi azalt" ayarı açıksa hiçbir hareket başlamaz (`<html class="mo-par">` yalnız hareket serbestken konur, tüm hareket kuralları buna bağlıdır). Klasik ve Sade, Türkçe ve İngilizce, masaüstü ve mobilde çalışır.
+
+| Özellik | Davranış |
+|---|---|
+| Fiyat düşüşü | Canlı güncellemede fiyat eskisinden yenisine sayarak iner, yanında yeşil "▼ fark" çipi çıkar, kart bir kez yeşil parlar. İlk açılıştaki sayaç (vivid) bununla karışmaz; metin 320 ms durulunca karşılaştırılır. |
+| İndirim rozeti | İndirim yüzdesi artınca ya da ekrandaki karta sonradan rozet gelince zıplar ve üstünden parıltı geçer. |
+| Canlanan favori kalbi | Favorideki oyunun fiyatı düşünce kalp üç kez atar ve minik kalpler saçar. İndirimdeki favori kartlarda kalp yavaşça nabız gibi atar. |
+| İskelet kartlar ve ilerleme çubuğu | Kart ızgarası yüklenirken parıltılı iskelet kartlar, üstte ince bir ilerleme çubuğu. Çubuk menü/gezinme tıklamalarında ve `pushState` geçişlerinde de çalışır. Ana bloklar sayfa değişince sırayla belirir. |
+| Paralaks kapaklar | Kart kapağı kaydırdıkça kart içinde ±%5 kayar (yalnız ekrandaki kartlar, tek `requestAnimationFrame`). |
+| Favoriye uçan kapak | Favoriye eklenince kapak yay çizerek üst gezinmedeki "İstek Listem"e (mobilde alt gezinme ya da Menü) uçar; hedef zıplar ve küçük bir konfeti çıkar. |
+| Işık süpürmesi | Sade/Klasik, OLED ya da site teması değişince ekranı soldan sağa bir ışık şeridi geçer (Klasik'te parlak, Sade'de mor-pembe tonlu). Açılışta çalışmaz. |
+| Başarım rozetleri | Rozetler sırayla belirir; nadir ve üstü kazanılmış rozetlerde yıldız parıltıları, efsanevide ışıma. Yeni kazanılan rozet açılma animasyonuyla (dönerek büyür, halka, konfeti) görünür. Görülen rozetler yalnız bu cihazda (`radar-mo-badges`) tutulur; ilk ziyarette hiçbiri "yeni" sayılmaz. |
+
 ## Dağıtım ve doğrulama
 
 - Kaynak: `sfunder2/oyun-radari`, yayın ve toplayıcılar: `sfunder2/oyun-radari-web`.
