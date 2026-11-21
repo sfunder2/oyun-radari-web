@@ -6,8 +6,7 @@ begin
           where n.nspname = 'public' and p.proname like 'search\_market%' loop
   def := pg_get_functiondef(r.oid);
   nd := def;
-  nd := replace(nd, 'when dev = ''pc'' then (case when m = ''xbox'' then array[''steam'',''epic'',''gog'',''xbox''] else array[''steam'',''epic'',''gog''] end)',
-                    'when dev = ''pc'' then array[''steam'',''epic'',''gog'']');
+  nd := regexp_replace(nd, 'when dev = ''pc'' then \(case when m = ''xbox'' then array\[([^\]]*),''xbox''\] else array\[[^\]]*\] end\)', 'when dev = ''pc'' then array[\1]');
   nd := replace(nd, 'then (dev in (''xbox_series'',''xbox_one'') or (dev = ''pc'' and m = ''xbox'')) and exists (select 1 from store_offers so',
                     'then dev in (''xbox_series'',''xbox_one'') and exists (select 1 from store_offers so');
   if nd <> def then execute nd; end if;
