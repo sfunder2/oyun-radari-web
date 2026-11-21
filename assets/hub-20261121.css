@@ -1,0 +1,63 @@
+/* Fırsat merkezi (21 Kasım 2026). Renkler sitenin değişkenlerinden gelir; Sade ve Klasik'te çalışır. */
+.hub-fab{position:fixed;left:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:120;width:46px;height:46px;display:grid;place-items:center;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--panel,#141b25);color:var(--lime,#b5f482);cursor:pointer;box-shadow:0 10px 30px #0006;transition:transform .15s,border-color .15s}
+.hub-fab:hover{transform:translateY(-2px);border-color:var(--lime,#b5f482)}
+.hub-fab:focus-visible,.hub-sheet button:focus-visible,.hub-sheet a:focus-visible{outline:2px solid var(--lime,#b5f482);outline-offset:2px}
+.hub-badge{position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:#ff5d8f;color:#fff;font:700 11px/19px system-ui,sans-serif;text-align:center}
+.hub-badge[hidden]{display:none}
+@media(max-width:700px){.hub-fab{bottom:calc(78px + env(safe-area-inset-bottom,0px));left:12px;width:44px;height:44px}}
+body.hub-lock{overflow:hidden}
+.hub-overlay{position:fixed;inset:0;z-index:380;display:grid;place-items:center;padding:16px;background:#05080fcc;backdrop-filter:blur(5px);animation:hub-fade .18s}
+.hub-sheet{width:min(640px,100%);max-height:min(86dvh,760px);display:flex;flex-direction:column;background:var(--panel,#141b25);color:var(--ink,#f1f5f8);border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 80px #000a;overflow:hidden;animation:hub-up .22s cubic-bezier(.2,.9,.25,1)}
+.hub-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px}
+.hub-head h2{margin:0;font-size:18px}
+.hub-close{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:transparent;color:inherit;font-size:22px;line-height:1;cursor:pointer}
+.hub-tabs{display:flex;gap:6px;padding:6px 16px 10px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line)}
+.hub-tabs::-webkit-scrollbar{display:none}
+.hub-tabs button{flex:0 0 auto;min-height:40px;padding:8px 14px;border-radius:20px;border:1px solid var(--line);background:transparent;color:var(--muted);font:600 13px/1 inherit;font-family:inherit;cursor:pointer}
+.hub-tabs button[aria-selected=true]{color:#101722;background:var(--lime,#b5f482);border-color:transparent}
+.hub-body{padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));overflow:auto;overscroll-behavior:contain}
+.hub-body h3{margin:18px 0 8px;font-size:14px}
+.hub-lead{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.5}
+.hub-note{margin:8px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+.hub-wait{opacity:.8}
+.hub-empty{padding:18px 12px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:14px}
+.hub-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.hub-row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--panel,#141b25) 88%,var(--lime,#b5f482) 4%)}
+.hub-list.compact .hub-row{grid-template-columns:minmax(0,1fr)}
+.hub-row.tall{align-items:start}
+.hub-row img,.hub-noimg{width:48px;height:64px;border-radius:8px;object-fit:cover;background:#0003}
+.hub-noimg{display:grid;place-items:center;font-style:normal;font-weight:800;color:var(--lime,#b5f482)}
+.hub-main{min-width:0}
+.hub-main b{display:block;font-size:14px;line-height:1.3;overflow-wrap:anywhere}
+.hub-main small{display:block;margin-top:3px;color:var(--muted);font-size:12px}
+.hub-side{display:grid;gap:6px;justify-items:end;align-content:center}
+.hub-chip{display:inline-block;padding:5px 10px;border-radius:14px;border:1px solid var(--line);font-size:12px;font-weight:700;white-space:nowrap}
+.hub-chip.ok,.hub-chip.v-buy{color:#0b2a12;background:#8fe38f;border-color:transparent}
+.hub-chip.warn,.hub-chip.v-fair{color:#3a2800;background:#ffd166;border-color:transparent}
+.hub-chip.v-wait{color:#fff;background:#d9534f;border-color:transparent}
+.hub-chip.mute,.hub-chip.v-unknown{color:var(--muted)}
+.hub-hot{color:#ff7a8a!important;font-weight:700}
+.hub-why{margin:4px 0 0;padding-left:16px;color:var(--muted);font-size:12px;line-height:1.5}
+.hub-mini,.hub-btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--ink);font:600 13px/1 inherit;font-family:inherit;text-decoration:none;cursor:pointer}
+.hub-mini{min-height:34px;padding:6px 10px;font-size:12px}
+.hub-mini.primary,.hub-btn:not(.ghost){background:var(--lime,#b5f482);color:#101722;border-color:transparent}
+.hub-btn.ghost{background:transparent;color:var(--ink)}
+.hub-card{margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:16px}
+.hub-card h3{margin:0 0 8px}
+.hub-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.hub-topic{display:block;margin-top:8px;padding:10px 12px;border-radius:10px;background:#0003;font:600 13px/1.3 ui-monospace,Menlo,monospace;overflow-wrap:anywhere;user-select:all}
+.hub-switch{display:flex;align-items:center;gap:10px;min-height:44px;font-size:14px;font-weight:600;cursor:pointer}
+.hub-switch input{width:22px;height:22px;accent-color:var(--lime,#b5f482)}
+:root[data-ui=sade] .hub-overlay{background:#1c163088}
+:root[data-ui=sade] .hub-topic,:root[data-ui=sade] .hub-row img,:root[data-ui=sade] .hub-noimg{background:#6b30c514}
+:root[data-ui=sade] .hub-fab{color:var(--lime,#693db7);box-shadow:0 10px 30px #3b1d7a22}
+@media(max-width:700px){
+.hub-overlay{padding:0;align-items:end}
+.hub-sheet{width:100%;max-height:90dvh;border-radius:22px 22px 0 0;border-bottom:0}
+.hub-row{grid-template-columns:44px minmax(0,1fr)}
+.hub-row .hub-side,.hub-row>.hub-chip{grid-column:2;justify-items:start;display:flex;flex-wrap:wrap;align-items:center}
+}
+@keyframes hub-fade{from{opacity:0}}
+@keyframes hub-up{from{transform:translateY(24px);opacity:0}}
+@media(prefers-reduced-motion:reduce){.hub-overlay,.hub-sheet,.hub-fab{animation:none;transition:none}}
+:root[data-reduce-motion=true] .hub-overlay,:root[data-reduce-motion=true] .hub-sheet{animation:none}
