@@ -170,6 +170,22 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Keşfet modül düzeni | Her modülde boyut (Geniş / Yarım / Daraltılmış; yarım yalnız geniş ekranda) ve gizle düğmesi. Gizlenenler "Gizli modüller" satırından geri açılır. |
 | Yazı boyutu | Menü > Görünüm'de %90–%130 kaydırıcısı ve Sıfırla. |
 
+## Görsel panolar ve zaman çizgileri (21 Kasım 2026)
+
+`assets/visuals-20261121.js` ve `.css`. Mevcut sayfalara DOM üzerinden eklenir; hareketler azaltılmış harekette kapanır; Klasik/Sade ve TR/EN desteklenir. Katalog verisi yalnız herkese açık okuma tablolarından ve yalnız ilgili panel açılınca okunur, 15 dk oturumda saklanır.
+
+| Özellik | Davranış |
+|---|---|
+| Cüzdan koçu halkası | Alanım > Bütçe: ayın harcamaları halka dilimleri, kalan bütçe gri dilim, aşımda kırmızı çerçeve. Veri cihazdaki `radar-lifestyle-v1`. |
+| Tasarruf sayacı ve konfeti | Toplam tasarruf sayaç olarak artar, sıradaki hedefe (100, 250, 500, 1.000 ...) ilerleme çubuğu. Tasarruf artınca konfeti; sayaca basınca tekrar. İlk açılışta konfeti yok. |
+| Oyun DNA'sı radarı | DNA kartında balon haritasındaki türlerden radar (3+ tür gerekir, en az 5 eksen). |
+| İndirim takvimi ısı haritası | Fırsatlar: 10 haftalık takvimde PlayStation TR indirimlerinin mağazanın bildirdiği bitiş günleri. Yalnız bitiş günü bilinen veri. |
+| Tür haritası | Fırsatlar: türlere göre indirimli teklif sayısı balonları; balona basınca Tür filtresi uygulanır. |
+| Fiyat düşüşü şelalesi | Ana sayfa: PlayStation fiyat geçmişinde önceki farklı fiyattan gerçekten düşenler. Tam katalog dökümü olan günler sayılmaz. |
+| Çıkış zaman çizgisi | Takvim: önümüzdeki 60 günün çıkış günleri yatay kaydırmalı çizgide, günde en çok 4 oyun. |
+| İndirim geri sayım halkası | "İndirim: ... kaldı" satırında kalan süre halkası (7 güne göre), yaklaştıkça sarı, turuncu, kırmızı. |
+| Kütüphane değeri | Steam kütüphanem: listede görünen oyunların normal Steam fiyat toplamı, oynanmamışların değeri, saat başı maliyet. Ödenen tutar değildir. |
+
 ## Hareket cilası (21 Kasım 2026)
 
 `assets/motion-20261121.js` ve `.css`. Paketin React koduna dokunmaz; DOM'u izler. Sistemin ya da sitenin "hareketi azalt" ayarı açıksa hiçbir hareket başlamaz (`<html class="mo-par">` yalnız hareket serbestken konur, tüm hareket kuralları buna bağlıdır). Klasik ve Sade, Türkçe ve İngilizce, masaüstü ve mobilde çalışır.
