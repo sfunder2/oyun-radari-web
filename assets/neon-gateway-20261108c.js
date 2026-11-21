@@ -81,13 +81,31 @@ function macminiEligible(url, init) {
   return !!m && MACMINI_READ_RPC.has(m[1]);
 }
 
+// Mac mini kapalıyken istekler askıda kalıp katalogu boş bırakmasın: kısa zaman aşımı + kısa süreli devre kesici.
+let macminiDownUntil = 0;
 async function macminiCall(realFetch, input, url, init) {
+  if (Date.now() < macminiDownUntil && !macminiAdminRpc(url, init)) return null; // yönetici RPC'lerinin Supabase yedeği yok, hep dene
   const headers = { ...(init?.headers || {}), Authorization: 'Bearer ' + MACMINI_ANON_KEY };
   delete headers.apikey; // Supabase anahtarı Mac mini'ye gönderilmez
+  const ctl = new AbortController();
+  const userSignal = init?.signal;
+  const onAbort = () => ctl.abort();
+  if (userSignal) { if (userSignal.aborted) ctl.abort(); else userSignal.addEventListener('abort', onAbort, { once: true }); }
+  const timer = setTimeout(() => ctl.abort(), 6000);
   try {
-    const r = await realFetch(MACMINI_API + url.slice(SUPABASE_REST.length), { ...init, headers, credentials: 'omit' });
-    if (r.status < 500 && r.status !== 401) return r;
-  } catch (e) { if (init?.signal?.aborted) throw e; }
+    const r = await realFetch(MACMINI_API + url.slice(SUPABASE_REST.length), { ...init, headers, credentials: 'omit', signal: ctl.signal });
+    if (r.status < 500 && r.status !== 401) {
+      // Katalog/arama RPC'si Mac'te hata (4xx) ya da boş dönerse Supabase'e düş: boş katalog göstermektense.
+      if (/\/rpc\/search_/.test(url) && (init?.method || 'GET').toUpperCase() === 'POST') {
+        if (!r.ok) return null;
+        const t = (await r.clone().text().catch(() => '')).trim();
+        if (t === '' || t === '[]' || t === 'null' || /^\{\s*"?(?:rows|items|games)"?\s*:\s*\[\s*\]/.test(t)) return null;
+      }
+      return r;
+    }
+  } catch (e) { if (userSignal?.aborted) throw e; }
+  finally { clearTimeout(timer); userSignal?.removeEventListener('abort', onAbort); }
+  if (!macminiAdminRpc(url, init)) macminiDownUntil = Date.now() + 120000;
   return null; // Mac mini ulaşılamıyor / anahtar reddedildi: Supabase'e düş
 }
 

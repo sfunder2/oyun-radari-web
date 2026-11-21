@@ -28,3 +28,9 @@ test('v50 migration patches the exact fragments the live search functions use', 
   assert.match(v50, /regexp_replace\(nd, 'when dev = ''pc'' then array/);
   assert.ok(v50.includes("then dev in (''xbox_series'',''xbox_one'') and exists (select 1 from store_offers so"));
 });
+
+test('v51 patches the recent-discount path the same way, only for the xbox market', () => {
+  const v51 = readFileSync(new URL('../supabase/schema-v51-xbox-windows-son-indirimler.sql', import.meta.url), 'utf8');
+  assert.ok(v51.includes("(d.platform=''xbox'' and m=''xbox'')"));
+  assert.ok(v51.includes("(dev=''pc'' and m=''xbox'')"));
+});
