@@ -186,6 +186,21 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | İndirim geri sayım halkası | "İndirim: ... kaldı" satırında kalan süre halkası (7 güne göre), yaklaştıkça sarı, turuncu, kırmızı. |
 | Kütüphane değeri | Steam kütüphanem: listede görünen oyunların normal Steam fiyat toplamı, oynanmamışların değeri, saat başı maliyet. Ödenen tutar değildir. |
 
+## Hareket cilası (21 Kasım 2026)
+
+`assets/motion-20261121.js` ve `.css`. Paketin React koduna dokunmaz; DOM'u izler. Sistemin ya da sitenin "hareketi azalt" ayarı açıksa hiçbir hareket başlamaz (`<html class="mo-par">` yalnız hareket serbestken konur, tüm hareket kuralları buna bağlıdır). Klasik ve Sade, Türkçe ve İngilizce, masaüstü ve mobilde çalışır.
+
+| Özellik | Davranış |
+|---|---|
+| Fiyat düşüşü | Canlı güncellemede fiyat eskisinden yenisine sayarak iner, yanında yeşil "▼ fark" çipi çıkar, kart bir kez yeşil parlar. İlk açılıştaki sayaç (vivid) bununla karışmaz; metin 320 ms durulunca karşılaştırılır. |
+| İndirim rozeti | İndirim yüzdesi artınca ya da ekrandaki karta sonradan rozet gelince zıplar ve üstünden parıltı geçer. |
+| Canlanan favori kalbi | Favorideki oyunun fiyatı düşünce kalp üç kez atar ve minik kalpler saçar. İndirimdeki favori kartlarda kalp yavaşça nabız gibi atar. |
+| İskelet kartlar ve ilerleme çubuğu | Kart ızgarası yüklenirken parıltılı iskelet kartlar, üstte ince bir ilerleme çubuğu. Çubuk menü/gezinme tıklamalarında ve `pushState` geçişlerinde de çalışır. Ana bloklar sayfa değişince sırayla belirir. |
+| Paralaks kapaklar | Kart kapağı kaydırdıkça kart içinde ±%5 kayar (yalnız ekrandaki kartlar, tek `requestAnimationFrame`). |
+| Favoriye uçan kapak | Favoriye eklenince kapak yay çizerek üst gezinmedeki "İstek Listem"e (mobilde alt gezinme ya da Menü) uçar; hedef zıplar ve küçük bir konfeti çıkar. |
+| Işık süpürmesi | Sade/Klasik, OLED ya da site teması değişince ekranı soldan sağa bir ışık şeridi geçer (Klasik'te parlak, Sade'de mor-pembe tonlu). Açılışta çalışmaz. |
+| Başarım rozetleri | Rozetler sırayla belirir; nadir ve üstü kazanılmış rozetlerde yıldız parıltıları, efsanevide ışıma. Yeni kazanılan rozet açılma animasyonuyla (dönerek büyür, halka, konfeti) görünür. Görülen rozetler yalnız bu cihazda (`radar-mo-badges`) tutulur; ilk ziyarette hiçbiri "yeni" sayılmaz. |
+
 ## Dağıtım ve doğrulama
 
 - Kaynak: `sfunder2/oyun-radari`, yayın ve toplayıcılar: `sfunder2/oyun-radari-web`.
@@ -195,3 +210,27 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 - `supabase/account-sync-v1.sql` hesap senkron tablosunu kurar; `tests/account-sync-rls.sql` başka kullanıcının ve anonim erişimin engellendiğini doğrular.
 - `tests/experience-rls.sql` iki kullanıcılı yetki testini tek işlemde çalıştırır ve bütün kayıtları geri alır.
 - `tests/experience.test.mjs` seri, XP tekrarları, kur doğruluğu, swipe eşikleri, yedek doğrulama, yıl dönümü ve güvenli medya bağlantılarını kontrol eder.
+
+## Fiyat grafikleri ve karşılaştırmalar (21 Kasım 2026)
+
+| İstek | Uygulama |
+|---|---|
+| Animasyonlu fiyat geçmişi | Çizgi soldan sağa çizilir, en düşük nokta parlar; dönem değişince yeniden oynar. Azaltılmış harekette durağan. |
+| Sıcaklık göstergesi | Ayrıntıdaki panelde ibreli kadran (soğuk mavi, ılık sarı, sıcak kırmızı); ibre sallanarak yerine oturur. |
+| Mağaza fiyat çubukları | Her mağaza satırının altında fiyatla orantılı çubuk büyüyerek açılır; en ucuz yeşil. |
+| Fiyat yarışı | Mağazalar şeritte yarışır: en ucuz bitişte, diğerleri fiyat farı oranında geride; "Tekrar oynat" düğmesi. |
+| Güven bandı | Önümüzdeki 90 gün için geçmiş indirimlerden gölgeli aralık (en iyi indirim – normal fiyat) ve güven düzeyi. Söz değildir; en az 30 gün kayıt ister. |
+| Tüm zamanların en düşüğü | Fiyat radarın kayıtlarındaki en düşükse ayrıntıda büyük, kartta kısa altın rozet. Yalnız ≥14 günlük kayıtta. |
+
+Kod: `assets/charts-20261121.js/.css`, testler: `tests/charts.test.mjs`.
+
+## Katalog araçları (21 Kasım 2026)
+
+Menüdeki "Katalog araçları" bölümünden (ya da `?arac=dlc|sezon|gereksinim|seri` adresiyle) açılan tek pencerede dört araç. Kaynak: `assets/catalog-tools-20261121.js` ve `.css`; yeni tablo ya da SQL gerekmez. Kişisel kayıtlar yalnız bu cihazda tutulur.
+
+| Araç | Veri | Eksik / sınır |
+|---|---|---|
+| Ek paket ve DLC takibi | `game_family.dlcs` (IGDB) + `library`/`store_offers` fiyatları; PlayStation `edition` metni ("Eklenti", "Oyun Paketi", "Premium Sürüm") ek paketi ve tam sürüm paketini ayırır. Takip listesi `radar-tools-track-v1`, eklerkenki fiyata göre değişimi gösterir. İndirimdeki ek paketler akışı. | IGDB'nin listelediği DLC'lerin yaklaşık %6'sının katalogda fiyatı var (7.630 DLC anahtarından ~470 PlayStation, ~680 diğer mağaza). Paketin içeriği bilinmediği için "paket daha ucuz" karşılaştırması gösterge niteliğindedir. Ek paket indirim akışı yalnız PlayStation. |
+| İndirim takvimi ve hazırlık listesi | Tasarım modülündeki yaklaşık sezon tarihleri (`SALE_SEASONS`); istek listesi `radar-fav-v3`; PlayStation kayıtları için güncel fiyat. Liste ve bütçe `radar-tools-prep-v1`. | Tarihler her yıl aynı haftalar varsayılarak yaklaşıktır; kesin gün mağazalardan gelmez. Geçmiş sezonlardaki gerçek dip oranı henüz hesaplanmıyor. |
+| Bilgisayarım çalıştırır mı? | `library.requirements` (Steam; ~22.700 oyunda var). RAM, depolama ve işletim sistemi kesin; işlemci ve ekran kartı yerleşik yaklaşık skor tablosuyla (~). Sistem `radar-tools-sys-v1`. | Tablo dışı ya da çok yeni modeller "doğrulanamadı" çıkar, karar bunlarla yükseltilmez. Yalnız Steam eşleşmesi olan oyunlar. |
+| Oyun serisi sayfası | `game_family.series_name/series` (IGDB, ~4.500 oyunda seri var) + katalogdaki en ucuz TRY fiyat. | Toplam yalnız TRY fiyatlı oyunları sayar; Steam/Switch fiyatları dolar olduğu için toplama girmez, ayrıca belirtilir. Katalogda olmayan oyun "Fiyat yok" görünür. |
