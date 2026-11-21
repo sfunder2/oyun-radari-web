@@ -1,0 +1,117 @@
+/* Fiyat grafikleri ve karşılaştırmalar (charts-20261121.js). Renkler tema değişkenlerinden gelir; hareket yalnız azaltılmamış harekette çalışır. */
+
+/* ---------- 1. Fiyat çizgisi soldan sağa çizilir, en düşük nokta parlar ---------- */
+.phchart .tz-lowglow{fill:var(--lime);opacity:.28;r:11px;pointer-events:none}
+:root[data-ui=sade] .phchart .tz-lowglow{opacity:.22}
+@media(prefers-reduced-motion:no-preference){
+  :root:not([data-reduce-motion=true]) .pricehistory .phline{stroke-dasharray:1;stroke-dashoffset:1;animation:tz-draw 1.5s cubic-bezier(.45,.05,.25,1) .1s forwards}
+  :root:not([data-reduce-motion=true]) .pricehistory .phbase{animation:tz-fade .8s ease .6s backwards}
+  :root:not([data-reduce-motion=true]) .pricehistory .phlow{animation:tz-pop .45s cubic-bezier(.3,1.6,.5,1) calc(.1s + var(--tz-d,1) * 1.5s) backwards}
+  :root:not([data-reduce-motion=true]) .pricehistory .phnow{animation:tz-pop .4s cubic-bezier(.3,1.6,.5,1) 1.55s backwards}
+  :root:not([data-reduce-motion=true]) .pricehistory .tz-lowglow{transform-box:fill-box;transform-origin:center;animation:tz-pulse 2.2s ease-out calc(.35s + var(--tz-d,1) * 1.5s) infinite backwards}
+}
+@keyframes tz-draw{to{stroke-dashoffset:0}}
+@keyframes tz-fade{from{opacity:0}}
+@keyframes tz-pop{from{opacity:0;transform:scale(.2)}}
+@keyframes tz-pulse{0%{opacity:.55;transform:scale(.5)}100%{opacity:0;transform:scale(1.5)}}
+.phlow,.phnow{transform-box:fill-box;transform-origin:center}
+
+/* ---------- 2. Tüm zamanların en düşüğü ---------- */
+.pbadge.tz-atl{display:inline-flex;align-items:center;gap:5px;font-weight:800;color:#2b1d00;background:linear-gradient(110deg,#f6c453,#ffe08a 45%,#f6c453);border-color:#e0a82e;position:relative;overflow:hidden}
+.pbadge.tz-atl svg{width:13px;height:13px;flex:none}
+.tz-atlbadge{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:12px 14px;border-radius:14px;border:1px solid color-mix(in srgb,#f6c453 70%,transparent);background:linear-gradient(110deg,color-mix(in srgb,#f6c453 20%,transparent),color-mix(in srgb,#f6c453 7%,transparent));position:relative;overflow:hidden}
+.tz-atlbadge strong{display:block;font-size:15px;color:#f6c453}
+.tz-atlbadge p{margin:2px 0 0;font-size:12px;line-height:1.55;color:var(--ink)}
+.tz-atl-ico{flex:none;display:grid;place-items:center;width:38px;height:38px;border-radius:50%;color:#2b1d00;background:linear-gradient(135deg,#ffe08a,#f6c453)}
+.tz-atl-ico svg{width:20px;height:20px}
+:root[data-ui=sade] .tz-atlbadge strong{color:#8a5a00}
+:root[data-ui=sade] .tz-atlbadge{border-color:#e0a82e}
+@media(prefers-reduced-motion:no-preference){
+  :root:not([data-reduce-motion=true]) .tz-atlbadge::after,:root:not([data-reduce-motion=true]) .pbadge.tz-atl::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,#ffffff66 50%,transparent 65%);transform:translateX(-120%);animation:tz-shine 3.6s ease-in-out 1s infinite;pointer-events:none}
+  :root:not([data-reduce-motion=true]) .tz-atlbadge{animation:tz-rise .5s cubic-bezier(.2,.9,.3,1)}
+}
+@keyframes tz-shine{60%,100%{transform:translateX(120%)}}
+@keyframes tz-rise{from{opacity:0;transform:translateY(8px) scale(.98)}}
+
+/* ---------- 3. Mağaza fiyat çubukları ---------- */
+.pc-row{position:relative}
+.pc-row>.tz-bar{position:absolute;left:12px;bottom:3px;height:3px;width:calc((100% - 24px) * var(--w));border-radius:3px;background:color-mix(in srgb,var(--muted) 55%,transparent);pointer-events:none;transform-origin:left center}
+.pc-row>.tz-bar.best{background:var(--lime);height:4px;bottom:2.5px}
+.pc-row a{padding-bottom:14px!important}
+@media(prefers-reduced-motion:no-preference){
+  :root:not([data-reduce-motion=true]) .pc-row>.tz-bar{animation:tz-grow .8s cubic-bezier(.2,.8,.2,1) calc(var(--i) * .08s + .1s) backwards}
+}
+@keyframes tz-grow{from{transform:scaleX(0)}}
+
+/* ---------- 4. Fiyat yarışı ---------- */
+.tz-race{position:relative;margin-top:14px;padding:12px 14px 10px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--panel) 85%,transparent)}
+.tz-race-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tz-race-head h4{margin:0;font-size:13px;font-weight:750}
+.tz-race-head button{min-height:32px;padding:4px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);font-size:12px;cursor:pointer}
+.tz-race-head button:hover{border-color:var(--lime)}
+.tz-lanes{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.tz-lane{display:grid;grid-template-columns:minmax(78px,26%) minmax(0,1fr) minmax(64px,auto);align-items:center;gap:10px;font-size:12px}
+.tz-lane-name{display:flex;align-items:center;gap:6px;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tz-lane-name .dot{flex:none;width:9px;height:9px}
+.tz-track{position:relative;height:22px;border-radius:999px;background:color-mix(in srgb,var(--muted) 14%,transparent)}
+.tz-track::before{content:"";position:absolute;inset:50% 11px auto 11px;border-top:2px dashed color-mix(in srgb,var(--muted) 45%,transparent)}
+.tz-track::after{content:"";position:absolute;right:2px;top:2px;bottom:2px;width:8px;border-radius:3px;background:repeating-conic-gradient(var(--ink) 0 25%,transparent 0 50%) 0 0/8px 8px;opacity:.55}
+.tz-runner{position:absolute;top:1px;left:calc((100% - 20px) * var(--p));width:20px;height:20px;border-radius:50%;background:var(--muted);border:2px solid var(--panel);display:grid;place-items:center;color:#2b1d00;box-shadow:0 2px 6px #0004}
+.tz-runner svg{width:12px;height:12px}
+.tz-lane.win .tz-runner{background:linear-gradient(135deg,#ffe08a,#f6c453)}
+.tz-lane.win .tz-lane-name{color:var(--lime)}
+.tz-lane-end{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700}
+.tz-lane.win .tz-lane-end{color:var(--lime)}
+@media(prefers-reduced-motion:no-preference){
+  :root:not([data-reduce-motion=true]) .tz-runner{animation:tz-run calc(1.1s + var(--p) * .5s) cubic-bezier(.25,.8,.3,1) calc(var(--r) * .1s) backwards}
+  :root:not([data-reduce-motion=true]) .tz-lane.win .tz-runner{animation-name:tz-run,tz-win;animation-duration:calc(1.1s + var(--p) * .5s),.6s;animation-delay:calc(var(--r) * .1s),1.3s;animation-timing-function:cubic-bezier(.25,.8,.3,1),ease-out;animation-fill-mode:backwards,none}
+}
+@keyframes tz-run{from{left:0}}
+@keyframes tz-win{40%{transform:scale(1.35)}}
+@media(max-width:560px){.tz-lane{grid-template-columns:minmax(64px,30%) minmax(0,1fr) auto;gap:7px}.tz-lane-end{font-size:11px}}
+
+/* ---------- 5. Güven bandı ---------- */
+.tz-forecast{margin:14px 0 0}
+.tz-forecast h4{margin:0;font-size:13px;font-weight:750}
+.tz-fc-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap}
+.tz-conf{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.tz-conf b{color:var(--ink)}
+.tz-conf-dots{display:inline-flex;gap:3px}
+.tz-conf-dots u{width:14px;height:5px;border-radius:3px;background:color-mix(in srgb,var(--muted) 35%,transparent);text-decoration:none}
+.tz-conf-dots u.on{background:var(--lime)}
+.tz-conf-low .tz-conf-dots u.on{background:#f0b04a}
+.tz-fc-band{fill:var(--lime);fill-opacity:.2;stroke:var(--lime);stroke-opacity:.5;stroke-width:1px;stroke-dasharray:3 3;transform-box:fill-box;transform-origin:left center}
+.tz-conf-low .tz-fc-band{fill:#f0b04a;stroke:#f0b04a;fill-opacity:.17}
+.tz-conf-high .tz-fc-band{fill-opacity:.28;stroke-dasharray:none}
+.tz-fc-past{stroke:#91b5df;stroke-width:2.5px;fill:none;stroke-linejoin:round}
+:root[data-ui=sade] .tz-fc-past{stroke:#5178a5}
+.tz-fc-now-line{stroke:var(--ink);stroke-opacity:.55;stroke-width:1.5px;stroke-dasharray:2 5;fill:none}
+.tz-fc-today{stroke:var(--muted);stroke-width:1px;stroke-dasharray:3 3}
+.tz-fc-reg{stroke:var(--muted);stroke-width:1px;stroke-dasharray:4 4}
+.tz-fc-typ{stroke:var(--lime);stroke-width:1px;stroke-opacity:.8;stroke-dasharray:6 3}
+.tz-fc-tag{fill:var(--lime);font-size:10px;font-weight:700}
+:root[data-ui=sade] .tz-fc-tag{fill:#15803d}
+:root[data-ui=sade] .tz-fc-typ{stroke:#15803d}
+.tz-fc-season{fill:#f5c242;fill-opacity:.12}
+.tz-fc-empty{padding:10px 12px;border:1px dashed var(--line);border-radius:10px}
+.tz-fc-note b{color:var(--ink)}
+@media(prefers-reduced-motion:no-preference){
+  :root:not([data-reduce-motion=true]) .tz-fc-band{animation:tz-bandgrow 1.2s cubic-bezier(.3,.7,.2,1) .2s backwards}
+  :root:not([data-reduce-motion=true]) .tz-fc-past{stroke-dasharray:1;stroke-dashoffset:1;animation:tz-draw 1s ease-out forwards}
+}
+@keyframes tz-bandgrow{from{transform:scaleX(0);opacity:0}}
+
+/* ---------- Sıcaklık kadranı (heat-20261031.js) ---------- */
+.heatdial{flex:none;overflow:visible}
+.hd-arc{fill:none;stroke-width:9;stroke-linecap:round;opacity:.38}
+.hd-arc.cold{stroke:#6cb8ff}.hd-arc.warm{stroke:#f5c242}.hd-arc.hot{stroke:#ff6a4d}
+.heatpanel.cold .hd-arc.cold,.heatpanel.warm .hd-arc.warm,.heatpanel.hot .hd-arc.hot{opacity:1}
+.heatdial.off .hd-arc{stroke:#8d9bad;opacity:.3;stroke-dasharray:2 5}
+.hd-needle{transform-origin:60px 62px;transform:rotate(var(--a));color:var(--heat)}
+.hd-needle line{stroke:var(--heat);stroke-width:3;stroke-linecap:round}
+.hd-needle circle{fill:var(--heat);stroke:var(--panel);stroke-width:2}
+@media(prefers-reduced-motion:no-preference){
+  :root:not([data-reduce-motion=true]) .hd-needle{animation:tz-needle 1.6s cubic-bezier(.3,1.5,.5,1) .2s backwards}
+}
+@keyframes tz-needle{from{transform:rotate(-90deg)}}
+@media(max-width:480px){.heatdial{width:84px;height:53px}}
