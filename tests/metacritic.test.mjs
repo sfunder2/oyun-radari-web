@@ -42,7 +42,7 @@ function memDb(seed){
    for(const col of ['title_key','steam_appid','store_id']){const l=inList(q,col);if(l)rows=rows.filter(r=>l.includes(String(r[col])));}
    const gt=q.match(/steam_appid=gt\.(\d+)/);if(gt)rows=rows.filter(r=>r.steam_appid>Number(gt[1])).sort((a,b)=>a.steam_appid-b.steam_appid);
    const lim=q.match(/limit=(\d+)/);if(lim)rows=rows.slice(0,Number(lim[1]));return rows;},
-  async upsert(name,rows,conflict){writes.push([name,rows]);for(const r of rows){const k=conflict.split(',');const i=t[name].findIndex(x=>k.every(c=>x[c]===r[c]));if(i<0)t[name].push({...r});else t[name][i]={...t[name][i],...r};}},
+  async upsert(name,rows,conflict){writes.push([name,rows]);if(name==='game_scores'&&rows.some(r=>r.checked_at==null))throw new Error('null value in column "checked_at" violates not-null constraint');for(const r of rows){const k=conflict.split(',');const i=t[name].findIndex(x=>k.every(c=>x[c]===r[c]));if(i<0)t[name].push({...r});else t[name][i]={...t[name][i],...r};}},
  };
 }
 test('Wikidata eşitlemesi yalnız sitede olan ve puanı eksik oyunları doldurur, OpenCritic alanına dokunmaz',async()=>{
