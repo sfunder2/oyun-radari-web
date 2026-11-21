@@ -133,7 +133,7 @@ test('mail and ntfy senders post the right payloads and surface failures', async
 });
 
 test('the SQL keeps the email server-chosen and the sending record server-only', () => {
-  const sql = readFileSync(new URL('../supabase/schema-v50-fiyat-merkezi.sql', import.meta.url), 'utf8');
+  const sql = readFileSync(new URL('../supabase/schema-v51-fiyat-merkezi.sql', import.meta.url), 'utf8');
   assert.match(sql, /select u\.email from auth\.users u where u\.id=new\.user_id/);
   assert.match(sql, /security definer set search_path=public,auth/);
   assert.match(sql, /enable row level security/);

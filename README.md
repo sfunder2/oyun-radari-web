@@ -182,7 +182,7 @@ Zenginleştirme Metacritic puanını yalnız Steam arama sonucundaki `metascore`
 
 Arayüz tarafı kurulum gerektirmez (zil düğmesi sitede hemen görünür). Haftalık e-posta özeti ve site kapalıyken telefon bildirimi için bir kerelik kurulum gerekir:
 
-1. **Veritabanı:** `supabase/schema-v50-fiyat-merkezi.sql` dosyasını çalıştır (geri alma: `-geri-al.sql`). Kurulana kadar "Özet" sekmesi "tercihler okunamadı" der, diğer sekmeler çalışır. `tests/digest-rls.sql` sahiplik ve e-posta sabitleme kurallarını doğrular (her şeyi geri alır).
+1. **Veritabanı:** `supabase/schema-v51-fiyat-merkezi.sql` dosyasını çalıştır (geri alma: `-geri-al.sql`). Kurulana kadar "Özet" sekmesi "tercihler okunamadı" der, diğer sekmeler çalışır. `tests/digest-rls.sql` sahiplik ve e-posta sabitleme kurallarını doğrular (her şeyi geri alır).
 2. **Telefon bildirimi (ücretsiz, anahtarsız):** ntfy.sh kullanır. Kullanıcı ntfy uygulamasında, merkezin gösterdiği rastgele konuya abone olur. Ek hesap ya da anahtar gerekmez.
 3. **E-posta (en ucuz yol):** Resend ücretsiz katman (ayda 3.000 e-posta). `RESEND_API_KEY` ve doğrulanmış alan adından bir `DIGEST_FROM` gerekir (ör. `Oyun Radarı <ozet@alanadin.com>`). Alan adı doğrulanmadan Resend yalnız kendi hesabının adresine gönderir; anahtar yoksa özet atlanır.
 4. **Zamanlama:** GitHub cron'ları kapalı, bu yüzden Mac mini'de launchd ile: `node scripts/digest-run.mjs --weekly` günde bir, `node scripts/digest-run.mjs --push` 30 dakikada bir. Ortam: `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `RESEND_API_KEY`, `DIGEST_FROM`. Önce `--dry` ile dene. `.github/workflows/digest.yml` yalnız el ile deneme içindir.

@@ -535,7 +535,7 @@ function initHub() {
     if (!live()) return;
     wait.remove();
     if (failed) {
-      box.append(empty(failed === 'expired' ? T('Oturumun süresi dolmuş görünüyor. Sayfayı yenileyip tekrar dene.', 'Your session looks expired. Reload the page and try again.') : T('Tercihler okunamadı. Bu özellik için veritabanı kurulumu gerekebilir (supabase/schema-v50-fiyat-merkezi.sql).', 'Could not load settings. This feature may need the database set up (supabase/schema-v50-fiyat-merkezi.sql).')));
+      box.append(empty(failed === 'expired' ? T('Oturumun süresi dolmuş görünüyor. Sayfayı yenileyip tekrar dene.', 'Your session looks expired. Reload the page and try again.') : T('Tercihler okunamadı. Bu özellik için veritabanı kurulumu gerekebilir (supabase/schema-v51-fiyat-merkezi.sql).', 'Could not load settings. This feature may need the database set up (supabase/schema-v51-fiyat-merkezi.sql).')));
       return;
     }
     const msg = el('p', { class: 'hub-note', role: 'status' });
