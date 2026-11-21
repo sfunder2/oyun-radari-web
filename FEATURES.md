@@ -195,6 +195,19 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 - `tests/experience-rls.sql` iki kullanıcılı yetki testini tek işlemde çalıştırır ve bütün kayıtları geri alır.
 - `tests/experience.test.mjs` seri, XP tekrarları, kur doğruluğu, swipe eşikleri, yedek doğrulama, yıl dönümü ve güvenli medya bağlantılarını kontrol eder.
 
+## Fiyat grafikleri ve karşılaştırmalar (21 Kasım 2026)
+
+| İstek | Uygulama |
+|---|---|
+| Animasyonlu fiyat geçmişi | Çizgi soldan sağa çizilir, en düşük nokta parlar; dönem değişince yeniden oynar. Azaltılmış harekette durağan. |
+| Sıcaklık göstergesi | Ayrıntıdaki panelde ibreli kadran (soğuk mavi, ılık sarı, sıcak kırmızı); ibre sallanarak yerine oturur. |
+| Mağaza fiyat çubukları | Her mağaza satırının altında fiyatla orantılı çubuk büyüyerek açılır; en ucuz yeşil. |
+| Fiyat yarışı | Mağazalar şeritte yarışır: en ucuz bitişte, diğerleri fiyat farı oranında geride; "Tekrar oynat" düğmesi. |
+| Güven bandı | Önümüzdeki 90 gün için geçmiş indirimlerden gölgeli aralık (en iyi indirim – normal fiyat) ve güven düzeyi. Söz değildir; en az 30 gün kayıt ister. |
+| Tüm zamanların en düşüğü | Fiyat radarın kayıtlarındaki en düşükse ayrıntıda büyük, kartta kısa altın rozet. Yalnız ≥14 günlük kayıtta. |
+
+Kod: `assets/charts-20261121.js/.css`, testler: `tests/charts.test.mjs`.
+
 ## Katalog araçları (21 Kasım 2026)
 
 Menüdeki "Katalog araçları" bölümünden (ya da `?arac=dlc|sezon|gereksinim|seri` adresiyle) açılan tek pencerede dört araç. Kaynak: `assets/catalog-tools-20261121.js` ve `.css`; yeni tablo ya da SQL gerekmez. Kişisel kayıtlar yalnız bu cihazda tutulur.
