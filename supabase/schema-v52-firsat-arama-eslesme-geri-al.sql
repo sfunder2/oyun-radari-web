@@ -6,4 +6,10 @@ begin
  if d is null then raise exception 'yedek bulunamadı'; end if;
  execute d;
 end$do$;
+do $do$
+declare d text;
+begin
+ select def into d from public.function_backups where name = 'search_market_r@v52' order by saved_at limit 1;
+ if d is not null then execute d; end if;
+end$do$;
 drop function if exists public.radar_text_match(text, text, boolean);

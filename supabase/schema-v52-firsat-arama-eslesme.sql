@@ -55,4 +55,24 @@ end $function$');
  end if;
  execute nd;
 end$do$;
--- Önbellek (1 dk) eski boş sonuçları kendiliğinden bırakır; beklemek istemezseniz: delete from public.search_cache;
+
+-- 2) "Tüm marketler" + yalnız indirimliler: aynı oyunun PlayStation kaydı varsa diğer mağaza satırları (in_all=false) listeye
+-- kendi başına girmiyor, yalnız PS kaydının "offers" alanına katlanıyordu. PS'te indirim yokken Xbox'ta indirim varsa,
+-- süzgeç PS satırına bakıp oyunu eliyordu (ör. The Blood of Dawnwalker, Kasım 2026). Artık indirimli PS karşılığı yoksa
+-- indirimli diğer mağaza satırı kendisi listelenir. PS de indirimdeyse davranış aynı kalır (tek satır, teklifler içinde).
+insert into public.function_backups(name, def)
+select 'search_market_r@v52', pg_get_functiondef('public.search_market_r'::regproc)
+where not exists (select 1 from public.function_backups where name = 'search_market_r@v52');
+do $do$
+declare def text; nd text;
+begin
+ def := pg_get_functiondef('public.search_market_r'::regproc);
+ nd := replace(def, 'where ((m = ''all'' and (b.in_all or dev <> '''')) or b.platform = m)',
+   'where ((m = ''all'' and (b.in_all or dev <> '''' or (deals_only and b.discount_percent > 0 and b.original_price > b.price
+          and not exists (select 1 from search_keys ps where ps.platform = ''playstation'' and ps.title_key = b.title_key
+                          and ps.discount_percent > 0 and ps.original_price > ps.price)))) or b.platform = m)');
+ if nd = def then raise exception 'search_market_r beklenen biçimde değil; v52 (2) uygulanmadı'; end if;
+ execute nd;
+end$do$;
+
+-- Önbellek (son indirimler 1 dk, metin araması 5 dk) eski sonuçları kendiliğinden bırakır; beklemek istemezseniz: delete from public.search_cache;
