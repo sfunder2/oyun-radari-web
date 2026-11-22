@@ -1,0 +1,152 @@
+/* Tasarım sistemi (design-system-20261122.js ile birlikte). Tek vurgu rengi, ortak jetonlar, Sade okunurluğu,
+   gerçek siyah OLED, yüksek kontrast, büyük yazı ve tek satır altbilgi. Bu dosya en son yüklenir. */
+
+/* ---------- 1. Jetonlar ---------- */
+:root{
+  /* köşe, boşluk, gölge ölçeği */
+  --ds-r-xs:6px;--ds-r-sm:10px;--ds-r-md:14px;--ds-r-lg:20px;--ds-r-pill:999px;
+  --ds-sp-1:4px;--ds-sp-2:8px;--ds-sp-3:12px;--ds-sp-4:16px;--ds-sp-5:24px;--ds-sp-6:32px;
+  --ds-shadow-1:0 1px 2px #0000004d;
+  --ds-shadow-2:0 10px 26px -14px #000000a6;
+  --ds-shadow-3:0 28px 64px -26px #000000bf;
+  /* tek vurgu rengi: her temada mevcut --lime. Anlam renkleri yalnızca fiyat/durum içindir. */
+  --ds-accent:var(--lime);--ds-on-accent:#0b1118;
+  --ds-good:#5ee08a;--ds-warn:#ffc94d;--ds-bad:#ff8a8a;--ds-neutral:var(--muted);
+  /* tipografi: başlık, fiyat, açıklama */
+  --ds-fs-caption:12px;--ds-fs-body:15px;--ds-fs-card-title:clamp(15px,.92rem + .2vw,17px);
+  --ds-fs-price:clamp(18px,1.05rem + .5vw,22px);--ds-fs-h2:clamp(20px,1.1rem + 1vw,28px);--ds-fs-h1:clamp(26px,1.4rem + 2vw,40px);
+  --ds-lh-tight:1.2;--ds-lh-body:1.55;
+  --ds-ease:cubic-bezier(.2,.8,.2,1);
+}
+:root[data-ui=sade]{
+  --ds-shadow-1:0 1px 2px #2d1f5a1f;--ds-shadow-2:0 10px 26px -14px #2d1f5a40;--ds-shadow-3:0 28px 64px -28px #2d1f5a59;
+  --ds-on-accent:#fff;--ds-good:#15803d;--ds-warn:#9a5b00;--ds-bad:#b42318;
+}
+
+/* ---------- 2. Sade: açık zemin ve okunur logo / menü ---------- */
+/* Yayındaki paket zemini iki görünümde de koyu bırakıyordu; Sade'nin değişkenleri açık olduğu için logo, menü ve
+   başlıklar koyu zeminde kayboluyordu. Sade artık gerçekten açık zeminli. */
+:root[data-ui=sade] body,:root[data-ui=sade] html body{background:var(--bg)!important;color:var(--ink)!important}
+:root[data-ui=sade] .brand{color:var(--ink)}
+:root[data-ui=sade] .brand span:not(.brandmark){background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--lime)!important}
+:root[data-ui=sade] .brandmark{color:var(--lime)!important;-webkit-text-fill-color:currentColor!important}
+:root[data-ui=sade] #root>header .menu-button,:root[data-ui=sade] #root>header .header-search,:root[data-ui=sade] #root>header .account-button{
+  background:var(--panel2,#f1eff8)!important;color:var(--ink)!important;border:1px solid var(--line2,var(--line))!important;box-shadow:var(--ds-shadow-1)}
+:root[data-ui=sade] #root>header .menu-button svg,:root[data-ui=sade] #root>header .header-search svg,:root[data-ui=sade] #root>header .account-button svg{color:var(--lime)}
+:root[data-ui=sade] #root>header nav button{color:var(--muted)}
+:root[data-ui=sade] #root>header nav button.active,:root[data-ui=sade] #root>header nav button:hover{color:var(--ink)}
+:root[data-ui=sade] .radar-landing-links{background:var(--panel2,#f1eff8);border:1px solid var(--line)}
+:root[data-ui=sade] .radar-landing-links button{color:var(--ink)}
+:root[data-ui=sade] .party{background:#11161e;border-radius:var(--ds-r-lg);padding-inline:var(--ds-sp-4)}
+
+/* Sade: koyu kalan yüzeyler ve form alanları açık yüzeye alınır */
+:root[data-ui=sade] .csearch-bar{background:var(--panel2,#f1eff8)!important;border:1px solid var(--line2,var(--line))!important;box-shadow:var(--ds-shadow-1)}
+:root[data-ui=sade] .csearch-bar input{color:var(--ink);background:transparent}
+:root[data-ui=sade] .csearch-bar input::placeholder{color:var(--muted);opacity:1}
+:root[data-ui=sade] body :is(select,input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file])){background-color:var(--panel2,#f1eff8)!important;color:var(--ink)!important;border-color:var(--line2,var(--line))}
+:root[data-ui=sade] :where(input,select)::placeholder{color:var(--muted);opacity:1}
+:root[data-ui=sade] .release-tabs button,:root[data-ui=sade] .viewtoggle button{background:var(--panel2,#f1eff8);color:var(--ink);border:1px solid var(--line2,var(--line))}
+:root[data-ui=sade] .release-tabs button[aria-pressed=true],:root[data-ui=sade] .release-tabs button.active,:root[data-ui=sade] .viewtoggle button.active{background:var(--lime);color:#fff;border-color:var(--lime)}
+:root[data-ui=sade] .viewtoggle button.active svg{color:#fff}
+:root[data-ui=sade] .tz-density button,:root[data-ui=sade] .libtools button{color:var(--ink)}
+
+:root[data-ui=sade] .filterpanel summary,:root[data-ui=sade] .filterpanel label{color:var(--ink)!important}
+:root[data-ui=sade] .filterpanel summary svg{color:var(--lime)}
+
+/* ---------- 3. Ortak köşe, gölge ve boşluk ---------- */
+.modal,.overlay .modal,.menu-panel,.csearch-panel{border-radius:var(--ds-r-lg)}
+.gamecard,.catalogcard,.comparerow,.tile,.panel,.pricecompare,.price-predict,.detail-disclosure{border-radius:var(--ds-r-md)}
+.gamecard,.catalogcard{box-shadow:var(--ds-shadow-1)}
+.gamecard:hover,.catalogcard:hover{box-shadow:var(--ds-shadow-2)}
+.modal.game-detail,.menu-panel,.csearch-panel{box-shadow:var(--ds-shadow-3)}
+button,select,input[type=text],input[type=search],input[type=number],input[type=email],input[type=password]{border-radius:var(--ds-r-sm)}
+.chip,.metachip,.agechip,.trchip,.trailer-chip,.scorechip,.ttbchip,.devchip,.notechip,.tastechip,.gmchip{border-radius:var(--ds-r-pill)}
+
+/* ---------- 4. Rozetler: tek vurgu + üç anlam rengi ---------- */
+.discountbadge,.catalogbadge.sale,.hitbadge{background:var(--ds-accent)!important;color:var(--ds-on-accent)!important;border-radius:var(--ds-r-pill);font-weight:800}
+.deals-badge{background:color-mix(in srgb,var(--ds-warn) 22%,transparent)!important;color:var(--ds-warn)!important;border:1px solid color-mix(in srgb,var(--ds-warn) 45%,transparent);border-radius:var(--ds-r-pill)}
+:root[data-ui=sade] .deals-badge{color:var(--ds-warn)!important}
+.agebadge{background:color-mix(in srgb,var(--ds-bad) 16%,transparent)!important;color:var(--ds-bad)!important;border-radius:var(--ds-r-pill)}
+.catalogbadge:not(.sale),.steam-badge,.cinebadge{border-radius:var(--ds-r-pill)}
+.steam-badge{color:var(--ds-accent)}
+.ds-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:var(--ds-r-pill);font-size:var(--ds-fs-caption);font-weight:700;line-height:1.5;
+  background:color-mix(in srgb,var(--ds-c,var(--ds-neutral)) 16%,transparent);color:var(--ds-c,var(--ds-neutral));border:1px solid color-mix(in srgb,var(--ds-c,var(--ds-neutral)) 40%,transparent)}
+.ds-badge.accent{--ds-c:var(--ds-accent)}.ds-badge.good{--ds-c:var(--ds-good)}.ds-badge.warn{--ds-c:var(--ds-warn)}.ds-badge.bad{--ds-c:var(--ds-bad)}
+
+/* ---------- 5. Tipografi hiyerarşisi ---------- */
+.cardbody h3,.catalogcard h3,.gamecard h3{font-size:var(--ds-fs-card-title);line-height:var(--ds-lh-tight);font-weight:800;letter-spacing:-.01em}
+.catalogprice strong,.catalogprice b,.price-now,.deal-best-price strong{font-size:var(--ds-fs-price);font-weight:800;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.015em}
+.catalogcard p,.gamecard p,.cardbody small,.footnote{font-size:var(--ds-fs-caption);line-height:var(--ds-lh-body);color:var(--muted)}
+.modal.game-detail h2,.page-title,main h2{font-size:var(--ds-fs-h2);line-height:var(--ds-lh-tight);letter-spacing:-.02em}
+.modal.game-detail h1,main h1{font-size:var(--ds-fs-h1);line-height:1.08;letter-spacing:-.03em}
+
+/* ---------- 6. Gerçek siyah OLED ---------- */
+:root[data-theme=oled]{--bg:#000;--panel:#07090c;--panel2:#0c0f13;--line:#161c23;--line2:#222b36;--muted:#a3afbf;--ink:#f4f7fb;--glass:#000000c7;--glass-line:#ffffff17;
+  --ds-shadow-1:0 0 0 1px #ffffff0f;--ds-shadow-2:0 0 0 1px #ffffff14;--ds-shadow-3:0 0 0 1px #ffffff1c}
+:root[data-theme=oled],:root[data-theme=oled] body,:root[data-theme=oled] html body{background:#000!important;color-scheme:dark}
+:root[data-theme=oled] #root>header,:root[data-theme=oled] footer,:root[data-theme=oled] .bottom-nav{background:#000!important;border-color:var(--line)!important}
+:root[data-theme=oled] .modal,:root[data-theme=oled] .menu-panel,:root[data-theme=oled] .csearch-panel{background:#05070a;border:1px solid var(--line2)}
+:root[data-theme=oled] .gamecard,:root[data-theme=oled] .catalogcard,:root[data-theme=oled] .tile,:root[data-theme=oled] .comparerow{background-color:#040608;border-color:var(--line)}
+
+/* ---------- 7. Yüksek kontrast ---------- */
+:root[data-contrast=high]{--ink:#fff;--muted:#d6deea;--line:#7b8798;--line2:#a0abbb}
+:root[data-contrast=high]:not([data-ui=sade]){--bg:#05070a;--panel:#0b0f14;--panel2:#10161e;--lime:#d6ff6a}
+:root[data-contrast=high][data-theme=oled]{--bg:#000;--panel:#000;--panel2:#050608}
+:root[data-contrast=high][data-ui=sade]{--bg:#fff;--panel:#fff;--panel2:#f4f2fb;--ink:#000;--muted:#1d2633;--line:#40485a;--line2:#2b3345;--lime:#4b1d9c;--ds-good:#0b5d2a;--ds-warn:#7a4500;--ds-bad:#8f1a10}
+:root[data-contrast=high] body{color:var(--ink)}
+:root[data-contrast=high] :where(button,select,input,textarea,.gamecard,.catalogcard,.modal,.chip,.tile,.panel){border-color:var(--line2)!important}
+:root[data-contrast=high] :where(a,button,select,input,textarea,[tabindex]):focus-visible{outline:3px solid var(--ds-accent)!important;outline-offset:2px!important}
+:root[data-contrast=high] a{text-decoration:underline;text-underline-offset:3px}
+:root[data-contrast=high] *{text-shadow:none!important}
+
+/* ---------- 8. Büyük yazı ---------- */
+:root[data-text=large] body{zoom:1.14}
+:root[data-text=large] .footnote,:root[data-text=large] small{font-size:max(1em,13px)}
+@media(max-width:700px){:root[data-text=large] body{zoom:1.1}}
+
+/* ---------- 9. Tek satır altbilgi + görünüm denetimleri ---------- */
+footer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--ds-sp-2) var(--ds-sp-4);padding:var(--ds-sp-3) var(--ds-sp-4)!important;
+  font-size:var(--ds-fs-caption);border-top:1px solid var(--line)}
+footer>p,footer p:not(.ds-keep){display:none}
+footer{padding-left:76px!important;padding-right:100px!important}
+footer .brand{font-size:14px;margin:0}
+footer a:not(.brand){display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+footer button:not(.ds-btn){white-space:nowrap}
+#root>header.radar-scrolled{background:color-mix(in srgb,var(--bg) 88%,transparent)!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)!important;border-bottom:1px solid var(--line)!important}
+footer button:not(.ds-btn),footer a:not(.brand){font-size:var(--ds-fs-caption);color:var(--muted);background:none;border:0;padding:6px 8px;min-height:32px;cursor:pointer;text-decoration:none}
+footer button:not(.ds-btn):hover,footer a:not(.brand):hover{color:var(--ink)}
+.ds-foot{display:flex;align-items:center;gap:var(--ds-sp-2);margin-left:auto;flex-wrap:nowrap}
+.ds-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:36px;min-height:36px;padding:0 10px;border:1px solid var(--line2,var(--line));border-radius:var(--ds-r-pill);
+  background:var(--panel);color:var(--ink);font:700 12px/1 var(--font,inherit);cursor:pointer;transition:border-color .15s,background-color .15s}
+.ds-btn:hover{border-color:var(--ds-accent)}
+.ds-btn:focus-visible{outline:2px solid var(--ds-accent);outline-offset:2px}
+.ds-btn[aria-pressed=true],.ds-btn[aria-expanded=true]{border-color:var(--ds-accent);background:color-mix(in srgb,var(--ds-accent) 14%,var(--panel))}
+.ds-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ds-theme svg{transition:transform .45s var(--ds-ease),opacity .2s}
+.ds-theme.ds-spin svg{animation:ds-spin .5s var(--ds-ease)}
+@keyframes ds-spin{from{transform:rotate(-120deg) scale(.4);opacity:0}to{transform:none;opacity:1}}
+.ds-pop{position:absolute;right:0;bottom:calc(100% + 8px);z-index:200;min-width:230px;padding:var(--ds-sp-3);border:1px solid var(--line2,var(--line));border-radius:var(--ds-r-md);
+  background:var(--panel);color:var(--ink);box-shadow:var(--ds-shadow-3);display:grid;gap:var(--ds-sp-2);text-align:left;animation:ds-pop .18s var(--ds-ease)}
+@keyframes ds-pop{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+.ds-pop h4{margin:0 0 2px;font-size:var(--ds-fs-caption);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ds-pop button{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:var(--ds-r-sm);background:transparent;color:var(--ink);font:600 13px var(--font,inherit);cursor:pointer}
+.ds-pop button[aria-pressed=true]{border-color:var(--ds-accent);background:color-mix(in srgb,var(--ds-accent) 14%,transparent)}
+.ds-pop button i{font-style:normal;font-size:11px;color:var(--muted)}
+.ds-anchor{position:relative}
+@media(max-width:700px){
+  footer{padding-inline:var(--ds-sp-4)!important;justify-content:flex-start;gap:var(--ds-sp-1) var(--ds-sp-2)}
+  footer>button:not(.ds-btn),footer>a:not(.brand){flex:0 0 auto!important;width:auto!important;padding:6px 8px}
+  footer{padding-bottom:calc(var(--ds-sp-3) + 150px)!important}
+  .ds-foot{width:100%;justify-content:flex-end}
+  .ds-pop{right:0;max-width:calc(100vw - 32px)}
+}
+
+/* ---------- 10. Tema geçişi: kısa, yumuşak renk geçişi ---------- */
+html.ds-fading,html.ds-fading *,html.ds-fading *::before,html.ds-fading *::after{transition:background-color .32s ease,color .32s ease,border-color .32s ease,box-shadow .32s ease,fill .32s ease,stroke .32s ease!important}
+@media(prefers-reduced-motion:reduce){
+  html.ds-fading,html.ds-fading *{transition:none!important}
+  .ds-theme.ds-spin svg,.ds-pop{animation:none!important}
+}
+html[data-reduce-motion=true]{--ds-ease:linear}
+html[data-reduce-motion=true].ds-fading *{transition:none!important}
+html[data-reduce-motion=true] .ds-theme.ds-spin svg,html[data-reduce-motion=true] .ds-pop{animation:none!important}

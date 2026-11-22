@@ -9,7 +9,13 @@
 <style>
 html,body{height:100%;margin:0;background:#090d12;color:#eef2f6;font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
 main{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:32px 16px;box-sizing:border-box;text-align:center}
-img{width:88px;height:88px;border-radius:20px}
+img{width:56px;height:56px;border-radius:14px}
+.art{width:132px;height:116px;color:#c4f85b;overflow:visible}
+.art .a{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.art .d{fill:none;stroke:#9aa7b4;stroke-width:2;stroke-linecap:round;stroke-dasharray:2 6;opacity:.7}
+.art .c{fill:currentColor}
+@media(prefers-reduced-motion:no-preference){.blink{animation:blink 1.8s ease-in-out infinite}.float{animation:float 3.2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}@keyframes float{0%,100%{translate:0 0}50%{translate:0 -3px}}}
 h1{margin:8px 0 0;font-size:22px}
 p{margin:0;max-width:340px;color:#9aa7b4}
 button{margin-top:16px;padding:12px 22px;border:0;border-radius:12px;background:#c4f85b;color:#090d12;font:inherit;font-weight:700;cursor:pointer}
@@ -17,6 +23,10 @@ button{margin-top:16px;padding:12px 22px;border:0;border-radius:12px;background:
 </head>
 <body>
 <main>
+<svg class="art" viewBox="0 0 96 84" role="img" aria-hidden="true">
+<path class="d" d="M18 38a42 42 0 0 1 60 0"/><path class="a" d="M28 48a28 28 0 0 1 40 0"/><path class="a" d="M38 58a14 14 0 0 1 20 0"/>
+<circle class="c blink" cx="48" cy="68" r="3"/><path class="a float" d="M24 24l48 48"/>
+</svg>
 <img src="/oyun-radari-web/icons/icon-192.png" alt="">
 <h1 id="t">İnternet bağlantısı yok</h1>
 <p id="b">Oyun Radarı canlı mağaza fiyatlarını gösterdiği için internete ihtiyaç duyar. Bağlantı gelince tekrar deneyin.</p>
