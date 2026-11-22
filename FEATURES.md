@@ -170,6 +170,20 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Keşfet modül düzeni | Her modülde boyut (Geniş / Yarım / Daraltılmış; yarım yalnız geniş ekranda) ve gizle düğmesi. Gizlenenler "Gizli modüller" satırından geri açılır. |
 | Yazı boyutu | Menü > Görünüm'de %90–%130 kaydırıcısı ve Sıfırla. |
 
+## Kişisel merkez (21 Kasım 2026)
+
+`assets/hub-20261121.js` ve `.css`. Üst menüde ve Menü'de "Senin için" düğmesi, Oyunlar sayfasında bir öneri şeridi. Veri sitenin `search_market` RPC'si ve `game_ttb` tablosundan okunur; fiyat, resmî mağazalardaki (PlayStation, Steam, Xbox, Switch, Epic, GOG) en ucuz TL karşılığıdır, anahtar satıcılar sayılmaz. Kur alınamazsa yalnız TL fiyatlı teklifler gösterilir. Tercihler yalnız bu cihazda tutulur.
+
+| Özellik | Davranış |
+|---|---|
+| Senin için fırsatlar | Oyuncu tarzı, favori türler ve seçilen ek türlerden zevk profili; indirimdeki oyunlar tür/etiket örtüşmesi, puan ve indirimle sıralanır, "neden" satırı gösterilir. Ana sayfada 8 oyunluk şerit. |
+| Bütçeye göre sepet | Bütçe ve en çok oyun sayısı verilir; 0/1 sırt çantasıyla toplamı aşmayan, kaliteyi sayıdan üstün tutan sepet çıkar. Toplam, kalan, indirimle tasarruf; liste kopyalama; "başka bir sepet". |
+| Gizli hazine | Puan ≥80, OpenCritic'te 1–30 inceleme (sitenin Akıllı sıralama tanımı), seçilen fiyatın altında, türe göre süzülür. İnceleme sayısı bilinmeyen oyun listelenmez. |
+| Ortak istek listesi ve hediye | "İstiyorum" listesi sunucusuz tek bağlantıya sıkıştırılır (`?hediye=`), arkadaş hesapsız açar, güncel fiyatları görür. Bütçe ve sevilen türe göre hediye önerisi; arkadaşın listesindekiler önce gelir. |
+| Karşılaştırma | 2–3 oyun yan yana: fiyat, indirim, puan, bitirme süresi, saat başı maliyet, yıl, topluluk oyu. Satır kazananı yalnız en az iki oyunda değer varsa işaretlenir. Kartlardaki "Kıyasla" ve ayrıntıdaki düğmeyle eklenir. |
+| Saat başı maliyet | Oyun ayrıntısında ve kartlarda: en ucuz resmî fiyat ÷ ortalama bitirme süresi (normal, yoksa hızlı). Süre verisi yoksa hesaplanmaz. |
+| Fiyatına değer mi? | Ayrıntıda evet/hayır oyu; yüzde en az 5 oyla görünür. Oy veren, ortak listeyle aynı tarayıcı anahtarıyla tanınır, sunucuda yalnız özeti saklanır. **`supabase/schema-v50-fiyata-deger-mi.sql` uygulanmadan oylama gizli kalır**, diğer özellikler çalışır. Geri alma: `...-geri-al.sql`. |
+
 ## Dağıtım ve doğrulama
 
 - Kaynak: `sfunder2/oyun-radari`, yayın ve toplayıcılar: `sfunder2/oyun-radari-web`.
