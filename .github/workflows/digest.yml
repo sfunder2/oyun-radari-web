@@ -1,0 +1,41 @@
+name: Weekly digest and phone alerts
+on:
+  # Zamanlama yok: bu iş Mac mini'de (launchd) çalışır, burada yalnız el ile deneme açıktır. README "Fırsat merkezi" bölümüne bak.
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'weekly, push ya da both'
+        default: 'weekly'
+      dry:
+        description: 'true ise hiçbir şey göndermez'
+        default: 'true'
+concurrency:
+  group: digest
+  cancel-in-progress: false
+permissions:
+  contents: read
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Run
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_FROM: ${{ secrets.DIGEST_FROM }}
+          MODE: ${{ inputs.mode }}
+          DRY: ${{ inputs.dry }}
+        run: |
+          flags=""
+          [ "$MODE" = "weekly" ] || [ "$MODE" = "both" ] && flags="$flags --weekly"
+          [ "$MODE" = "push" ] || [ "$MODE" = "both" ] && flags="$flags --push"
+          [ "$DRY" = "true" ] && flags="$flags --dry"
+          node scripts/digest-run.mjs $flags

@@ -1,221 +1,166 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  toTry, bestOffer, normItem, uniqueGames, tasteProfile, matchOf, forYouScore, rankForYou, pickBasket,
-  isHiddenGem, rankGems, hoursOf, costPerHour, costTier, worthSummary, encodeWishlist, decodeWishlist,
-  giftIdeas, compareRows, MIN_VOTES,
+  cleanHistory, buyAdvice, adviceLabel, adviceLines, alarmStatus, regionalAlert, normalizeFree, dueReminders,
+  timeLeftText, buildDigest, makeTopic, cleanTopic, pushMessage, esc,
 } from '../assets/hub-20261121.js';
 
-const rates = { usdTry: 40, eurTry: 45 };
-const game = (o = {}) => ({
-  id: 'x:' + (o.key || 'a'), key: 'a', name: 'A', image: '', url: 'https://store.steampowered.com/app/1/', store: 'Steam', platform: 'steam',
-  price: 100, currency: 'TRY', priceTry: 100, original: 200, originalTry: 200, discount: 50, score: 85, reviews: 10, genres: ['RPG'], tags: [],
-  year: 2022, turkish: false, free: false, dlc: false, ...o,
+const D = s => Date.parse(s + 'T00:00:00Z');
+const NOW = D('2026-10-01'); // Kara Cuma'ya 50 gün var
+const hist = (prices, start = '2026-06-01') => prices.map((p, i) => ({ day: new Date(D(start) + i * 864e5).toISOString().slice(0, 10), price: p }));
+const flat = (n, p) => Array(n).fill(p);
+
+test('cleanHistory drops junk rows and sorts by day', () => {
+  const r = cleanHistory([{ day: '2026-02-02', price: '10' }, { day: 'x', price: 5 }, { day: '2026-02-01', price: 20 }, { day: '2026-02-03', price: null }, null]);
+  assert.deepEqual(r.map(x => x.p), [20, 10]);
+  assert.deepEqual(cleanHistory(undefined), []);
 });
 
-test('toTry converts only with a real rate and never invents one', () => {
-  assert.equal(toTry(10, 'USD', rates), 400);
-  assert.equal(toTry(10, 'EUR', rates), 450);
-  assert.equal(toTry(10, 'USD', null), null);
-  assert.equal(toTry(10, 'GBP', rates), null);
-  assert.equal(toTry(-1, 'TRY', rates), null);
-  assert.equal(toTry('12.5', 'TRY', rates), 12.5);
+test('buyAdvice needs 14 days and 5 points of history and never guesses', () => {
+  assert.equal(buyAdvice(hist([100, 100, 100]), 100, NOW).verdict, 'unknown');
+  assert.equal(buyAdvice(hist(flat(10, 100)), 100, NOW).why, 'short');
+  assert.equal(buyAdvice([], null, NOW).why, 'noprice');
+  assert.equal(buyAdvice([], 0, NOW).verdict, 'buy');
 });
 
-test('bestOffer takes the cheapest official store and ignores key resellers', () => {
-  const raw = {
-    platform: 'playstation', price: 2099, currency: 'TRY', original_price: null, discount_percent: 0, url: 'https://store.playstation.com/x',
+test('buyAdvice: at the recorded low is buy; far above is wait; in between is fair', () => {
+  const h = hist([...flat(40, 500), ...flat(10, 300), ...flat(40, 500)]);
+  assert.equal(buyAdvice(h, 300, NOW).verdict, 'buy');
+  assert.equal(buyAdvice(h, 310, NOW).verdict, 'buy');      // dibin %8'i içinde
+  assert.equal(buyAdvice(h, 500, NOW).verdict, 'wait');     // dibin %67 üstü
+  assert.equal(buyAdvice(h, 340, NOW).verdict, 'fair');     // %13 üstü, büyük indirim uzak
+  assert.equal(buyAdvice(h, 250, NOW).verdict, 'buy');      // kaydın altına inmiş
+});
+
+test('buyAdvice: a big sale within three weeks turns fair into wait, but never a buy', () => {
+  const h = hist([...flat(40, 500), ...flat(10, 300), ...flat(40, 500)]);
+  const nearSale = D('2026-11-05'); // Kara Cuma 15 gün sonra
+  assert.equal(buyAdvice(h, 340, nearSale).verdict, 'wait');
+  assert.equal(buyAdvice(h, 340, nearSale).saleSoon, true);
+  assert.equal(buyAdvice(h, 300, nearSale).verdict, 'buy');
+});
+
+test('adviceLines explains with evidence and the disclaimer; labels are bilingual', () => {
+  const h = hist([...flat(40, 500), ...flat(10, 300), ...flat(40, 500)]);
+  const a = buyAdvice(h, 340, D('2026-11-05'));
+  const tr = adviceLines(a, 'TRY', false).join(' ');
+  assert.match(tr, /%13 üstünde/);
+  assert.match(tr, /Kara Cuma/);
+  assert.match(tr, /tahmini değildir/);
+  assert.match(adviceLines(a, 'TRY', true).join(' '), /not a price prediction/);
+  assert.equal(adviceLabel(a, false), 'Bekle');
+  assert.equal(adviceLabel(a, true), 'Wait');
+  assert.match(adviceLines(buyAdvice(hist(flat(10, 100)), 100, NOW))[0], /en az 14 gün/);
+});
+
+test('alarmStatus: hit, near, waiting, and stale for old or foreign-currency prices', () => {
+  const fav = { id: 'a', target: 300, currency: 'TRY' };
+  const cur = p => ({ price: p, currency: 'TRY', checkedAt: new Date(NOW - 36e5).toISOString() });
+  assert.equal(alarmStatus(fav, cur(300), NOW).state, 'hit');
+  assert.equal(alarmStatus(fav, cur(250), NOW).state, 'hit');
+  assert.equal(alarmStatus(fav, cur(330), NOW).state, 'near');
+  assert.equal(alarmStatus(fav, cur(500), NOW).state, 'waiting');
+  assert.equal(alarmStatus(fav, { ...cur(100), checkedAt: new Date(NOW - 30 * 36e5).toISOString() }, NOW).state, 'stale');
+  assert.equal(alarmStatus(fav, { ...cur(100), currency: 'USD' }, NOW).state, 'stale');
+  assert.equal(alarmStatus(fav, undefined, NOW).state, 'stale');
+  assert.equal(alarmStatus({ id: 'b' }, cur(1), NOW), null);
+  assert.equal(alarmStatus({ ...fav, target: 0 }, cur(0), NOW).state, 'hit'); // 0 hedef: ücretsiz olunca
+});
+
+test('regionalAlert needs 15% and 20 TRY, ignores stale rates and missing home price', () => {
+  const data = { countries: [
+    { cc: 'TR', status: 'ok', price_try: 1000, currency: 'TRY', price: 1000 },
+    { cc: 'AR', name: 'Arjantin', status: 'ok', price_try: 700, currency: 'ARS', price: 40000, url: 'https://x.test/ar' },
+    { cc: 'BR', name: 'Brezilya', status: 'ok', price_try: 800, currency: 'BRL', price: 90 },
+    { cc: 'XX', name: 'Eski kur', status: 'ok', price_try: 100, currency: 'XXX', price: 1, fx_stale: true },
+    { cc: 'ZZ', status: 'error' },
+  ] };
+  const a = regionalAlert(data);
+  assert.equal(a.cc, 'AR');
+  assert.equal(a.savePct, 30);
+  assert.equal(a.saveTry, 300);
+  assert.equal(a.url, 'https://x.test/ar');
+  assert.equal(regionalAlert({ countries: [data.countries[0], { cc: 'BR', status: 'ok', price_try: 900, currency: 'BRL' }] }), null);
+  assert.equal(regionalAlert({ countries: [{ cc: 'TR', status: 'ok', price_try: 50 }, { cc: 'BR', status: 'ok', price_try: 35 }] }), null); // 15 TL fark
+  assert.equal(regionalAlert({ countries: [{ cc: 'BR', status: 'ok', price_try: 1 }] }), null);
+  assert.equal(regionalAlert(null), null);
+});
+
+test('normalizeFree keeps live Epic promos and only fresh zero-price offers; no invented end times', () => {
+  const now = D('2026-11-21') + 12 * 36e5;
+  const iso = ms => new Date(ms).toISOString();
+  const free = normalizeFree({
+    epic: [{ id: 'e1', name: 'Epic A', end: iso(now + 5 * 36e5), url: 'https://store.epicgames.com/tr/p/a', image: 'https://img.test/a.jpg' }, { id: 'e2', name: 'Old', end: iso(now - 1) }, { id: 'e3', name: 'Later', end: iso(now + 30 * 36e5), url: 'javascript:alert(1)' }],
     offers: [
-      { platform: 'gamebillet', price: 118, currency: 'TRY', original_price: 1010, discount_percent: 88, url: 'https://gb.example/x' },
-      { platform: 'steam', price: 19.99, currency: 'USD', original_price: 39.99, discount_percent: 50, url: 'https://store.steampowered.com/app/1' },
-      { platform: 'xbox', price: 1300, currency: 'TRY', original_price: null, discount_percent: 0, url: 'https://www.xbox.com/x' },
+      { platform: 'steam', store_id: '1', name: 'Steam Free', price: 0, original_price: 100, checked_at: iso(now - 36e5), url: 'https://store.steampowered.com/app/1/' },
+      { platform: 'steam', store_id: '2', name: 'Permanent F2P', price: 0, original_price: null, checked_at: iso(now) },
+      { platform: 'xbox', store_id: '3', name: 'Stale', price: 0, original_price: 50, checked_at: iso(now - 30 * 36e5) },
+      { platform: 'switch', store_id: '4', name: 'Wrong store', price: 0, original_price: 50, checked_at: iso(now) },
     ],
-  };
-  const b = bestOffer(raw, rates);
-  assert.equal(b.platform, 'steam');
-  assert.equal(b.priceTry, 799.6);
-  assert.equal(b.discount, 50);
-  assert.equal(b.original, 39.99);
-  // kur yoksa USD teklif atlanır, TL'lilerden en ucuzu seçilir
-  assert.equal(bestOffer(raw, null).platform, 'xbox');
-  assert.equal(bestOffer({ platform: 'steam', price: 5, currency: 'USD', offers: [] }, null), null);
-  assert.equal(bestOffer(null, rates), null);
+  }, now);
+  assert.deepEqual(free.map(g => g.name), ['Epic A', 'Later', 'Steam Free']);
+  assert.equal(free[0].endKnown, true);
+  assert.equal(free[1].url, null);
+  assert.equal(free[2].end, null);
+  assert.equal(free[2].endKnown, false);
 });
 
-test('normItem builds a game from a PlayStation-style row with scores nested', () => {
-  const g = normItem({
-    id: 'EP1', platform: 'playstation', name: ' Celeste ', title_key: 'celeste', price: 849, currency: 'TRY', best_score: 92, genres: ['Bağımsız'], tags: ['Pixel Graphics'],
-    scores: { opencritic_reviews: 74 }, release_date: '2018-01-25', image: 'https://img/x.png', url: 'https://store.playstation.com/p', turkish: true, offers: [],
-  }, rates);
-  assert.equal(g.name, 'Celeste');
-  assert.equal(g.reviews, 74);
-  assert.equal(g.year, 2018);
-  assert.equal(g.priceTry, 849);
-  assert.equal(g.turkish, true);
-  assert.equal(normItem({ name: '', price: 1 }, rates), null);
-  assert.equal(normItem({ name: 'X', platform: 'steam', price: 3, currency: 'USD' }, null), null);
-  assert.equal(normItem({ name: 'Free', platform: 'steam', price: 0, currency: 'TRY' }, rates).free, true);
+test('dueReminders fires the nearest threshold once, only for known end times', () => {
+  const now = D('2026-11-21');
+  const g = (key, hours, endKnown = true) => ({ key, end: now + hours * 36e5, endKnown });
+  const games = [g('epic:a', 20), g('epic:b', 1.5), g('epic:c', 60), g('steam:1', 1, false)];
+  const due = dueReminders(games, now, new Set());
+  assert.deepEqual(due.map(d => [d.game.key, d.lead]), [['epic:a', 24], ['epic:b', 2]]);
+  assert.deepEqual(dueReminders(games, now, new Set(['free:epic:a:24'])).map(d => d.game.key), ['epic:b']);
+  assert.deepEqual(dueReminders([g('epic:x', -1)], now, new Set()), []);
 });
 
-test('uniqueGames keeps the cheapest row per title', () => {
-  const list = uniqueGames([game({ key: 'k', priceTry: 90 }), game({ key: 'k', priceTry: 60 }), game({ key: 'z', priceTry: 5 }), null]);
-  assert.equal(list.length, 2);
-  assert.equal(list.find(g => g.key === 'k').priceTry, 60);
+test('timeLeftText', () => {
+  assert.equal(timeLeftText(2 * 864e5 + 3 * 36e5), '2 gün 3 saat kaldı');
+  assert.equal(timeLeftText(5 * 36e5, true), '5 h left');
+  assert.equal(timeLeftText(90 * 1e3), '2 dakika kaldı');
+  assert.equal(timeLeftText(0), 'Bitti');
 });
 
-test('tasteProfile merges personas, preferred genre and favourite genres like the site does', () => {
-  const p = tasteProfile({ personas: ['story', 'cozy', 'story', 'nope', 'action', 'horror'], preferredGenre: 'Spor' }, [
-    { genres: ['Strateji', 'RPG'] }, { genres: ['Strateji'] }, { genres: ['Yarış'] },
-  ]);
-  assert.deepEqual(p.personas, ['story', 'cozy', 'action']);
-  assert.ok(p.genres.includes('Spor') && p.genres.includes('Strateji') && p.genres.includes('Rahat'));
-  assert.deepEqual(p.fromFavs, ['Strateji', 'RPG']);
-  assert.equal(p.empty, false);
-  assert.equal(tasteProfile({}, []).empty, true);
-  assert.equal(tasteProfile(null, null).empty, true);
+const fav = (id, name, extra = {}) => ({ id, name, status: 'wish', currency: 'TRY', price: 500, ...extra });
+const fresh = (price, extra = {}) => ({ price, currency: 'TRY', discountPercent: 0, checkedAt: new Date(NOW - 36e5).toISOString(), ...extra });
+
+test('buildDigest groups news, escapes HTML, and returns null when there is nothing to say', () => {
+  assert.equal(buildDigest({ favs: [fav('a', 'A', { target: 100 })], prices: { a: fresh(900) }, now: NOW }), null);
+  assert.equal(buildDigest({}), null);
+  const d = buildDigest({
+    favs: [fav('a', 'Hit <b>Game</b>', { target: 300 }), fav('b', 'Close', { target: 300 }), fav('c', 'Sale', {}), fav('d', 'Done', { status: 'done', target: 999 })],
+    prices: { a: fresh(250), b: fresh(330), c: fresh(300, { discountPercent: 40 }), d: fresh(10) },
+    advice: { c: { verdict: 'buy' } }, free: [{ key: 'epic:1', store: 'epic', name: 'Free One', end: NOW + 5 * 36e5, endKnown: true }], now: NOW,
+  });
+  assert.equal(d.sections.map(s => s.title).join('|'), 'Hedef fiyatına ulaşanlar|Hedefe yaklaşanlar|Favorilerinde indirim|Şimdi almak için iyi zaman|Ücretsiz oyunlar');
+  assert.match(d.subject, /hedef fiyatına ulaştı/);
+  assert.doesNotMatch(d.html, /<b>Game<\/b>/);
+  assert.match(d.html, /Hit &lt;b&gt;Game&lt;\/b&gt;/);
+  assert.match(d.text, /Free One — Epic Games · 5 saat kaldı/);
+  assert.ok(!d.text.includes('Done'), 'oynanmış oyun özete girmez');
+  const e = buildDigest({ favs: [fav('a', 'A', { target: 300 })], prices: { a: fresh(250) }, now: NOW, en: true });
+  assert.match(e.subject, /reached your target price/);
+  assert.match(e.text, /target/);
 });
 
-test('matchOf and rankForYou prefer taste matches, require a discount and skip DLC and free games', () => {
-  const profile = tasteProfile({ personas: ['story'] }, []);
-  const rpg = game({ key: 'rpg', genres: ['RPG'], tags: ['Story Rich'], score: 80, discount: 40 });
-  const sports = game({ key: 'sp', genres: ['Spor'], score: 95, discount: 90 });
-  const noSale = game({ key: 'ns', genres: ['RPG'], discount: 0 });
-  const dlc = game({ key: 'dlc', genres: ['RPG'], dlc: true });
-  const free = game({ key: 'fr', genres: ['RPG'], free: true });
-  assert.deepEqual(matchOf(rpg, profile), { genres: ['RPG'], tags: ['Story Rich'] });
-  const ranked = rankForYou([sports, rpg, noSale, dlc, free], profile);
-  assert.deepEqual(ranked.map(x => x.g.key), ['rpg']);
-  assert.ok(forYouScore(rpg, profile) > forYouScore(sports, profile));
-  // profil boşken sıralama genel kalır
-  const open = rankForYou([sports, rpg], tasteProfile({}, []));
-  assert.equal(open.length, 2);
+test('buildDigest ignores stale prices', () => {
+  const old = { price: 100, currency: 'TRY', discountPercent: 70, checkedAt: new Date(NOW - 5 * 864e5).toISOString() };
+  assert.equal(buildDigest({ favs: [fav('a', 'A')], prices: { a: old }, advice: { a: { verdict: 'buy' } }, now: NOW }), null);
 });
 
-test('pickBasket never exceeds the budget or the game limit and maximises value', () => {
-  const pool = [
-    game({ key: 'a', priceTry: 600, originalTry: 1200, score: 90 }), game({ key: 'b', priceTry: 400, originalTry: 800, score: 88 }), game({ key: 'c', priceTry: 300, score: 70 }),
-    game({ key: 'd', priceTry: 100, score: 80 }), game({ key: 'e', priceTry: 5000, score: 99 }), game({ key: 'f', priceTry: 50, score: null }),
-    game({ key: 'g', priceTry: 90, dlc: true, score: 99 }), game({ key: 'h', priceTry: 0, free: true, score: 99 }),
-  ];
-  const r = pickBasket(pool, 1000, { max: 3 });
-  assert.ok(r.total <= 1000);
-  assert.ok(r.picks.length <= 3);
-  assert.deepEqual(r.picks.map(g => g.key).sort(), ['a', 'b']);
-  assert.equal(r.total, 1000);
-  assert.equal(Math.round((r.total + r.left) * 100) / 100, 1000);
-  assert.equal(r.saved, 1000);
-  const tight = pickBasket(pool, 120, { max: 5 });
-  assert.deepEqual(tight.picks.map(g => g.key), ['d']);
-  assert.deepEqual(pickBasket(pool, 20).picks, []);
-  assert.deepEqual(pickBasket([], 1000).picks, []);
-  assert.deepEqual(pickBasket(pool, NaN).picks, []);
+test('ntfy topics are random-looking, validated and never user supplied text', () => {
+  const t = makeTopic(new Uint8Array(12).map((_, i) => i * 17));
+  assert.match(t, /^oyunradari-[a-f0-9]{24}$/);
+  assert.equal(cleanTopic(t), t);
+  assert.equal(cleanTopic('oyunradari-../x'), null);
+  assert.equal(cleanTopic('x'), null);
+  assert.equal(cleanTopic(null), null);
 });
 
-test('pickBasket lets taste break near ties', () => {
-  const profile = tasteProfile({ personas: ['strategy'] }, []);
-  const strat = game({ key: 's', priceTry: 500, score: 80, genres: ['Strateji'], tags: ['Tactical'] });
-  const other = game({ key: 'o', priceTry: 500, score: 82, genres: ['Spor'] });
-  assert.deepEqual(pickBasket([other, strat], 500, { max: 1, profile }).picks.map(g => g.key), ['s']);
-  assert.deepEqual(pickBasket([other, strat], 500, { max: 1 }).picks.map(g => g.key), ['o']);
-});
-
-test('hidden gems need a high score, 1–30 reviews and a low price', () => {
-  assert.equal(isHiddenGem(game({ score: 85, reviews: 12, priceTry: 200 })), true);
-  assert.equal(isHiddenGem(game({ score: 79, reviews: 12 })), false);
-  assert.equal(isHiddenGem(game({ reviews: 31 })), false);
-  assert.equal(isHiddenGem(game({ reviews: 0 })), false);
-  assert.equal(isHiddenGem(game({ reviews: null })), false);
-  assert.equal(isHiddenGem(game({ priceTry: 401 })), false);
-  assert.equal(isHiddenGem(game({ priceTry: 401 }), { maxPrice: 600 }), true);
-  assert.equal(isHiddenGem(game({ free: true, priceTry: 0 })), false);
-  const list = rankGems([game({ key: 'a', score: 82, priceTry: 90 }), game({ key: 'b', score: 90, priceTry: 300, genres: ['Rahat'] }), game({ key: 'c', score: 90, priceTry: 100, reviews: 99 })]);
-  assert.deepEqual(list.map(g => g.key), ['b', 'a']);
-  assert.deepEqual(rankGems(list, { genre: 'Rahat' }).map(g => g.key), ['b']);
-});
-
-test('cost per hour uses normal time first and refuses tiny or missing times', () => {
-  assert.equal(hoursOf({ normally_min: 600, hastily_min: 300 }), 10);
-  assert.equal(hoursOf({ normally_min: null, hastily_min: 120 }), 2);
-  assert.equal(hoursOf({ normally_min: 0 }), null);
-  assert.equal(hoursOf(null), null);
-  assert.equal(costPerHour(500, 10), 50);
-  assert.equal(costPerHour(500, 0.2), null);
-  assert.equal(costPerHour(0, 10), null);
-  assert.equal(costPerHour(500, null), null);
-  assert.equal(costTier(5), 'great');
-  assert.equal(costTier(20), 'good');
-  assert.equal(costTier(50), 'fair');
-  assert.equal(costTier(100), 'high');
-  assert.equal(costTier(null), null);
-});
-
-test('worthSummary hides the percentage until enough votes', () => {
-  assert.deepEqual(worthSummary({ yes: 3, no: 1 }), { yes: 3, no: 1, total: 4, pct: null, verdict: null });
-  assert.equal(MIN_VOTES, 5);
-  assert.equal(worthSummary({ yes: 4, no: 1 }).pct, 80);
-  assert.equal(worthSummary({ yes: 4, no: 1 }).verdict, 'yes');
-  assert.equal(worthSummary({ yes: 2, no: 3 }).verdict, 'mixed');
-  assert.equal(worthSummary({ yes: 1, no: 9 }).verdict, 'no');
-  assert.deepEqual(worthSummary(null), { yes: 0, no: 0, total: 0, pct: null, verdict: null });
-  assert.equal(worthSummary({ yes: -4, no: 'x' }).total, 0);
-});
-
-test('wishlist link round-trips, keeps only wanted valid games and rejects tampering', () => {
-  const favs = [
-    { id: 'steam:1086940', name: 'Baldur’s Gate 3', status: 'wish' },
-    { id: 'EP3383-PPSA14002_00-0872837811678079', name: 'Çılgın Oyun ğüşiöç', status: 'wish' },
-    { id: 'steam:9', name: 'Bitti', status: 'done' },
-    { id: 'bad id!', name: 'Geçersiz', status: 'wish' },
-    { id: 'steam:2', name: '   ', status: 'wish' },
-  ];
-  const code = encodeWishlist(favs, { by: 'Ayşe <b>' });
-  assert.match(code, /^[A-Za-z0-9_-]+$/);
-  const back = decodeWishlist(code);
-  assert.deepEqual(back.items.map(i => i.id), ['steam:1086940', 'EP3383-PPSA14002_00-0872837811678079']);
-  assert.equal(back.items[1].name, 'Çılgın Oyun ğüşiöç');
-  assert.equal(back.by, 'Ayşe b');
-  assert.equal(encodeWishlist([], {}), '');
-  assert.equal(decodeWishlist(''), null);
-  assert.equal(decodeWishlist('%%%'), null);
-  assert.equal(decodeWishlist('abcd'), null);
-  assert.equal(decodeWishlist(btoa(JSON.stringify({ v: 2, i: [['a', 'b']] }))), null);
-  assert.equal(decodeWishlist(btoa(JSON.stringify({ v: 1, i: [['<x>', 'b'], [1, 2]] })).replace(/=+$/, '')), null);
-  const many = Array.from({ length: 50 }, (_, i) => ({ id: 'steam:' + i, name: 'G' + i, status: 'wish' }));
-  assert.equal(decodeWishlist(encodeWishlist(many)).items.length, 30);
-  assert.equal(decodeWishlist('A'.repeat(7000)), null);
-});
-
-test('giftIdeas puts the friend’s wishlist first, then genre matches within budget', () => {
-  const pool = [
-    game({ key: 'w', id: 'steam:w', priceTry: 300, score: 70, genres: ['Spor'] }),
-    game({ key: 'r', id: 'steam:r', priceTry: 200, score: 90, genres: ['RPG'] }),
-    game({ key: 's', id: 'steam:s', priceTry: 150, score: 95, genres: ['Spor'] }),
-    game({ key: 'big', id: 'steam:big', priceTry: 900, score: 99, genres: ['RPG'] }),
-  ];
-  const out = giftIdeas(pool, { budget: 500, genres: ['RPG'], wanted: new Set(['steam:w']) });
-  assert.deepEqual(out.map(x => x.g.key), ['w', 'r']);
-  assert.equal(out[0].wished, true);
-  assert.deepEqual(giftIdeas(pool, { budget: 500, genres: [], wanted: new Set() }).map(x => x.g.key), ['s', 'r', 'w']);
-  assert.deepEqual(giftIdeas(pool, { budget: 100, genres: ['RPG'] }), []);
-});
-
-test('compareRows marks winners only where at least two games have a value and they differ', () => {
-  const a = game({ key: 'a', priceTry: 100, discount: 50, score: 90, year: 2020 });
-  const b = game({ key: 'b', priceTry: 300, discount: 50, score: 85, year: null });
-  const c = game({ key: 'c', priceTry: 200, discount: 0, score: null, year: 2024 });
-  const rows = compareRows([a, b, c], { a: { normally_min: 600 }, b: { normally_min: 1200 } });
-  const by = k => rows.find(r => r.key === k);
-  assert.deepEqual(by('price').win, [0]);
-  assert.deepEqual(by('discount').win, [0, 1]);
-  assert.deepEqual(by('score').win, [0]);
-  assert.deepEqual(by('hours').win, [1]);
-  assert.deepEqual(by('hours').vals, [10, 20, null]);
-  assert.deepEqual(by('cph').vals, [10, 15, null]);
-  assert.deepEqual(by('cph').win, [0]);
-  assert.deepEqual(by('year').win, [2]);
-  // eşit değerlerde kazanan yok; tek değerde kazanan yok
-  const tie = compareRows([game({ priceTry: 5 }), game({ priceTry: 5 })]);
-  assert.deepEqual(tie.find(r => r.key === 'price').win, []);
-  const lone = compareRows([game({ score: 80 }), game({ score: null })]);
-  assert.deepEqual(lone.find(r => r.key === 'score').win, []);
+test('pushMessage', () => {
+  assert.deepEqual(pushMessage('hit', { name: 'G', price: 250, currency: 'TRY' }).title, 'Hedef fiyata ulaştı');
+  assert.match(pushMessage('free', { name: 'F', store: 'epic', endKnown: true, end: 5 * 36e5, now: 0 }, true).body, /5 h left/);
+  assert.equal(pushMessage('nope', {}), null);
+  assert.equal(esc('<&>"\''), '&lt;&amp;&gt;&quot;&#39;');
 });

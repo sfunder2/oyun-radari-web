@@ -170,9 +170,54 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 | Keşfet modül düzeni | Her modülde boyut (Geniş / Yarım / Daraltılmış; yarım yalnız geniş ekranda) ve gizle düğmesi. Gizlenenler "Gizli modüller" satırından geri açılır. |
 | Yazı boyutu | Menü > Görünüm'de %90–%130 kaydırıcısı ve Sıfırla. |
 
+## Görsel panolar ve zaman çizgileri (21 Kasım 2026)
+
+`assets/visuals-20261121.js` ve `.css`. Mevcut sayfalara DOM üzerinden eklenir; hareketler azaltılmış harekette kapanır; Klasik/Sade ve TR/EN desteklenir. Katalog verisi yalnız herkese açık okuma tablolarından ve yalnız ilgili panel açılınca okunur, 15 dk oturumda saklanır.
+
+| Özellik | Davranış |
+|---|---|
+| Cüzdan koçu halkası | Alanım > Bütçe: ayın harcamaları halka dilimleri, kalan bütçe gri dilim, aşımda kırmızı çerçeve. Veri cihazdaki `radar-lifestyle-v1`. |
+| Tasarruf sayacı ve konfeti | Toplam tasarruf sayaç olarak artar, sıradaki hedefe (100, 250, 500, 1.000 ...) ilerleme çubuğu. Tasarruf artınca konfeti; sayaca basınca tekrar. İlk açılışta konfeti yok. |
+| Oyun DNA'sı radarı | DNA kartında balon haritasındaki türlerden radar (3+ tür gerekir, en az 5 eksen). |
+| İndirim takvimi ısı haritası | Fırsatlar: 10 haftalık takvimde PlayStation TR indirimlerinin mağazanın bildirdiği bitiş günleri. Yalnız bitiş günü bilinen veri. |
+| Tür haritası | Fırsatlar: türlere göre indirimli teklif sayısı balonları; balona basınca Tür filtresi uygulanır. |
+| Fiyat düşüşü şelalesi | Ana sayfa: PlayStation fiyat geçmişinde önceki farklı fiyattan gerçekten düşenler. Tam katalog dökümü olan günler sayılmaz. |
+| Çıkış zaman çizgisi | Takvim: önümüzdeki 60 günün çıkış günleri yatay kaydırmalı çizgide, günde en çok 4 oyun. |
+| İndirim geri sayım halkası | "İndirim: ... kaldı" satırında kalan süre halkası (7 güne göre), yaklaştıkça sarı, turuncu, kırmızı. |
+| Kütüphane değeri | Steam kütüphanem: listede görünen oyunların normal Steam fiyat toplamı, oynanmamışların değeri, saat başı maliyet. Ödenen tutar değildir. |
+
+## Hareket cilası (21 Kasım 2026)
+
+`assets/motion-20261121.js` ve `.css`. Paketin React koduna dokunmaz; DOM'u izler. Sistemin ya da sitenin "hareketi azalt" ayarı açıksa hiçbir hareket başlamaz (`<html class="mo-par">` yalnız hareket serbestken konur, tüm hareket kuralları buna bağlıdır). Klasik ve Sade, Türkçe ve İngilizce, masaüstü ve mobilde çalışır.
+
+| Özellik | Davranış |
+|---|---|
+| Fiyat düşüşü | Canlı güncellemede fiyat eskisinden yenisine sayarak iner, yanında yeşil "▼ fark" çipi çıkar, kart bir kez yeşil parlar. İlk açılıştaki sayaç (vivid) bununla karışmaz; metin 320 ms durulunca karşılaştırılır. |
+| İndirim rozeti | İndirim yüzdesi artınca ya da ekrandaki karta sonradan rozet gelince zıplar ve üstünden parıltı geçer. |
+| Canlanan favori kalbi | Favorideki oyunun fiyatı düşünce kalp üç kez atar ve minik kalpler saçar. İndirimdeki favori kartlarda kalp yavaşça nabız gibi atar. |
+| İskelet kartlar ve ilerleme çubuğu | Kart ızgarası yüklenirken parıltılı iskelet kartlar, üstte ince bir ilerleme çubuğu. Çubuk menü/gezinme tıklamalarında ve `pushState` geçişlerinde de çalışır. Ana bloklar sayfa değişince sırayla belirir. |
+| Paralaks kapaklar | Kart kapağı kaydırdıkça kart içinde ±%5 kayar (yalnız ekrandaki kartlar, tek `requestAnimationFrame`). |
+| Favoriye uçan kapak | Favoriye eklenince kapak yay çizerek üst gezinmedeki "İstek Listem"e (mobilde alt gezinme ya da Menü) uçar; hedef zıplar ve küçük bir konfeti çıkar. |
+| Işık süpürmesi | Sade/Klasik, OLED ya da site teması değişince ekranı soldan sağa bir ışık şeridi geçer (Klasik'te parlak, Sade'de mor-pembe tonlu). Açılışta çalışmaz. |
+| Başarım rozetleri | Rozetler sırayla belirir; nadir ve üstü kazanılmış rozetlerde yıldız parıltıları, efsanevide ışıma. Yeni kazanılan rozet açılma animasyonuyla (dönerek büyür, halka, konfeti) görünür. Görülen rozetler yalnız bu cihazda (`radar-mo-badges`) tutulur; ilk ziyarette hiçbiri "yeni" sayılmaz. |
+
+## Fırsat merkezi (21 Kasım 2026)
+
+`assets/hub-20261121.js` ve `.css`; sol altta zil düğmesi (mobilde alt menünün üstünde). Sade/Klasik, TR/EN, masaüstü/mobil. Mevcut alarm mantığı (favoride hedef fiyat, site açıkken 5 dakikalık kontrol) aynen çalışır; merkez onun üstüne ek bakış ve sunucu tarafı ekler. Hiçbir sekme veri uydurmaz: veri yoksa "veri az" ya da "bitiş saati bilinmiyor" yazar.
+
+| Özellik | Davranış |
+|---|---|
+| Alarmlar | Hedef koyduğun favoriler: Hedefte / Yaklaştı (%15 içinde) / Bekliyor / Fiyat yok (24 saatten eski ya da para birimi farklı). Son uyarılar, tarayıcı bildirimi izni. Zil rozeti hedefe inenleri ve süresi dolmak üzere ücretsiz oyunları sayar. |
+| Al / bekle | Favori başına fiyat geçmişinden Şimdi al (kayıtlı dibin %8 içinde), Makul, Bekle (dibin %25 üstü ya da 21 gün içinde büyük indirim haftası). En az 14 gün ve 5 kayıt yoksa "Veri az". Gerekçe cümleleri yazılır ve "fiyat tahmini değildir" der. |
+| Paylaşım kartı | Al/bekle satırında "Paylaş": tasarım modülünün cihazda ürettiği 1080×1350 PNG'si (`openShare`). |
+| Ücretsiz oyunlar | Epic gerçek bitişle (`radar-services?action=epic`), Steam/Xbox/GOG'da fiyatı 0 ve orijinal fiyatı olan, son 24 saatte doğrulanmış teklifler. Bitişi bilinmeyen oyunda süre yazılmaz. Epic için 24 sa ve 2 sa kala bildirim (site açıkken, izinle). |
+| Bölge | Favori başına `regional-prices`; başka ülke TR'den en az %15 ve 20 TL ucuzsa gösterilir (eski kur ve hatalı satırlar atılır). Kart komisyonu ve ülke kısıtı dahil değildir. |
+| Özet | Giriş yapmış kullanıcı için haftalık e-posta özeti ve site kapalıyken telefona bildirim (ntfy). Tercihler `radar_digest` tablosunda; e-posta adresini istemci seçemez (tetikleyici `auth.users`'tan alır). |
+
+Sunucu tarafı (`scripts/digest.mjs`, çalıştırıcı `scripts/digest-run.mjs`): `--weekly` günde bir çalıştırılır ve bir kullanıcıya 6,5 günden sık göndermez; haber yoksa e-posta yollamaz. `--push` yarım saatte bir çalıştırılır; hedefe inen favoriyi günde bir kez, Epic ücretsiz oyununu 24 sa / 2 sa eşiğinde bir kez yollar. `--dry` hiçbir şey göndermez. Gerekli kurulum için README "Fırsat merkezi" bölümüne bak.
 ## Kişisel merkez (21 Kasım 2026)
 
-`assets/hub-20261121.js` ve `.css`. Üst menüde ve Menü'de "Senin için" düğmesi, Oyunlar sayfasında bir öneri şeridi. Veri sitenin `search_market` RPC'si ve `game_ttb` tablosundan okunur; fiyat, resmî mağazalardaki (PlayStation, Steam, Xbox, Switch, Epic, GOG) en ucuz TL karşılığıdır, anahtar satıcılar sayılmaz. Kur alınamazsa yalnız TL fiyatlı teklifler gösterilir. Tercihler yalnız bu cihazda tutulur.
+`assets/kisisel-20261121.js` ve `.css`. Üst menüde ve Menü'de "Senin için" düğmesi, Oyunlar sayfasında bir öneri şeridi. Veri sitenin `search_market` RPC'si ve `game_ttb` tablosundan okunur; fiyat, resmî mağazalardaki (PlayStation, Steam, Xbox, Switch, Epic, GOG) en ucuz TL karşılığıdır, anahtar satıcılar sayılmaz. Kur alınamazsa yalnız TL fiyatlı teklifler gösterilir. Tercihler yalnız bu cihazda tutulur.
 
 | Özellik | Davranış |
 |---|---|
@@ -193,3 +238,27 @@ Bu dosya, 23 Ekim 2026 sürümünde gerçekten çalışan davranışı ve dış 
 - `supabase/account-sync-v1.sql` hesap senkron tablosunu kurar; `tests/account-sync-rls.sql` başka kullanıcının ve anonim erişimin engellendiğini doğrular.
 - `tests/experience-rls.sql` iki kullanıcılı yetki testini tek işlemde çalıştırır ve bütün kayıtları geri alır.
 - `tests/experience.test.mjs` seri, XP tekrarları, kur doğruluğu, swipe eşikleri, yedek doğrulama, yıl dönümü ve güvenli medya bağlantılarını kontrol eder.
+
+## Fiyat grafikleri ve karşılaştırmalar (21 Kasım 2026)
+
+| İstek | Uygulama |
+|---|---|
+| Animasyonlu fiyat geçmişi | Çizgi soldan sağa çizilir, en düşük nokta parlar; dönem değişince yeniden oynar. Azaltılmış harekette durağan. |
+| Sıcaklık göstergesi | Ayrıntıdaki panelde ibreli kadran (soğuk mavi, ılık sarı, sıcak kırmızı); ibre sallanarak yerine oturur. |
+| Mağaza fiyat çubukları | Her mağaza satırının altında fiyatla orantılı çubuk büyüyerek açılır; en ucuz yeşil. |
+| Fiyat yarışı | Mağazalar şeritte yarışır: en ucuz bitişte, diğerleri fiyat farı oranında geride; "Tekrar oynat" düğmesi. |
+| Güven bandı | Önümüzdeki 90 gün için geçmiş indirimlerden gölgeli aralık (en iyi indirim – normal fiyat) ve güven düzeyi. Söz değildir; en az 30 gün kayıt ister. |
+| Tüm zamanların en düşüğü | Fiyat radarın kayıtlarındaki en düşükse ayrıntıda büyük, kartta kısa altın rozet. Yalnız ≥14 günlük kayıtta. |
+
+Kod: `assets/charts-20261121.js/.css`, testler: `tests/charts.test.mjs`.
+
+## Katalog araçları (21 Kasım 2026)
+
+Menüdeki "Katalog araçları" bölümünden (ya da `?arac=dlc|sezon|gereksinim|seri` adresiyle) açılan tek pencerede dört araç. Kaynak: `assets/catalog-tools-20261121.js` ve `.css`; yeni tablo ya da SQL gerekmez. Kişisel kayıtlar yalnız bu cihazda tutulur.
+
+| Araç | Veri | Eksik / sınır |
+|---|---|---|
+| Ek paket ve DLC takibi | `game_family.dlcs` (IGDB) + `library`/`store_offers` fiyatları; PlayStation `edition` metni ("Eklenti", "Oyun Paketi", "Premium Sürüm") ek paketi ve tam sürüm paketini ayırır. Takip listesi `radar-tools-track-v1`, eklerkenki fiyata göre değişimi gösterir. İndirimdeki ek paketler akışı. | IGDB'nin listelediği DLC'lerin yaklaşık %6'sının katalogda fiyatı var (7.630 DLC anahtarından ~470 PlayStation, ~680 diğer mağaza). Paketin içeriği bilinmediği için "paket daha ucuz" karşılaştırması gösterge niteliğindedir. Ek paket indirim akışı yalnız PlayStation. |
+| İndirim takvimi ve hazırlık listesi | Tasarım modülündeki yaklaşık sezon tarihleri (`SALE_SEASONS`); istek listesi `radar-fav-v3`; PlayStation kayıtları için güncel fiyat. Liste ve bütçe `radar-tools-prep-v1`. | Tarihler her yıl aynı haftalar varsayılarak yaklaşıktır; kesin gün mağazalardan gelmez. Geçmiş sezonlardaki gerçek dip oranı henüz hesaplanmıyor. |
+| Bilgisayarım çalıştırır mı? | `library.requirements` (Steam; ~22.700 oyunda var). RAM, depolama ve işletim sistemi kesin; işlemci ve ekran kartı yerleşik yaklaşık skor tablosuyla (~). Sistem `radar-tools-sys-v1`. | Tablo dışı ya da çok yeni modeller "doğrulanamadı" çıkar, karar bunlarla yükseltilmez. Yalnız Steam eşleşmesi olan oyunlar. |
+| Oyun serisi sayfası | `game_family.series_name/series` (IGDB, ~4.500 oyunda seri var) + katalogdaki en ucuz TRY fiyat. | Toplam yalnız TRY fiyatlı oyunları sayar; Steam/Switch fiyatları dolar olduğu için toplama girmez, ayrıca belirtilir. Katalogda olmayan oyun "Fiyat yok" görünür. |
