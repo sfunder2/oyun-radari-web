@@ -110,3 +110,83 @@ test('every animation sits behind prefers-reduced-motion and the in-app switch',
   assert.ok(animated.length > 8);
   assert.ok(animated.every(l => l.includes('data-reduce-motion')), 'animation outside the reduce-motion guard');
 });
+
+import { priceForecast, saleEpisodes } from '../assets/charts-20261121.js';
+
+// 400 gün: normal 1000; her ~80 günde bir 12 günlük indirim (derinlik %30–%40); bugün normal fiyat.
+function cadence(gap = 80, n = 5, endAt = 400, depth = [700, 600]) {
+  const rows = [];
+  const startOf = k => endAt - 30 - (n - 1 - k) * gap;
+  for (let i = 0; i <= endAt; i++) {
+    let p = 1000;
+    for (let k = 0; k < n; k++) if (i >= startOf(k) && i < startOf(k) + 12) p = depth[k % depth.length];
+    rows.push([day(i), p, 1000, p]);
+  }
+  return rows;
+}
+
+test('priceForecast refuses to guess with a thin record', () => {
+  assert.equal(priceForecast(null, day(200)), null);
+  assert.equal(priceForecast(hist().slice(-20), day(200)).state, 'collecting');
+  const flat = Array.from({ length: 120 }, (_, i) => [day(i), 800, 800, 800]);
+  assert.equal(priceForecast(flat, day(119)).state, 'nosale');
+  const one = [];
+  for (let i = 0; i < 150; i++) one.push([day(i), i >= 40 && i < 50 ? 700 : 1000, 1000, i >= 40 && i < 50 ? 700 : 1000]);
+  assert.equal(priceForecast(one, day(149)).state, 'thin');
+});
+
+test('priceForecast finds cadence, typical depth and a window about one gap after the last sale', () => {
+  const fc = priceForecast(cadence(), day(400));
+  assert.equal(fc.state, 'ok');
+  assert.equal(fc.episodes, 5);
+  assert.equal(fc.medGap, 80);
+  assert.equal(fc.depthMinPct, 30);
+  assert.equal(fc.depthMaxPct, 40);
+  assert.ok(fc.expPrice >= 600 && fc.expPrice <= 700);
+  assert.ok(fc.priceLo <= fc.expPrice && fc.expPrice <= fc.priceHi);
+  assert.equal(fc.sinceLast, 30);
+  // son indirim 30 gün önce başladı → ~50 gün sonra
+  assert.ok(fc.daysTo >= 35 && fc.daysTo <= 55, String(fc.daysTo));
+  assert.ok(fc.to > fc.from);
+  assert.equal(fc.overdue, false);
+  assert.equal(fc.level, fc.score >= 70 ? 'high' : 'mid');
+});
+
+test('priceForecast marks an overdue sale and keeps the window in the future', () => {
+  const rows = cadence(80, 5, 400);
+  for (let i = 401; i <= 520; i++) rows.push([day(i), 1000, 1000, 1000]);
+  const fc = priceForecast(rows, day(520));
+  assert.equal(fc.overdue, true);
+  assert.ok(fc.from >= Date.parse(day(520)));
+});
+
+test('priceForecast confidence grows with sales and regularity', () => {
+  const regular = priceForecast(cadence(80, 5), day(400));
+  const two = priceForecast(cadence(80, 2), day(400));
+  assert.ok(regular.score > two.score);
+  assert.ok(regular.score <= 95 && two.score >= 0);
+});
+
+test('priceForecast says the current price is already at the typical sale level', () => {
+  const rows = cadence(80, 4);
+  const last = rows.length - 1;
+  rows[last] = [day(400), 650, 1000, 650];
+  const fc = priceForecast(rows, day(400));
+  assert.equal(fc.onSale, true);
+  assert.equal(fc.worth, true);
+});
+
+test('saleEpisodes ignores shallow dips under 5 percent', () => {
+  const rows = cadence(80, 3).map(r => ({ t: Date.parse(r[0]), p: r[1], base: r[2], low: r[3] }));
+  assert.equal(saleEpisodes(rows, Date.parse(day(400)), 1000).length, 3);
+  assert.equal(saleEpisodes(rows, Date.parse(day(400)), 1000 / 0.97).length >= 3, true);
+});
+
+test('the forecast component is bilingual and states it is only an estimate', () => {
+  const src = readFileSync(new URL('../assets/charts-20261121.js', import.meta.url), 'utf8');
+  assert.match(src, /Fiyat tahmini/);
+  assert.match(src, /Price forecast/);
+  assert.match(src, /İstatistiksel tahmin/);
+  assert.match(src, /Yeterli veri yok/);
+  assert.match(src, /Not enough data/);
+});

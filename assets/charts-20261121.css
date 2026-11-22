@@ -70,7 +70,7 @@
 @keyframes tz-win{40%{transform:scale(1.35)}}
 @media(max-width:560px){.tz-lane{grid-template-columns:minmax(64px,30%) minmax(0,1fr) auto;gap:7px}.tz-lane-end{font-size:11px}}
 
-/* ---------- 5. Güven bandı ---------- */
+/* ---------- 5. Fiyat tahmini ---------- */
 .tz-forecast{margin:14px 0 0}
 .tz-forecast h4{margin:0;font-size:13px;font-weight:750}
 .tz-fc-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap}
@@ -95,6 +95,46 @@
 .tz-fc-season{fill:#f5c242;fill-opacity:.12}
 .tz-fc-empty{padding:10px 12px;border:1px dashed var(--line);border-radius:10px}
 .tz-fc-note b{color:var(--ink)}
+.tz-fc-kind{font-size:11px;font-weight:700;color:var(--muted);padding:3px 9px;border:1px solid var(--line);border-radius:999px}
+.tz-fc-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0 6px}
+.tz-fc-tile{display:grid;gap:3px;align-content:start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--lime) 5%,transparent);min-width:0}
+.tz-fc-tile small{font-size:11px;color:var(--muted);font-weight:600}
+.tz-fc-tile strong{font-size:17px;line-height:1.25;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.tz-fc-tile strong em{font-style:normal;font-size:12px;color:var(--lime);font-weight:700}
+.tz-fc-tile>span{font-size:11px;line-height:1.5;color:var(--muted)}
+.tz-fc-meter{display:block;height:6px;border-radius:3px;background:color-mix(in srgb,var(--muted) 30%,transparent);overflow:hidden;margin-top:4px}
+.tz-fc-meter b{display:block;height:100%;border-radius:3px;background:var(--lime)}
+.tz-conf-low .tz-fc-meter b{background:#f0b04a}
+.tz-fc-verdict{margin:6px 0 4px;font-size:13px;font-weight:650;line-height:1.55}
+.tz-fc-win{fill:var(--lime);fill-opacity:.14;stroke:var(--lime);stroke-opacity:.7;stroke-width:1.5px}
+.tz-conf-low .tz-fc-win{fill:#f0b04a;stroke:#f0b04a}
+.tz-fc-exp{stroke:var(--lime);stroke-width:3px;stroke-linecap:round}
+.tz-conf-low .tz-fc-exp{stroke:#f0b04a}
+.tz-fc .tz-fc-tag{font-size:12.5px}
+.tz-fc-legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:2px 0 6px;padding:0;list-style:none;font-size:11px;color:var(--muted)}
+.tz-fc-legend li{display:inline-flex;align-items:center;gap:6px}
+.tz-fc-legend li::before{content:"";width:14px;height:8px;border-radius:2px;background:var(--lime);opacity:.5}
+.tz-fc-legend .k-past::before{height:3px;background:#91b5df;opacity:1}
+:root[data-ui=sade] .tz-fc-legend .k-past::before{background:#5178a5}
+.tz-fc-legend .k-win::before{border:1.5px solid var(--lime);background:color-mix(in srgb,var(--lime) 18%,transparent);opacity:1}
+.tz-fc-legend .k-season::before{background:#f5c242;opacity:.35}
+.tz-fc-why{margin:6px 0 0;font-size:12px}
+.tz-fc-why summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--ink)}
+.tz-fc-why ul{margin:0 0 4px;padding-left:18px;color:var(--muted);line-height:1.65}
+.tz-fc-why li+li{margin-top:4px}
+:root[data-ui=sade] .tz-fc-win,:root[data-ui=sade] .tz-fc-band{stroke:#15803d;fill:#15803d}
+:root[data-ui=sade] .tz-fc-exp{stroke:#15803d}
+:root[data-ui=sade] .tz-fc-tile strong em{color:#15803d}
+@media(max-width:560px){
+  .tz-fc-tiles{grid-template-columns:1fr 1fr}
+  .tz-fc-tile.tz-fc-score{grid-column:1/-1}
+  .tz-fc-tile strong{font-size:16px}
+  .tz-fc-kind{font-size:10px}
+  .tz-fc .phaxis{font-size:17px}
+  .tz-fc .tz-fc-tag{font-size:18px}
+  .tz-fc-tile>span{font-size:12px}
+}
+
 @media(prefers-reduced-motion:no-preference){
   :root:not([data-reduce-motion=true]) .tz-fc-band{animation:tz-bandgrow 1.2s cubic-bezier(.3,.7,.2,1) .2s backwards}
   :root:not([data-reduce-motion=true]) .tz-fc-past{stroke-dasharray:1;stroke-dashoffset:1;animation:tz-draw 1s ease-out forwards}
