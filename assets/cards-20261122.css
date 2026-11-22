@@ -29,15 +29,12 @@ body #root .gamecard .catalogprice>small{grid-area:src;margin-top:2px;font-size:
 :root[data-ui=sade] .cd-delta[data-dir=down]{color:#0f7b43}
 :root[data-ui=sade] .cd-delta[data-dir=up]{color:#c0392b}
 
-/* 3 — İndirim rozeti: tek rozet, %20 / %50 / %75 kademeleri */
-html body #root :is(.discountbadge,.deal-discount>b)[data-cd-tier]{border:0;font-weight:800;text-shadow:none;animation:none}
-html body #root :is(.discountbadge,.deal-discount>b)[data-cd-tier="0"]{background:#3b4a5c;color:#e6edf5;box-shadow:none}
-html body #root :is(.discountbadge,.deal-discount>b)[data-cd-tier="1"]{background:#2fd07a;color:#04210f;box-shadow:0 4px 12px -5px #2fd07a}
-html body #root :is(.discountbadge,.deal-discount>b)[data-cd-tier="2"]{background:#ffb02e;color:#2b1a00;box-shadow:0 4px 14px -5px #ffb02e}
-html body #root :is(.discountbadge,.deal-discount>b)[data-cd-tier="3"]{background:linear-gradient(120deg,#ff3d71,#ff7a45);color:#fff;box-shadow:0 5px 16px -4px #ff3d71}
-:root[data-ui=sade] :is(.discountbadge,.deal-discount>b)[data-cd-tier="0"]{background:#e3e7ee;color:#334155}
-:root[data-ui=sade] :is(.discountbadge,.deal-discount>b)[data-cd-tier="1"]{background:#18a957;color:#fff}
-:root[data-ui=sade] :is(.discountbadge,.deal-discount>b)[data-cd-tier="2"]{background:#f59e0b;color:#1f1300}
+/* 3 — İndirim rozeti: tek rozet, %20 / %50 / %75 kademeleri (tasarım sisteminin good / warn / bad renkleriyle) */
+html body #root :is(.discountbadge,.deal-discount>b)[data-cd-tier]{border:0;font-weight:800;text-shadow:none;animation:none;background-image:none}
+html body #root :is(.discountbadge,.deal-discount>b)[data-cd-tier="0"]{background:color-mix(in srgb,var(--ink,#e6edf5) 16%,#3b4a5c)!important;color:var(--ink,#e6edf5)!important;box-shadow:none}
+html body #root :is(.discountbadge,.deal-discount>b)[data-cd-tier="1"]{background:var(--ds-good,#2fd07a)!important;color:var(--ds-on-accent,#04210f)!important;box-shadow:0 4px 12px -5px var(--ds-good,#2fd07a)}
+html body #root :is(.discountbadge,.deal-discount>b)[data-cd-tier="2"]{background:var(--ds-warn,#ffb02e)!important;color:var(--ds-on-accent,#2b1a00)!important;box-shadow:0 4px 14px -5px var(--ds-warn,#ffb02e)}
+html body #root :is(.discountbadge,.deal-discount>b)[data-cd-tier="3"]{background:var(--ds-bad,#ff5d7a)!important;color:var(--ds-on-accent,#fff)!important;box-shadow:0 5px 16px -4px var(--ds-bad,#ff5d7a)}
 .deal-discount>b::before,.deal-discount>b::after,.discountbadge::before,.discountbadge::after{content:none!important}
 
 /* 4 — Köşe şeritleri */
