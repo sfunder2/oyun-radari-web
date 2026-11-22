@@ -247,7 +247,7 @@ Sunucu tarafı (`scripts/digest.mjs`, çalıştırıcı `scripts/digest-run.mjs`
 | Sıcaklık göstergesi | Ayrıntıdaki panelde ibreli kadran (soğuk mavi, ılık sarı, sıcak kırmızı); ibre sallanarak yerine oturur. |
 | Mağaza fiyat çubukları | Her mağaza satırının altında fiyatla orantılı çubuk büyüyerek açılır; en ucuz yeşil. |
 | Fiyat yarışı | Mağazalar şeritte yarışır: en ucuz bitişte, diğerleri fiyat farı oranında geride; "Tekrar oynat" düğmesi. |
-| Güven bandı | Önümüzdeki 90 gün için geçmiş indirimlerden gölgeli aralık (en iyi indirim – normal fiyat) ve güven düzeyi. Söz değildir; en az 30 gün kayıt ister. |
+| Fiyat tahmini | Oyun ayrıntısındaki fiyat grafiğinin altında: geçmiş indirimlerden beklenen indirim penceresi (ortalama aralık; indirimlerin çoğu büyük mağaza haftalarına denk geliyorsa o haftaya oturur), beklenen fiyat ve yüzde (tipik derinlik, en az–en çok aralığı), 0–100 güven puanı (indirim sayısı, kayıt süresi, düzenlilik) ve "Neden böyle?" açıklaması. Geçmiş + olası aralık grafiği. İstatistiksel tahmindir, söz değildir; 30 günden az kayıt ya da 2'den az indirimde "Yeterli veri yok" gösterilir. Oyuncuların kendi Tahminlerim oyunundan ayrıdır. |
 | Tüm zamanların en düşüğü | Fiyat radarın kayıtlarındaki en düşükse ayrıntıda büyük, kartta kısa altın rozet. Yalnız ≥14 günlük kayıtta. |
 
 Kod: `assets/charts-20261121.js/.css`, testler: `tests/charts.test.mjs`.

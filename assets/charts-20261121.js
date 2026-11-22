@@ -3,10 +3,10 @@
 //  2 "Tüm zamanların en düşüğü" rozeti (ayrıntıda ve kartta)
 //  3 Mağaza fiyat çubukları: satırın altında büyüyerek açılır
 //  4 Mağazalar arası fiyat yarışı: en ucuz mağaza bitişe varır, diğerleri ne kadar geride kaldığını gösterir
-//  5 Fiyat tahmini güven bandı: geçmiş indirimlere dayanan gölgeli aralık (söz değil, geçmişin özeti)
+//  5 Fiyat tahmini: ne zaman (indirim penceresi), ne kadar (beklenen fiyat), güven puanı (0–100), neden ve grafik; veri azsa "yeterli veri yok"
 // (Sıcaklık göstergesinin ibreli kadranı heat-20261031.js içindedir.)
 // Hareketler azaltılmış harekette kapanır; metinler TR/EN; renkler klasik ve sade temada CSS değişkenlerinden gelir.
-import { seasonsBetween, nextSeason, atLowest, money } from './tasarim-20261117.js';
+import { seasonsBetween, nextSeason, atLowest, money, SALE_SEASONS } from './tasarim-20261117.js';
 
 const DAY = 864e5;
 
@@ -106,6 +106,100 @@ export function bandAt(fc, f) {
   };
 }
 
+// ---- Fiyat tahmini (22 Kasım 2026) ----
+// Geçmiş fiyat satırlarından: ne kadar ucuzlar, ne zaman ucuzlar, ne kadar güveniyoruz. Tahmin istatistikseldir;
+// yeterli indirim yoksa pencere de fiyat da üretilmez.
+const pct = (a, b) => Math.round((1 - a / b) * 100);
+const cvOf = list => {
+  if (list.length < 2) return null;
+  const mean = list.reduce((a, b) => a + b, 0) / list.length;
+  if (!mean) return null;
+  return Math.sqrt(list.reduce((a, b) => a + (b - mean) ** 2, 0) / list.length) / mean;
+};
+
+// Son 365 günlük indirim dönemleri: { start, end, low, open }.
+export function saleEpisodes(rows, todayMs, regular) {
+  const win = rows.filter(r => r.t >= todayMs - 365 * DAY);
+  const out = [];
+  let cur = null;
+  for (const r of win) {
+    if (r.low < regular * 0.95) {
+      if (!cur) cur = { start: r.t, end: r.t, low: r.low, open: false };
+      cur.end = r.t; cur.low = Math.min(cur.low, r.low);
+    } else if (cur) { out.push(cur); cur = null; }
+  }
+  if (cur) { cur.open = true; out.push(cur); }
+  return out;
+}
+
+export function priceForecast(hist, todayStr, horizon = 120) {
+  const todayMs = Date.parse(todayStr);
+  const rows = cleanRows(hist, todayMs);
+  if (!Number.isFinite(todayMs) || rows.length < 2) return null;
+  const spanDays = Math.round((todayMs - rows[0].t) / DAY);
+  if (spanDays < 30) return { state: 'collecting', spanDays };
+  const win = rows.filter(r => r.t >= todayMs - 365 * DAY);
+  const cur = rows[rows.length - 1].p;
+  const regular = Math.max(median(win.map(r => r.base)), cur);
+  const eps = saleEpisodes(rows, todayMs, regular);
+  if (!eps.length) return { state: 'nosale', spanDays, cur, regular };
+  if (eps.length < 2) return { state: 'thin', spanDays, cur, regular, episodes: eps.length };
+
+  const depths = eps.map(e => 1 - e.low / regular).sort((a, b) => a - b);
+  const depth = median(depths);
+  const expPrice = Math.round(regular * (1 - depth) * 100) / 100;
+  const priceLo = Math.round(regular * (1 - depths[depths.length - 1]) * 100) / 100;
+  const priceHi = Math.round(regular * (1 - depths[0]) * 100) / 100;
+  const starts = eps.map(e => e.start);
+  const gaps = starts.slice(1).map((s, i) => Math.round((s - starts[i]) / DAY));
+  const medGap = Math.max(14, median(gaps));
+  const half = Math.round(Math.min(medGap * 0.5, Math.max(7, ...gaps.map(g => Math.abs(g - medGap)))));
+  const onSale = cur < regular * 0.95;
+  const last = eps[eps.length - 1];
+  const sinceLast = Math.round((todayMs - last.start) / DAY);
+  const center = last.start + medGap * DAY;
+  let overdue = false;
+  let from = center - half * DAY, to = center + half * DAY;
+  if (to < todayMs) { overdue = true; from = todayMs; to = todayMs + Math.max(14, half) * DAY; }
+  else if (from < todayMs) from = todayMs;
+
+  // Dönemsel indirimler: indirimlerin çoğu büyük mağaza haftalarına denk geliyorsa pencere o haftaya oturur.
+  const inSeason = eps.filter(e => seasonsBetween(e.start - DAY, e.end + 2 * DAY).length > 0).length;
+  const seasonShare = inSeason / eps.length;
+  let season = null;
+  if (seasonShare >= 0.5 && eps.length >= 3) {
+    const want = overdue ? todayMs + 30 * DAY : center;
+    const cands = seasonsBetween(todayMs, todayMs + 420 * DAY, SALE_SEASONS).filter(x => !x.clipped || x.to > todayMs);
+    const near = cands.sort((a, b) => Math.abs((a.from + a.to) / 2 - want) - Math.abs((b.from + b.to) / 2 - want))[0];
+    if (near && Math.abs((near.from + near.to) / 2 - want) <= Math.max(30, medGap * 0.5) * DAY) {
+      season = near; from = Math.max(todayMs, near.from); to = near.to;
+    }
+  }
+  const daysTo = Math.max(0, Math.round((from - todayMs) / DAY));
+  const beyond = daysTo > horizon;
+
+  const cv = cvOf(gaps);
+  const parts = {
+    count: Math.min(40, eps.length * 10),
+    span: Math.round(Math.min(25, (spanDays / 365) * 25)),
+    regular: cv === null ? 0 : Math.round(25 * Math.max(0, 1 - cv)),
+    season: season ? Math.round(10 * seasonShare) : 0,
+  };
+  if (gaps.length === 1) parts.regular = 10;
+  const score = Math.min(95, parts.count + parts.span + parts.regular + parts.season);
+  const level = score >= 70 ? 'high' : score >= 40 ? 'mid' : 'low';
+  const worth = cur <= expPrice * 1.03; // şimdiki fiyat zaten tipik indirim seviyesinde ya da altında
+  return {
+    state: 'ok', spanDays, cur, regular, horizon, onSale, worth,
+    episodes: eps.length, perYear: Math.round((eps.length * 365 / Math.max(30, Math.min(365, spanDays))) * 10) / 10,
+    depthPct: Math.round(depth * 100), depthMinPct: Math.round(depths[0] * 100), depthMaxPct: Math.round(depths[depths.length - 1] * 100),
+    expPrice, priceLo, priceHi, best: Math.min(cur, ...eps.map(e => e.low)), typical: expPrice,
+    medGap, sinceLast, overdue, from, to, daysTo, beyond, season, inSeason,
+    seasonShare, score, level, parts,
+    pastEpisodes: eps,
+  };
+}
+
 // ---- Tarayıcı ortak ----
 const BROWSER = typeof document !== 'undefined';
 const root = BROWSER ? document.documentElement : null;
@@ -179,75 +273,131 @@ export function createCharts(React) {
         'The closer to the finish line, the cheaper: the cheapest store reaches it and the others fall behind in proportion to the price gap. Bar length follows the price, so a short bar is cheap. Dollar prices are converted to TRY at the current rate.')));
   }
 
-  // 5 — Güven bandı
+  // 5 — Fiyat tahmini: ne zaman, ne kadar, ne kadar güveniyoruz, neden
+  const dfmt = (ms, en) => new Date(ms).toLocaleDateString(en ? 'en-GB' : 'tr-TR', { day: 'numeric', month: 'short', timeZone: 'UTC' });
   function Forecast({ hist, today, currency }) {
-    const fc = forecastBand(hist, today);
+    const fc = priceForecast(hist, today);
     if (!fc) return null;
     const en = isEn(), cur = currency || 'TRY';
-    const title = h('h4', null, T('Önümüzdeki 90 gün', 'The next 90 days'));
+    const m = v => money(v, cur, en);
+    const title = h('h4', null, T('Fiyat tahmini', 'Price forecast'));
+    const empty = (tr, enText) => h('section', { className: 'tz-forecast tz-fc-empty', 'aria-label': T('Fiyat tahmini', 'Price forecast') }, title,
+      h('p', { className: 'phnote' }, T(tr, enText)));
     if (fc.state === 'collecting') {
-      return h('div', { className: 'tz-forecast tz-fc-empty' }, title,
-        h('p', { className: 'phnote' }, T(
-          `Fiyatı ${fc.spanDays} gündür izliyoruz. Gölgeli aralık için en az 30 günlük kayıt gerekiyor.`,
-          `We have tracked this price for ${fc.spanDays} days. The shaded range needs at least 30 days of records.`)));
+      return empty(
+        `Yeterli veri yok: fiyatı ${fc.spanDays} gündür izliyoruz. Tahmin için en az 30 günlük kayıt ve 2 indirim gerekiyor.`,
+        `Not enough data: we have tracked this price for ${fc.spanDays} days. A forecast needs at least 30 days of records and 2 sales.`);
     }
     if (fc.state === 'nosale') {
-      return h('div', { className: 'tz-forecast tz-fc-empty' }, title,
-        h('p', { className: 'phnote' }, T(
-          `Kayıtlı ${fc.spanDays} günde bu oyun indirime girmedi; bir aralık çizecek kadar veri yok.`,
-          `This game has not gone on sale in the ${fc.spanDays} days we recorded, so there is not enough to draw a range.`)));
+      return empty(
+        `Yeterli veri yok: kayıtlı ${fc.spanDays} günde bu oyun indirime girmedi, bu yüzden ne zaman ve ne kadar ucuzlayacağını söyleyemeyiz.`,
+        `Not enough data: this game has not gone on sale in the ${fc.spanDays} days we recorded, so we cannot say when or how much it will drop.`);
     }
-    const X0 = 56, XT = 236, X1 = 588, Y0 = 16, Y1 = 142;
-    const pastDays = 45, H = fc.horizon;
+    if (fc.state === 'thin') {
+      return empty(
+        `Yeterli veri yok: kayıtlı ${fc.spanDays} günde yalnızca 1 indirim gördük. Zamanlama ve fiyat tahmini için en az 2 indirim gerekiyor.`,
+        `Not enough data: we saw only 1 sale in the ${fc.spanDays} days we recorded. A timing and price forecast needs at least 2 sales.`);
+    }
+    // --- metinler ---
+    const lvl = LEVEL[fc.level][en ? 1 : 0];
+    const range = `${dfmt(fc.from, en)} – ${dfmt(fc.to, en)}`;
+    let when, whenSub;
+    if (fc.overdue) {
+      when = T('Her an olabilir', 'Could happen any time');
+      whenSub = T(`Genelde ${fc.medGap} günde bir indirim görüyoruz; sonuncusunun üzerinden ${fc.sinceLast} gün geçti.`, `Sales usually come every ${fc.medGap} days; the last one began ${fc.sinceLast} days ago.`);
+    } else if (fc.season) {
+      when = `${en ? fc.season.en : fc.season.tr}`;
+      whenSub = T(`Yaklaşık ${range}${fc.daysTo ? ` (${fc.daysTo} gün sonra)` : ' (bu günlerde)'}`, `About ${range}${fc.daysTo ? ` (in ${fc.daysTo} days)` : ' (right about now)'}`);
+    } else {
+      when = range;
+      whenSub = fc.daysTo ? T(`Yaklaşık ${fc.daysTo} gün sonra başlayabilir`, `Could start in about ${fc.daysTo} days`) : T('Bu günlerde başlayabilir', 'Could start any day now');
+    }
+    if (fc.beyond && !fc.overdue) whenSub += T(' · grafiğin dışında', ' · beyond the chart');
+    const bullets = [
+      T(`Son ${Math.min(365, fc.spanDays)} günde ${fc.episodes} indirim gördük (yılda yaklaşık ${String(fc.perYear).replace('.', ',')}); ortalama ${fc.medGap} günde bir.`,
+        `In the last ${Math.min(365, fc.spanDays)} days we saw ${fc.episodes} sales (about ${fc.perYear} a year), roughly one every ${fc.medGap} days.`),
+      T(`İndirimler normal fiyatı (${m(fc.regular)}) ortalama %${fc.depthPct} düşürdü; en az %${fc.depthMinPct}, en çok %${fc.depthMaxPct}.`,
+        `Sales cut the regular price (${m(fc.regular)}) by ${fc.depthPct}% on average, from ${fc.depthMinPct}% to ${fc.depthMaxPct}%.`),
+      fc.onSale
+        ? T(`Şu an indirimdesin (${m(fc.cur)}); son indirim ${fc.sinceLast} gün önce başladı.`, `It is on sale now (${m(fc.cur)}); the current sale began ${fc.sinceLast} days ago.`)
+        : T(`Son indirim ${fc.sinceLast} gün önce başladı${fc.overdue ? ' ve olağan aralığı aştık' : ''}.`, `The last sale began ${fc.sinceLast} days ago${fc.overdue ? ', longer than the usual gap' : ''}.`),
+    ];
+    if (fc.season) bullets.push(T(
+      `İndirimlerin ${fc.inSeason}/${fc.episodes} tanesi büyük mağaza dönemlerine denk geldi; bu yüzden pencere ${fc.season.tr} haftasına oturtuldu.`,
+      `${fc.inSeason} of ${fc.episodes} sales fell in big store sale weeks, so the window is set to ${fc.season.en}.`));
+    bullets.push(T(
+      `Güven ${lvl} (${fc.score}/100): ${fc.episodes} indirim ve ${fc.spanDays} günlük kayıt${fc.parts.regular >= 15 ? '; indirimler düzenli aralıklarla geldi' : '; indirimler düzensiz aralıklarla geldi'}.`,
+      `Confidence is ${lvl} (${fc.score}/100): ${fc.episodes} sales and ${fc.spanDays} days of records${fc.parts.regular >= 15 ? '; sales came at regular intervals' : '; sales came at irregular intervals'}.`));
+    const verdict = fc.worth
+      ? T('Şu anki fiyat tipik indirim seviyesinde ya da altında; beklemek çoğu zaman fazla kazandırmaz.', 'The current price is at or below the typical sale price; waiting usually saves little.')
+      : fc.onSale
+        ? T(`Şu anki indirim tipik indirimden sığ; geçmişte ${m(fc.expPrice)} civarına indi.`, `The current sale is shallower than typical; it has gone down to about ${m(fc.expPrice)} before.`)
+        : T(`Beklersen geçmişteki gibi ${m(fc.expPrice)} civarına inebilir (şimdikinden ${m(fc.cur - fc.expPrice)} ucuz).`, `If you wait it could drop to about ${m(fc.expPrice)} as before (${m(fc.cur - fc.expPrice)} less than now).`);
+
+    // --- grafik ---
+    const X0 = 58, XT = 262, X1 = 588, Y0 = 18, Y1 = 150;
+    const pastDays = 90, H = fc.horizon;
     const todayMs = Date.parse(today);
     const rows = cleanRows(hist, todayMs).filter(r => r.t >= todayMs - pastDays * DAY);
-    const lowV = Math.min(fc.best, fc.cur, ...rows.map(r => r.p)) * 0.97;
+    const lowV = Math.min(fc.priceLo, fc.cur, ...rows.map(r => r.p)) * 0.96;
     const highV = Math.max(fc.regular, fc.cur, ...rows.map(r => r.p)) * 1.04;
     const y = v => Y0 + (1 - (v - lowV) / (highV - lowV || 1)) * (Y1 - Y0);
     const xPast = t => X0 + ((t - (todayMs - pastDays * DAY)) / (pastDays * DAY)) * (XT - X0);
-    const xFut = f => XT + f * (X1 - XT);
+    const fx = t => XT + ((t - todayMs) / (H * DAY)) * (X1 - XT);
     const steps = Array.from({ length: 19 }, (_, i) => i / 18);
-    const up = steps.map(f => `${xFut(f).toFixed(1)},${y(bandAt(fc, f).hi).toFixed(1)}`);
-    const dn = steps.slice().reverse().map(f => `${xFut(f).toFixed(1)},${y(bandAt(fc, f).lo).toFixed(1)}`);
+    const bfc = { cur: fc.cur, regular: fc.regular, best: fc.priceLo };
+    const up = steps.map(f => `${(XT + f * (X1 - XT)).toFixed(1)},${y(bandAt(bfc, f).hi).toFixed(1)}`);
+    const dn = steps.slice().reverse().map(f => `${(XT + f * (X1 - XT)).toFixed(1)},${y(bandAt(bfc, f).lo).toFixed(1)}`);
     const pastD = rows.length
       ? rows.map((r, i) => (i ? `L${xPast(r.t).toFixed(1)} ${y(rows[i - 1].p).toFixed(1)} L${xPast(r.t).toFixed(1)} ${y(r.p).toFixed(1)}` : `M${xPast(Math.max(r.t, todayMs - pastDays * DAY)).toFixed(1)} ${y(r.p).toFixed(1)}`)).join(' ') + ` L${XT} ${y(rows[rows.length - 1].p).toFixed(1)}`
       : `M${X0} ${y(fc.cur).toFixed(1)} L${XT} ${y(fc.cur).toFixed(1)}`;
     const seasons = seasonsBetween(todayMs, todayMs + H * DAY);
-    const fx = t => XT + ((t - todayMs) / (H * DAY)) * (X1 - XT);
-    const next = nextSeason(todayMs);
-    const lvl = LEVEL[fc.level][en ? 1 : 0];
+    const winOn = !fc.beyond;
+    const wx0 = fx(fc.from), wx1 = Math.min(X1, fx(fc.to));
     const mid = (a, b) => (a + b) / 2;
-    const label = (v, cls, dy = 4) => h('text', { x: 50, y: y(v) + dy, textAnchor: 'end', className: 'phaxis ' + (cls || '') }, money(v, cur, en));
+    const label = (v, dy = 4) => h('text', { x: 52, y: y(v) + dy, textAnchor: 'end', className: 'phaxis' }, money(v, cur, en));
     const alt = en
-      ? `Shaded range for the next ${H} days: from about ${money(fc.best, cur, true)} up to ${money(fc.regular, cur, true)}. Confidence ${lvl}.`
-      : `Önümüzdeki ${H} gün için gölgeli aralık: yaklaşık ${money(fc.best, cur)} ile ${money(fc.regular, cur)} arası. Güven ${lvl}.`;
-    return h('div', { className: 'tz-forecast tz-conf-' + fc.level },
+      ? `Forecast chart: ${winOn ? `expected sale window ${range}, price about ${m(fc.expPrice)}` : 'expected sale window is beyond the chart'}. Confidence ${lvl}, ${fc.score} out of 100.`
+      : `Tahmin grafiği: ${winOn ? `beklenen indirim penceresi ${range}, fiyat yaklaşık ${m(fc.expPrice)}` : 'beklenen indirim penceresi grafiğin dışında'}. Güven ${lvl}, 100 üzerinden ${fc.score}.`;
+    return h('section', { className: 'tz-forecast tz-conf-' + fc.level, 'aria-label': T('Fiyat tahmini', 'Price forecast') },
       h('div', { className: 'tz-fc-head' }, title,
-        h('span', { className: 'tz-conf', title: T('Güven; geçmişteki indirim sayısına ve kayıt süresine bağlıdır', 'Confidence depends on the number of past sales and the length of the record') },
-          h('i', { className: 'tz-conf-dots', 'aria-hidden': 'true' }, [0, 1, 2].map(i => h('u', { key: i, className: i <= ['low', 'mid', 'high'].indexOf(fc.level) ? 'on' : '' }))),
-          T('Güven: ', 'Confidence: '), h('b', null, lvl))),
-      h('svg', { className: 'phchart tz-fc', viewBox: '0 0 600 172', role: 'img', 'aria-label': alt },
-        [fc.regular, mid(fc.regular, fc.best), fc.best].map((v, i) => h('line', { key: i, className: 'phgrid', x1: X0, x2: X1, y1: y(v), y2: y(v) })),
-        label(fc.regular), label(fc.best),
+        h('span', { className: 'tz-fc-kind' }, T('İstatistiksel tahmin', 'Statistical estimate'))),
+      h('div', { className: 'tz-fc-tiles' },
+        h('div', { className: 'tz-fc-tile' }, h('small', null, T('Ne zaman ucuzlar?', 'When might it drop?')), h('strong', null, when), h('span', null, whenSub)),
+        h('div', { className: 'tz-fc-tile' }, h('small', null, T('Ne kadar ucuzlar?', 'How much might it drop?')),
+          h('strong', null, `≈ ${m(fc.expPrice)}`, h('em', null, ` −%${fc.depthPct}`)),
+          h('span', null, T(`Aralık ${m(fc.priceLo)} – ${m(fc.priceHi)}`, `Range ${m(fc.priceLo)} – ${m(fc.priceHi)}`))),
+        h('div', { className: 'tz-fc-tile tz-fc-score' }, h('small', null, T('Güven', 'Confidence')),
+          h('strong', null, fc.score, h('em', null, '/100 · ' + lvl)),
+          h('i', { className: 'tz-fc-meter', 'aria-hidden': 'true' }, h('b', { style: { width: fc.score + '%' } })))),
+      h('p', { className: 'tz-fc-verdict' }, verdict),
+      h('svg', { className: 'phchart tz-fc', viewBox: '0 0 600 182', role: 'img', 'aria-label': alt },
+        [fc.regular, mid(fc.regular, fc.priceLo), fc.priceLo].map((v, i) => h('line', { key: i, className: 'phgrid', x1: X0, x2: X1, y1: y(v), y2: y(v) })),
+        label(fc.regular), label(fc.priceLo),
         seasons.map((s, i) => h('rect', { key: s.key + i, className: 'tz-fc-season', x: fx(s.from), y: Y0, width: Math.max(3, fx(s.to) - fx(s.from)), height: Y1 - Y0, rx: 3 })),
         h('line', { className: 'tz-fc-reg', x1: XT, x2: X1, y1: y(fc.regular), y2: y(fc.regular) }),
-        h('line', { className: 'tz-fc-typ', x1: XT, x2: X1, y1: y(fc.typical), y2: y(fc.typical) }),
-        h('text', { className: 'tz-fc-tag', x: X1, y: y(fc.typical) - 5, textAnchor: 'end' }, T('Tipik indirim fiyatı ', 'Typical sale price ') + money(fc.typical, cur, en)),
         h('polygon', { className: 'tz-fc-band', points: up.concat(dn).join(' ') }),
+        winOn && h('rect', { className: 'tz-fc-win', x: wx0, y: Y0, width: Math.max(6, wx1 - wx0), height: Y1 - Y0, rx: 4 }),
+        winOn && h('line', { className: 'tz-fc-exp', x1: wx0, x2: Math.max(wx0 + 6, wx1), y1: y(fc.expPrice), y2: y(fc.expPrice) }),
+        winOn && h('text', { className: 'tz-fc-tag', x: Math.min(X1, Math.max(X0 + 60, mid(wx0, wx1))), y: Y0 - 5, textAnchor: wx1 > X1 - 70 ? 'end' : 'middle' }, `≈ ${m(fc.expPrice)}`),
         h('path', { className: 'tz-fc-now-line', d: `M${XT} ${y(fc.cur).toFixed(1)} L${X1} ${y(fc.cur).toFixed(1)}` }),
         h('path', { className: 'tz-fc-past', d: pastD }),
         h('line', { className: 'tz-fc-today', x1: XT, x2: XT, y1: Y0 - 4, y2: Y1 + 4 }),
         h('circle', { className: 'phnow', cx: XT, cy: y(fc.cur), r: 5 }),
-        h('text', { className: 'phaxis', x: XT, y: Y1 + 22, textAnchor: 'middle' }, T('bugün', 'today')),
-        h('text', { className: 'phaxis', x: X0, y: Y1 + 22 }, T(`${pastDays} gün önce`, `${pastDays} days ago`)),
-        h('text', { className: 'phaxis', x: X1, y: Y1 + 22, textAnchor: 'end' }, T(`${H} gün sonra`, `in ${H} days`))),
+        h('text', { className: 'phaxis', x: XT, y: Y1 + 24, textAnchor: 'middle' }, T('bugün', 'today')),
+        h('text', { className: 'phaxis', x: X0, y: Y1 + 24 }, T(`${pastDays} gün önce`, `${pastDays} days ago`)),
+        h('text', { className: 'phaxis', x: X1, y: Y1 + 24, textAnchor: 'end' }, T(`${H} gün sonra`, `in ${H} days`))),
+      h('ul', { className: 'tz-fc-legend', 'aria-hidden': 'true' },
+        h('li', { className: 'k-past' }, T('Geçmiş fiyat', 'Past price')),
+        h('li', { className: 'k-win' }, T('Beklenen indirim penceresi', 'Expected sale window')),
+        h('li', { className: 'k-band' }, T('Olası fiyat aralığı', 'Possible price range')),
+        h('li', { className: 'k-season' }, T('Büyük mağaza dönemi', 'Big store sale'))),
+      h('details', { className: 'tz-fc-why' },
+        h('summary', null, T('Neden böyle?', 'Why this estimate?')),
+        h('ul', null, bullets.map((b, i) => h('li', { key: i }, b)))),
       h('p', { className: 'phnote tz-fc-note' },
-        next && h('b', null, next.days === 0
-          ? T(`Genelde indirim dönemi: ${next.tr}. `, `Usually a sale period: ${next.en}. `)
-          : T(`Sıradaki büyük indirim: ${next.tr} (genelde ${next.label} civarı). `, `Next big sale: ${next.en} (usually around ${next.label}). `)),
-        T(
-          `Gölgeli alan bu oyunun son ${Math.min(365, fc.spanDays)} günde ${fc.episodes} kez girdiği indirimlerden çıkar: alt sınır en iyi indirim, üst sınır normal fiyat. Yılda yaklaşık ${String(fc.perYear).replace('.', ',')} indirim görüyoruz. Bu bir söz ya da kesin tahmin değildir; güven aralık genişledikçe ve kayıt kısaldıkça düşer.`,
-          `The shaded area comes from the ${fc.episodes} sale${fc.episodes === 1 ? '' : 's'} this game had in the last ${Math.min(365, fc.spanDays)} days: the floor is the best sale, the ceiling the regular price. We see about ${fc.perYear} sales a year. It is not a promise or an exact forecast; confidence drops as the range widens and the record is short.`)));
+        T('Bu, radarın gördüğü fiyat geçmişine dayanan istatistiksel bir tahmindir; söz ya da kesin tarih değildir. Mağaza indirim yapmayabilir ya da başka zamanda yapabilir. Güven, indirim sayısı, kayıt süresi ve indirimlerin ne kadar düzenli geldiğiyle artar.',
+          'This is a statistical estimate from the price history this radar recorded, not a promise or an exact date. A store may skip a sale or run it at a different time. Confidence rises with the number of sales, the length of the record and how regularly the sales came.')));
   }
 
   return { AtlChip, AtlBadge, StoreBar, StoreRace, Forecast };
