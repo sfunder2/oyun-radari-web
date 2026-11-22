@@ -275,3 +275,7 @@ Menüdeki "Katalog araçları" bölümünden (ya da `?arac=dlc|sezon|gereksinim|
 | Hikâye halkası | Hikâye açıldıkça halka dilimlenir: izlenen kartlar gri, kalanlar hikâyenin renginde, "2/10" rozeti. Bitenler soluk ve soluk renkli. Kayıt günlüktür ve yalnız bu cihazda (`radar-story-progress-v1`). |
 | Aramada vurgu | Sonuç satırı ve kart başlıklarında aranan sözcükler vurgulanır (CSS Custom Highlight API, DOM'a dokunmaz; Türkçe harfler ve aksanlar yok sayılır). Yazarken kapak resimli canlı öneri listesi ve vurgusu zaten vardı. |
 | Sade zemini | Sade'de gövde zemini açık renge döner (eski `html body{background:#11161e!important}` kuralı eziyordu). |
+
+## Kart ve liste cilası (22 Kasım 2026)
+
+`assets/cards-20261122.js` ve `.css` (paket koduna dokunmaz, DOM'u izler): kapak 16:9 ve yüklenirken bulanık önizleme; eski fiyat üstü çizili, yeni fiyat büyük; indirim rozeti %20 / %50 / %75 kademeli renk; köşe şeritleri ("Tüm zamanların en düşüğü" radarın kendi kaydından, "Yeni indirim" son ziyaretten beri düşen fiyattan, 72 saat); son ziyarete göre ▼/▲ yüzde etiketi (yalnız bu cihazda, `radar-cd-prices`); kapaktan vurgu rengi; fareyle hızlı özet (puan, tür, en düşük fiyat); platform simgeleri tek sırada (PC, PS, Xbox, Switch); favori parıltısı ve sayaç vurgusu; mağaza noktaları yerine tek tip simgeler; sıkı liste satırı. Hareket azaltılmışsa animasyonlar kapalıdır.
