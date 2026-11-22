@@ -1,0 +1,180 @@
+/* Grafik birliği ve mikro cila (22 Kasım 2026), polish-20261122.js ile birlikte.
+   1 Tüm grafiklerde ortak renk ve eksen stili (aşağıdaki --pc-* değişkenleri)
+   2 Üzerine gelince ayrıntı balonu (.pl-tip) ve fiyat grafiğinde imleç
+   3 Fiyat grafiğinde indirim dönemleri gölgeli bant (.pl-sale)
+   4 İndirim takviminde bu ayın günleri (.pl-month, .pl-cal)
+   5 Boş / hata / çevrimdışı küçük çizimler (.pl-art, .pl-offline)
+   6 Mikro etkileşimler: sekme göstergesi, düğme basma, bildirim çubuğu
+   7 Yükleme iskeletleri her yerde aynı biçimde (.pl-skel)
+   8 Sayfa açılışında kartlar sırayla belirir (html[data-pl-enter])
+   Hareket kuralları html.mo-par'a bağlıdır; sınıfı motion-20261121.js yalnız hareket serbestken koyar
+   (prefers-reduced-motion ya da sitenin "hareketi azalt" ayarı açıkken hiçbiri eşleşmez).
+   Renkler Klasik ve Sade temada değişkenlerden gelir. */
+
+/* ---------- 1. Ortak grafik değişkenleri ---------- */
+:root{
+ --pc-grid:var(--line);
+ --pc-axis:var(--muted);
+ --pc-axis-size:11px;
+ --pc-axis-weight:600;
+ --pc-line:#91b5df;
+ --pc-line-2:var(--muted);
+ --pc-sale:#34c77b;
+ --pc-sale-fill:color-mix(in srgb,#34c77b 15%,transparent);
+ --pc-focus:var(--ink);
+ --pc-now:#91b5df;
+ --pc-tip-bg:#0c121b;
+ --pc-tip-ink:#f1f5f8;
+ --pc-tip-line:color-mix(in srgb,#fff 16%,transparent);
+}
+:root[data-ui=sade]{
+ --pc-line:#5178a5;
+ --pc-now:#5178a5;
+ --pc-sale:#168a53;
+ --pc-sale-fill:color-mix(in srgb,#168a53 15%,transparent);
+ --pc-tip-bg:#ffffff;
+ --pc-tip-ink:#100e16;
+ --pc-tip-line:#cfc9e6;
+}
+/* Eksen yazıları ve ızgara aynı biçimde. */
+.phchart .phaxis,.tz-fc .phaxis,.vz-axis{fill:var(--pc-axis);font:var(--pc-axis-weight) var(--pc-axis-size)/1 Manrope,system-ui,sans-serif}
+.phchart .phgrid,.tz-fc .phgrid,.vz-grid{stroke:var(--pc-grid);stroke-width:1;stroke-dasharray:none}
+.pricehistory .phline,.tz-fc-past{stroke:var(--pc-line)}
+.pricehistory .phbase{stroke:var(--pc-line-2)}
+.phnow{fill:var(--pc-now)}
+.tz-fc-tag,.tz-season text{font-family:Manrope,system-ui,sans-serif}
+.vz-axis{fill:var(--pc-axis)}
+.vz-heat-rows,.vz-heat-months{font-weight:var(--pc-axis-weight);font-size:10px;color:var(--pc-axis)}
+.phchart,.tz-fc{overflow:visible}
+
+/* ---------- 2. Ayrıntı balonu ---------- */
+.pl-tip{position:fixed;left:0;top:0;z-index:700;max-width:min(260px,calc(100vw - 20px));padding:8px 11px;border:1px solid var(--pc-tip-line);border-radius:12px;
+ background:var(--pc-tip-bg);color:var(--pc-tip-ink);font:600 12px/1.4 Manrope,system-ui,sans-serif;box-shadow:0 14px 34px -12px #000c;pointer-events:none;opacity:0;visibility:hidden;transform:translate(var(--pl-x,0),var(--pl-y,0))}
+.pl-tip[data-on="1"]{opacity:1;visibility:visible}
+.pl-tip b{display:block;font-weight:800;font-size:12px}
+.pl-tip span{display:block;color:color-mix(in srgb,var(--pc-tip-ink) 72%,transparent);font-size:11.5px;font-weight:600}
+.pl-tip strong{display:block;font-size:15px;font-weight:800;letter-spacing:-.01em}
+.pl-tip .pl-tip-sale{display:flex;align-items:center;gap:6px;color:var(--pc-sale);font-weight:800}
+.pl-tip .pl-tip-sale::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--pc-sale)}
+:root[data-ui=sade] .pl-tip{box-shadow:0 14px 30px -14px #3a2a6a66}
+html.mo-par .pl-tip{transition:opacity .14s ease,visibility .14s}
+.pl-hit{fill:transparent;cursor:crosshair;touch-action:pan-y}
+.pl-hover{pointer-events:none;opacity:0}
+.pl-hover[data-on="1"]{opacity:1}
+.pl-cross{stroke:var(--pc-focus);stroke-opacity:.5;stroke-width:1;stroke-dasharray:3 3}
+.pl-dot{fill:var(--panel);stroke:var(--pc-line);stroke-width:2.5}
+.pl-dot.is-sale{stroke:var(--pc-sale)}
+svg.pl-live:focus-visible{outline:2px solid var(--pc-focus);outline-offset:3px;border-radius:8px}
+[data-pl-tip]{cursor:pointer}
+
+/* ---------- 3. İndirim dönemleri gölgeli bant ---------- */
+.pl-sale rect{fill:var(--pc-sale-fill)}
+.pl-sale line{stroke:var(--pc-sale);stroke-width:2;stroke-opacity:.75;stroke-linecap:round}
+html.mo-par .pl-sale rect{animation:pl-band .7s ease-out .5s backwards}
+html.mo-par .pl-sale line{animation:pl-band .7s ease-out .7s backwards}
+@keyframes pl-band{from{opacity:0}}
+.pl-legend{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin:6px 0 0}
+.pl-legend i{display:inline-block;width:18px;height:10px;margin-right:6px;vertical-align:-1px;border-radius:3px;border-top:2px solid var(--pc-sale);background:var(--pc-sale-fill)}
+
+/* ---------- 4. Bu ayın günleri ---------- */
+.vz-cell.pl-month{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 28%,transparent)}
+.vz-cell.pl-month.past{opacity:.55}
+.vz-cell.pl-mstart{box-shadow:inset 2px 0 0 var(--lime),inset 0 0 0 1px color-mix(in srgb,var(--ink) 28%,transparent)}
+.vz-cell.today{position:relative;outline:2px solid var(--ink);outline-offset:2px}
+.vz-cell.today::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 2px var(--panel)}
+html.mo-par .vz-cell.today::after{animation:pl-ping 2s ease-out infinite}
+@keyframes pl-ping{0%{box-shadow:0 0 0 2px var(--panel),0 0 0 2px color-mix(in srgb,var(--ink) 60%,transparent)}100%{box-shadow:0 0 0 2px var(--panel),0 0 0 11px transparent}}
+.vz-heat-month.pl-cur{color:var(--ink);font-weight:800;white-space:nowrap;text-decoration:underline;text-decoration-color:var(--lime);text-decoration-thickness:2px;text-underline-offset:3px}
+.pl-cal{margin:0 0 14px;padding:12px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--ink) 3%,transparent)}
+.pl-cal-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 0 8px}
+.pl-cal-head b{font-size:15px;font-weight:800;text-transform:capitalize}
+.pl-cal-head small{font-size:11px;color:var(--muted)}
+.pl-cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;text-align:center}
+.pl-cal-grid>i{font-style:normal;font-size:10px;font-weight:700;color:var(--muted);padding:2px 0}
+.pl-cal-grid>span{position:relative;display:grid;place-items:center;min-height:30px;border-radius:9px;font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.pl-cal-grid>span.past{color:var(--muted);opacity:.6}
+.pl-cal-grid>span.sale{background:color-mix(in srgb,var(--pc-sale) 22%,transparent);font-weight:800}
+.pl-cal-grid>span.sale.s-autumn,.pl-cal-grid>span.sale.s-winter{background:color-mix(in srgb,#ff8a4c 26%,transparent)}
+.pl-cal-grid>span.sale.s-summer{background:color-mix(in srgb,#ffc94d 30%,transparent)}
+.pl-cal-grid>span.sale.s-dop{background:color-mix(in srgb,#6fb6ff 28%,transparent)}
+.pl-cal-grid>span.today,.pl-cal-grid>span.sale.today:is(.s-autumn,.s-winter,.s-summer,.s-dop,.sale){outline:2px solid var(--ink);outline-offset:1px;background:var(--ink);color:var(--bg);font-weight:800;opacity:1}
+html.mo-par .pl-cal-grid>span{animation:pl-pop .4s cubic-bezier(.2,1.2,.4,1) calc(var(--pl-i,0)*14ms) backwards}
+@keyframes pl-pop{from{opacity:0;scale:.6}}
+
+/* ---------- 5. Çizimler ---------- */
+.pl-art{display:block;width:112px;height:84px;margin:0 auto 8px;color:var(--lime);overflow:visible}
+.pl-art.is-small{width:72px;height:54px;margin-bottom:4px}
+.pl-art .a{fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.pl-art .b{fill:currentColor;opacity:.16}
+.pl-art .c{fill:currentColor}
+.pl-art .d{fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-dasharray:2 6;opacity:.7}
+.pl-art[data-kind=error]{color:#f0b04a}
+.pl-art[data-kind=offline]{color:var(--muted)}
+.pl-art-host{text-align:center}
+html.mo-par .pl-art .sweep{transform-origin:46px 40px;animation:pl-sweep 3.4s linear infinite}
+html.mo-par .pl-art .blink{animation:pl-blink 1.8s ease-in-out infinite}
+html.mo-par .pl-art .float{animation:pl-float 3.2s ease-in-out infinite}
+@keyframes pl-sweep{to{transform:rotate(360deg)}}
+@keyframes pl-blink{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes pl-float{0%,100%{translate:0 0}50%{translate:0 -3px}}
+.empty>svg:first-child:not(.pl-art){display:none}
+.pl-offline{position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top,0px));z-index:650;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 24px);padding:8px 14px 8px 10px;
+ border:1px solid var(--pc-tip-line);border-radius:999px;background:var(--pc-tip-bg);color:var(--pc-tip-ink);font:700 13px/1.3 Manrope,system-ui,sans-serif;box-shadow:0 14px 34px -12px #000c;transform:translate(-50%,-160%);opacity:0;visibility:hidden}
+.pl-offline[data-on="1"]{transform:translate(-50%,0);opacity:1;visibility:visible}
+html.mo-par .pl-offline{transition:transform .38s cubic-bezier(.2,1.2,.4,1),opacity .25s,visibility .38s}
+.pl-offline .pl-art{width:34px;height:26px;margin:0;flex:none}
+.pl-offline[data-state=back]{border-color:color-mix(in srgb,var(--pc-sale) 55%,transparent)}
+.pl-offline[data-state=back] .pl-art{color:var(--pc-sale)}
+
+/* ---------- 6. Mikro etkileşimler ---------- */
+/* Pencere ve alt sayfa sekmeleri: alttan kayan gösterge */
+.ct-tabs button,[role=tab]{position:relative}
+.ct-tabs button[aria-selected=true]::after,[role=tab][aria-selected=true]::after{content:"";position:absolute;left:12%;right:12%;bottom:-1px;height:3px;border-radius:3px;background:var(--lime)}
+html.mo-par .ct-tabs button[aria-selected=true]::after,html.mo-par [role=tab][aria-selected=true]::after{animation:pl-ink .3s cubic-bezier(.3,1.3,.5,1) backwards}
+@keyframes pl-ink{from{transform:scaleX(0);opacity:0}}
+html.mo-par .ct-body>*{animation:pl-fade .28s ease-out backwards}
+html.mo-par .ct-body>*:nth-child(2){animation-delay:40ms}
+html.mo-par .ct-body>*:nth-child(3){animation-delay:80ms}
+html.mo-par .ct-body>*:nth-child(n+4){animation-delay:120ms}
+@keyframes pl-fade{from{opacity:0;translate:0 8px}}
+/* Düğme basma: bağlantı biçimli düğmeler ve hap etiketler de aynı tepkiyi verir. */
+html.mo-par :is(a.button,a.btn,[role=button],.chip,.pbadge,.menu-grid>button,.vz-cell,.vz-bubble):not(:disabled):active{scale:.96}
+html.mo-par :is([role=button],.vz-cell,.vz-bubble){transition:scale .12s ease,background-color .2s,border-color .2s,color .2s,box-shadow .2s}
+/* Bildirim çubukları: alttan yaylanarak gelir, kısa süre sonra kendiliğinden gider (JS bitiş sınıfı koyar). */
+html.mo-par .kh-toast,html.mo-par .achievement-toast{animation:pl-toast-in .45s cubic-bezier(.2,1.25,.4,1) backwards}
+html.mo-par .kh-toast.pl-out,html.mo-par .achievement-toast.pl-out{animation:pl-toast-out .28s ease-in forwards}
+html.mo-par .catalognotice{animation:pl-fade .35s ease-out backwards}
+@keyframes pl-toast-in{from{opacity:0;translate:0 24px;scale:.94}}
+@keyframes pl-toast-out{to{opacity:0;translate:0 16px;scale:.96}}
+
+/* ---------- 7. Ortak yükleme iskeleti ---------- */
+.pl-skel,.vz-skel,.kh-skel,[data-pl-loading]{
+ --sk1:color-mix(in srgb,var(--ink,#fff) 7%,transparent);--sk2:color-mix(in srgb,var(--ink,#fff) 15%,transparent)}
+.vz-skel,[data-pl-loading]{position:relative;display:block;min-height:84px;padding:0;color:transparent!important;font-size:0!important;border-radius:14px;overflow:hidden;
+ background:
+  linear-gradient(var(--sk1),var(--sk1)) 14px 16px/46% 12px no-repeat,
+  linear-gradient(var(--sk1),var(--sk1)) 14px 40px/78% 10px no-repeat,
+  linear-gradient(var(--sk1),var(--sk1)) 14px 60px/58% 10px no-repeat,
+  color-mix(in srgb,var(--ink,#fff) 3%,transparent)}
+.vz-skel::after,[data-pl-loading]::after,.kh-skel::before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+ background:linear-gradient(100deg,transparent 30%,color-mix(in srgb,var(--ink,#fff) 10%,transparent) 50%,transparent 70%);transform:translateX(-100%)}
+html.mo-par .vz-skel::after,html.mo-par [data-pl-loading]::after,html.mo-par .kh-skel::before{animation:pl-shimmer 1.5s linear infinite}
+@keyframes pl-shimmer{to{transform:translateX(100%)}}
+.kh-skel::after{content:none!important;animation:none!important}
+.pixel-loading{--sk1:color-mix(in srgb,var(--ink,#fff) 7%,transparent)}
+
+/* ---------- 8. Sayfa açılışında kartların sırayla belirmesi ---------- */
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail)>*,
+html.mo-par[data-pl-enter] .deal-list>.deal-list-row{animation:pl-rise .55s cubic-bezier(.2,.8,.2,1) calc(var(--pl-i,0)*45ms) backwards}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(1){--pl-i:0}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(2){--pl-i:1}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(3){--pl-i:2}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(4){--pl-i:3}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(5){--pl-i:4}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(6){--pl-i:5}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(7){--pl-i:6}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(8){--pl-i:7}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(9){--pl-i:8}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(10){--pl-i:9}
+html.mo-par[data-pl-enter] :is(.cataloggrid,.mini-game-grid,.vz-fall-list,.kh-rail,.deal-list)>:nth-child(n+11){--pl-i:10}
+@keyframes pl-rise{from{opacity:0;translate:0 18px;scale:.97}}
