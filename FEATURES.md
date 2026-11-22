@@ -263,6 +263,19 @@ Menüdeki "Katalog araçları" bölümünden (ya da `?arac=dlc|sezon|gereksinim|
 | Bilgisayarım çalıştırır mı? | `library.requirements` (Steam; ~22.700 oyunda var). RAM, depolama ve işletim sistemi kesin; işlemci ve ekran kartı yerleşik yaklaşık skor tablosuyla (~). Sistem `radar-tools-sys-v1`. | Tablo dışı ya da çok yeni modeller "doğrulanamadı" çıkar, karar bunlarla yükseltilmez. Yalnız Steam eşleşmesi olan oyunlar. |
 | Oyun serisi sayfası | `game_family.series_name/series` (IGDB, ~4.500 oyunda seri var) + katalogdaki en ucuz TRY fiyat. | Toplam yalnız TRY fiyatlı oyunları sayar; Steam/Switch fiyatları dolar olduğu için toplama girmez, ayrıca belirtilir. Katalogda olmayan oyun "Fiyat yok" görünür. |
 
+## Ana sayfa vitrini ve arama cilası (22 Kasım 2026)
+
+`assets/home-search-20261122.js` ve `.css`. Paketin React koduna dokunmaz; DOM'a kardeş düğümler ekler. Hareketler azaltılmış harekette kapanır; Klasik/Sade ve TR/EN desteklenir. Veri yalnız herkese açık okuma kaynaklarından (`search_market`, `upcoming_games`, `store_offers`) gelir, 15–30 dk oturumda saklanır.
+
+| Özellik | Davranış |
+|---|---|
+| Günün fırsatı | Açılış sayfasında kaydırmalı büyük vitrin: indirim ve puana göre en iyi 5 teklif, kalan süre, "Ayrıntıyı aç" ve "Mağazada aç". 6,5 sn'de bir kendiliğinden geçer; üstüne gelince, odakta, sekme gizliyken ve azaltılmış harekette durur; durdur/başlat düğmesi var. |
+| Resimli tür kartları | Açılış sayfasında 10 tür kartı (türün en indirimli oyununun kapağı); basınca Oyunlar'a geçip Tür süzgecini uygular. Oyunlar sayfasında aynı kartlar tek sıra, Tür kutusuyla eşleşik; seçili kart işaretli, tekrar basınca kalkar. |
+| Yeni çıkanlar / Yakında | İki ayrı şerit: Yeni çıkanlar (turkuaz, son 14 gün) ve Yakında (mor, sonraki 60 gün); en çok beklenenler seçilir, her kartta "3 gün önce / Yarın" rozeti. |
+| Hikâye halkası | Hikâye açıldıkça halka dilimlenir: izlenen kartlar gri, kalanlar hikâyenin renginde, "2/10" rozeti. Bitenler soluk ve soluk renkli. Kayıt günlüktür ve yalnız bu cihazda (`radar-story-progress-v1`). |
+| Aramada vurgu | Sonuç satırı ve kart başlıklarında aranan sözcükler vurgulanır (CSS Custom Highlight API, DOM'a dokunmaz; Türkçe harfler ve aksanlar yok sayılır). Yazarken kapak resimli canlı öneri listesi ve vurgusu zaten vardı. |
+| Sade zemini | Sade'de gövde zemini açık renge döner (eski `html body{background:#11161e!important}` kuralı eziyordu). |
+
 ## Kart ve liste cilası (22 Kasım 2026)
 
 `assets/cards-20261122.js` ve `.css` (paket koduna dokunmaz, DOM'u izler): kapak 16:9 ve yüklenirken bulanık önizleme; eski fiyat üstü çizili, yeni fiyat büyük; indirim rozeti %20 / %50 / %75 kademeli renk; köşe şeritleri ("Tüm zamanların en düşüğü" radarın kendi kaydından, "Yeni indirim" son ziyaretten beri düşen fiyattan, 72 saat); son ziyarete göre ▼/▲ yüzde etiketi (yalnız bu cihazda, `radar-cd-prices`); kapaktan vurgu rengi; fareyle hızlı özet (puan, tür, en düşük fiyat); platform simgeleri tek sırada (PC, PS, Xbox, Switch); favori parıltısı ve sayaç vurgusu; mağaza noktaları yerine tek tip simgeler; sıkı liste satırı. Hareket azaltılmışsa animasyonlar kapalıdır.

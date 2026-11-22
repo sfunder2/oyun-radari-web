@@ -1,0 +1,175 @@
+/* Oyun ayrıntısı yenilemesi (detail-20261122.js). Her kural [data-dx] ya da kendi sınıfımızla sınırlı; ?detay=eski ile hepsi kapanır. */
+.modal.game-detail{--dx-acc:var(--lime,#9be564);--dx-acc-ink:#0b1118;--dx-hi:#58d68d;--dx-mid:#f5b942;--dx-lo:#ef6b6b;--dx-tint:color-mix(in srgb,var(--dx-acc) 13%,transparent);--dx-ringbg:var(--panel,#141b25);--dx-glass:rgba(8,12,18,.62)}
+:root[data-ui=sade] .modal.game-detail{--dx-acc:#1d1533;--dx-acc-ink:#fff;--dx-hi:#1f9d55;--dx-mid:#c98a0b;--dx-lo:#d64545;--dx-tint:color-mix(in srgb,#6d4aff 9%,transparent);--dx-ringbg:#fff}
+.dx-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---- Kapak ---- */
+.modal.game-detail[data-dx][data-dx-hero]>.close{position:absolute!important;top:14px;right:14px;z-index:8;margin:0!important;background:var(--dx-glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff}
+.game-detail[data-dx][data-dx-hero]>.detail-backdrop{display:none!important}
+.game-detail[data-dx]>.dx-hero{order:0!important;position:relative;isolation:isolate;overflow:hidden;margin:calc(-1*var(--dx-pt,28px)) calc(-1*var(--dx-pr,28px)) 6px calc(-1*var(--dx-pl,28px));padding:56px var(--dx-pr,28px) 22px var(--dx-pl,28px);border-radius:inherit;border-bottom-left-radius:0;border-bottom-right-radius:0;flex-shrink:0}
+.dx-hero[hidden]{display:none}
+.dx-hero .dx-bg{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.dx-hero .dx-bg img{width:100%;height:100%;object-fit:cover;filter:blur(30px) saturate(1.35);transform:scale(1.25);opacity:.8}
+.dx-hero .dx-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,color-mix(in srgb,var(--bd-bg,#141b25) 25%,transparent) 0%,color-mix(in srgb,var(--bd-bg,#141b25) 10%,transparent) 45%,var(--bd-bg,#141b25) 100%)}
+.dx-stage{position:relative;width:min(100%,720px);aspect-ratio:16/9;margin:0 auto;border-radius:16px;overflow:hidden;background:#0b1118;box-shadow:0 18px 50px -14px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.1)}
+:root[data-ui=sade] .dx-stage{box-shadow:0 14px 36px -14px rgba(29,21,51,.45),0 0 0 1px rgba(29,21,51,.1)}
+.dx-stage>.dx-cover{width:100%;height:100%;object-fit:cover;display:block}
+.dx-stage>.dx-media{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.dx-play{position:absolute;left:50%;top:50%;translate:-50% -50%;display:grid;place-items:center;width:68px;height:68px;border:0;border-radius:50%;background:var(--dx-acc);color:var(--dx-acc-ink);cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.5);transition:scale .18s ease}
+.dx-play svg{width:28px;height:28px;margin-left:3px}
+.dx-play:hover{scale:1.08}
+.dx-hero-rings{position:absolute;left:10px;top:10px;display:flex;gap:6px;z-index:2}
+.dx-hero-rings:empty{display:none}
+.dx-hero-bar{position:absolute;left:10px;right:10px;bottom:10px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;pointer-events:none;z-index:2}
+.dx-hero-bar>*{pointer-events:auto}
+.dx-seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--dx-glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.dx-seg button{min-height:36px;padding:6px 14px;border:0;border-radius:999px;background:transparent;color:#e8edf4;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.dx-seg button[aria-pressed=true]{background:#fff;color:#0b1118}
+.dx-seg button:focus-visible,.dx-thumb:focus-visible,.dx-play:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.dx-thumb{position:relative;width:116px;aspect-ratio:16/9;padding:0;border:2px solid rgba(255,255,255,.55);border-radius:10px;overflow:hidden;background:#000;cursor:pointer}
+.dx-thumb img{width:100%;height:100%;object-fit:cover;display:block;opacity:.85}
+.dx-thumb span{position:absolute;inset:0;display:grid;place-items:center;color:#fff}
+.dx-thumb svg{width:22px;height:22px;filter:drop-shadow(0 1px 4px rgba(0,0,0,.7))}
+.dx-hero[data-mode=trailer] .dx-cover,.dx-hero[data-mode=trailer] .dx-play,.dx-hero[data-mode=trailer] .dx-thumb,.dx-hero[data-mode=trailer] .dx-hero-rings{display:none}
+.dx-hero[data-mode=trailer] .dx-hero-bar{top:10px;bottom:auto;justify-content:flex-start}
+.game-detail[data-dx][data-dx-hero]>.eyebrow{margin-top:10px}
+
+/* ---- Puan halkaları ---- */
+.dx-ring{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 8px 5px;border-radius:14px;background:var(--dx-glass);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff}
+.dx-ring small{font-size:10.5px;font-weight:600;line-height:1;opacity:.9}
+.dx-ring[data-tier=hi],.dx-ringed[data-tier=hi]{--rc:var(--dx-hi)}.dx-ring[data-tier=mid],.dx-ringed[data-tier=mid]{--rc:var(--dx-mid)}.dx-ring[data-tier=lo],.dx-ringed[data-tier=lo]{--rc:var(--dx-lo)}
+.dx-ring b,body .game-detail .dx-ringed{position:relative;isolation:isolate;display:inline-grid;place-items:center;flex:none;box-sizing:border-box;width:48px;height:48px;min-width:0;min-height:0;padding:0;margin:0;border:0;border-radius:50%;font-size:15px;font-weight:800;line-height:1;font-style:normal;color:inherit;background:conic-gradient(var(--rc) calc(var(--p)*1%),color-mix(in srgb,currentColor 18%,transparent) 0)!important;box-shadow:none}
+.dx-ring b::before,body .game-detail .dx-ringed::before{content:"";position:absolute;inset:5px;z-index:-1;border-radius:50%;background:var(--dx-ringbg)}
+.dx-ring b::before{background:#0b1118}
+body .game-detail .scores .dx-ringed{width:56px;height:56px;font-size:18px;color:var(--ink)}
+body .game-detail .scores .dx-ringed::before{inset:6px}
+body .game-detail .scorechips .dx-ringed{width:34px;height:34px;font-size:12px}
+body .game-detail .scorechips .dx-ringed::before{inset:3.5px}
+
+/* ---- Mağaza fiyat tablosu ---- */
+.game-detail .pricecompare[data-dx-table]>.pc-list,.game-detail .pricecompare[data-dx-table]>.dt-more{display:none!important}
+.dx-ptable-wrap{overflow-x:auto;margin:8px 0 0;-webkit-overflow-scrolling:touch}
+.dx-ptable{width:100%;border-collapse:separate;border-spacing:0 6px;font-size:14px}
+.dx-ptable thead th{padding:2px 12px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.dx-ptable th:nth-child(n+2),.dx-ptable td{text-align:right}
+.dx-ptable tbody th,.dx-ptable tbody td{padding:13px 12px;background:color-mix(in srgb,var(--ink,#fff) 5%,transparent);border-block:1px solid var(--line);vertical-align:middle;font-weight:500}
+.dx-ptable tbody th{text-align:left;border-left:1px solid var(--line);border-radius:12px 0 0 12px}
+.dx-ptable tbody td:last-child{border-right:1px solid var(--line);border-radius:0 12px 12px 0}
+.dx-ptable tbody tr{cursor:pointer}
+.dx-ptable tbody tr:hover th,.dx-ptable tbody tr:hover td{background:color-mix(in srgb,var(--ink,#fff) 9%,transparent)}
+.dx-ptable tbody tr.best th,.dx-ptable tbody tr.best td{background:var(--dx-tint);border-color:var(--dx-acc)}
+.dx-ptable tbody tr.best th{box-shadow:inset 4px 0 0 var(--dx-acc)}
+.dx-ptable th a,.dx-ptable th>span{display:inline-flex;align-items:center;gap:8px;color:inherit;text-decoration:none}
+.dx-ptable th a:hover b{text-decoration:underline}
+.dx-ptable th small{color:var(--muted);font-size:11px;font-weight:500}
+.dx-ptable .p{white-space:nowrap}
+.dx-ptable .p del{display:block;font-size:11.5px;color:var(--muted);font-weight:400}
+.dx-ptable .p strong{font-size:17px;font-weight:800}
+.dx-ptable tr.best .p strong{color:var(--dx-acc)}
+:root[data-ui=sade] .dx-ptable tr.best .p strong{color:inherit}
+.dx-ptable .o em{display:inline-block;padding:2px 8px;border-radius:999px;background:color-mix(in srgb,var(--dx-hi) 20%,transparent);color:var(--dx-hi);font-style:normal;font-size:12px;font-weight:800}
+.dx-ptable .d{white-space:nowrap;font-size:12.5px;color:var(--muted)}
+.dx-ptable .bestchip{display:inline-block;padding:3px 10px;border-radius:999px;background:var(--dx-acc);color:var(--dx-acc-ink);font-style:normal;font-size:12px;font-weight:800}
+
+/* ---- Yapışkan sekmeler ---- */
+.dx-mini{display:none;align-items:baseline;gap:10px;flex:0 1 auto;min-width:0;max-width:42%;padding:0 12px 0 8px;white-space:nowrap}
+.dx-mini b{overflow:hidden;text-overflow:ellipsis;font-size:14px}
+.dx-mini small{color:var(--dx-acc);font-size:13px;font-weight:800}
+:root[data-ui=sade] .dx-mini small{color:inherit}
+@media(min-width:701px){.game-detail[data-dx-stuck]>.dt-tabs .dx-mini{display:flex;align-items:center}}
+.game-detail[data-dx-stuck]>.dt-tabs{box-shadow:0 14px 28px -16px rgba(0,0,0,.65);border-top-left-radius:0;border-top-right-radius:0}
+.game-detail[data-dx]>.dt-tabs{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:color-mix(in srgb,var(--panel,#121922) 94%,transparent)}
+
+/* ---- Yapışkan satın al çubuğu ---- */
+.game-detail[data-dx]>.dx-buy{order:90!important;position:sticky;bottom:0;z-index:7;display:flex;align-items:center;justify-content:space-between;gap:14px;box-sizing:border-box;margin:10px calc(-1*var(--dx-pr,28px)) calc(-1*var(--dx-pb,28px)) calc(-1*var(--dx-pl,28px));padding:12px var(--dx-pr,28px) calc(12px + env(safe-area-inset-bottom)) var(--dx-pl,28px);border-top:1px solid var(--line);background:color-mix(in srgb,var(--bd-bg,#141b25) 90%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 -14px 30px -18px rgba(0,0,0,.6)}
+.dx-buy-txt{display:grid;gap:1px;min-width:0}
+.dx-buy-txt small{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dx-buy-txt b{font-size:20px;font-weight:800;white-space:nowrap}
+.dx-buy-btn{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 22px;border-radius:12px;background:var(--dx-acc);color:var(--dx-acc-ink)!important;font-weight:800;font-size:15px;text-decoration:none;white-space:nowrap}
+.dx-buy-btn:hover{filter:brightness(1.08)}
+.dx-buy-btn:focus-visible{outline:2px solid var(--dx-acc);outline-offset:3px}
+.game-detail[data-dx]:has(>.dx-buy)>.directstore{display:none}
+@media(max-width:700px){.game-detail[data-dx]>.dx-buy{padding-bottom:calc(12px + 76px + env(safe-area-inset-bottom))}.game-detail[data-dx]>.dx-buy{padding-left:68px}.dx-buy-btn{flex:1;max-width:220px}.dx-buy-txt b{font-size:18px}}
+
+/* ---- Sistem gereksinimleri ---- */
+.infoblock[data-dx-req]:not([data-dx-reqopen])>.tablewrap{display:none}
+.dx-req{display:grid;gap:12px;margin:10px 0 4px}
+.dx-req h4{margin:0;font-size:14px}
+.dx-req-legend{display:flex;gap:16px;margin:0;font-size:12px;color:var(--muted)}
+.dx-req-legend span::before{content:"";display:inline-block;width:14px;height:6px;margin-right:6px;border-radius:3px;vertical-align:middle;background:var(--c)}
+.dx-req-legend .mn{--c:color-mix(in srgb,var(--ink,#fff) 45%,transparent)}.dx-req-legend .rc{--c:var(--dx-acc)}
+.dx-meter{display:grid;grid-template-columns:84px 1fr auto;align-items:center;gap:12px;font-size:13px}
+.dx-meter .l{color:var(--muted)}
+.dx-meter .tr{position:relative;height:16px;border-radius:8px;background:color-mix(in srgb,var(--ink,#fff) 8%,transparent)}
+.dx-meter .tr i{position:absolute;left:0;width:var(--w);height:7px;border-radius:4px;transition:width .5s ease}
+.dx-meter .tr .mn{top:1px;background:color-mix(in srgb,var(--ink,#fff) 45%,transparent)}
+.dx-meter .tr .rc{top:8px;background:var(--dx-acc)}
+.dx-meter .v{font-weight:700;white-space:nowrap}
+.dx-req-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.dx-req-chips .c{display:grid;gap:2px;padding:9px 12px;border:1px solid var(--line);border-radius:12px;min-width:0}
+.dx-req-chips small{color:var(--muted);font-size:11px}
+.dx-req-chips b{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dx-req-more{justify-self:start;min-height:40px;padding:8px 14px;border:1px dashed var(--line);border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
+.dx-req-more:hover{border-color:var(--dx-acc)}
+
+/* ---- Benzer oyunlar: yatay şerit ---- */
+.game-detail .similar[data-dx-strip]{position:relative}
+body .game-detail .similar[data-dx-strip]>ul{display:flex!important;grid-template-columns:none!important;gap:12px;margin:10px 0 0;padding:4px 2px 12px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:thin;list-style:none}
+body .game-detail .similar[data-dx-strip]>ul>li{flex:0 0 clamp(138px,34%,176px);min-width:0;scroll-snap-align:start}
+.game-detail .similar[data-dx-strip]>ul>li>button{height:100%}
+.game-detail .similar>.dx-arrow,.dx-arrow{position:absolute;box-sizing:border-box;min-width:0;min-height:0;margin:0;font-size:0;text-align:center;top:calc(50% + 34px);z-index:3;display:none;place-items:center;width:40px;height:40px;padding:0;border:1px solid var(--line);border-radius:50%;background:var(--panel,#141b25);color:var(--ink);cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.45);translate:0 -50%}
+.dx-arrow[data-dir=prev]{left:-8px}.dx-arrow[data-dir=next]{right:-8px}
+.similar[data-dx-scrollable]>.dx-arrow{display:grid}
+.dx-arrow:disabled{opacity:.3;cursor:default}
+.dx-arrow:not(:disabled):hover{border-color:var(--dx-acc)}
+.dx-arrow:focus-visible{outline:2px solid var(--dx-acc);outline-offset:2px}
+:root[data-ui=sade] .dx-arrow{background:#fff}
+@media(max-width:700px){.game-detail .similar>.dx-arrow{width:36px;height:36px}.dx-arrow[data-dir=prev]{left:-4px}.dx-arrow[data-dir=next]{right:-4px}}
+
+/* ---- Ekran görüntüleri ---- */
+.dx-shots{margin:6px 0}
+.dx-shots h3{margin:0 0 10px;font-size:16px}
+.dx-shots-strip{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:8px;scrollbar-width:thin}
+.dx-shots-strip button{flex:0 0 clamp(190px,46%,260px);aspect-ratio:16/9;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b1118;cursor:zoom-in;scroll-snap-align:start}
+.dx-shots-strip img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s ease}
+.dx-shots-strip button:hover img{transform:scale(1.05)}
+.dx-shots-strip button:focus-visible{outline:2px solid var(--dx-acc);outline-offset:2px}
+html.dx-lb-open{overflow:hidden}
+.dx-lb{position:fixed;inset:0;z-index:100000;display:grid;background:rgba(4,6,10,.95);animation:dxfade .18s ease}
+@keyframes dxfade{from{opacity:0}}
+.dx-lb-stage{display:grid;place-items:center;min-height:0;padding:56px 64px 48px;touch-action:pan-y}
+.dx-lb-stage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;user-select:none;-webkit-user-drag:none}
+.dx-lb button{position:absolute;display:grid;place-items:center;width:46px;height:46px;padding:0;border:1px solid rgba(255,255,255,.25);border-radius:50%;background:rgba(20,26,36,.85);color:#fff;cursor:pointer}
+.dx-lb button:hover{background:#2a3548}.dx-lb button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.dx-lb button[hidden]{display:none}
+.dx-lb-x{top:max(12px,env(safe-area-inset-top));right:12px}
+.dx-lb-nav{top:50%;translate:0 -50%}.dx-lb-nav.prev{left:12px}.dx-lb-nav.next{right:12px}
+.dx-lb-count{position:absolute;bottom:max(14px,env(safe-area-inset-bottom));left:50%;translate:-50% 0;padding:4px 12px;border-radius:999px;background:rgba(20,26,36,.85);color:#fff;font-size:13px;font-weight:700}
+@media(max-width:700px){.dx-lb-stage{padding:60px 8px 56px}.dx-lb-nav{top:auto;bottom:max(10px,env(safe-area-inset-bottom));translate:none}.dx-lb-nav.prev{left:16px}.dx-lb-nav.next{right:16px}}
+
+/* ---- Fiyat geçmişi grafiği: net eksen, tek tıkla dönem ---- */
+.game-detail .pricehistory .phaxis{font-size:12.5px;font-weight:600;fill:var(--ink);opacity:.85}
+.game-detail .pricehistory .phgrid{stroke:var(--ink);stroke-opacity:.18;stroke-dasharray:none}
+.game-detail .pricehistory .phrange{display:flex;width:100%;box-sizing:border-box;gap:4px;padding:4px;border-radius:12px}
+.game-detail .pricehistory .phrange>button{flex:1 1 0;min-height:42px;padding:8px 6px;font-size:14px;font-weight:700;border-radius:9px;cursor:pointer}
+.game-detail .pricehistory .phrange>button:focus-visible{outline:2px solid var(--dx-acc);outline-offset:2px}
+
+@media(max-width:700px){
+.game-detail[data-dx]>.dx-hero{padding-top:52px;padding-bottom:16px}
+.dx-stage{border-radius:12px}
+.dx-thumb{width:96px}
+.dx-play{width:58px;height:58px}
+.dx-ptable{font-size:13px}
+.dx-ptable tbody th,.dx-ptable tbody td{padding:11px 8px}
+.dx-ptable th small{display:none}
+.dx-ptable .p strong{font-size:15px}
+.dx-meter{grid-template-columns:70px 1fr;row-gap:4px}.dx-meter .v{grid-column:2}
+}
+@media(max-width:460px){.dx-ptable th:nth-child(3),.dx-ptable td.o{display:none}}
+@media(prefers-reduced-motion:reduce){
+.dx-play,.dx-shots-strip img,.dx-meter .tr i{transition:none!important}
+.dx-lb{animation:none}
+.dx-play:hover,.dx-shots-strip button:hover img{scale:none;transform:none}
+}
+/* Kapak ve fragman artık üstteki kapakta; eski "Görseller ve fragman" kutusu DOM'da kalır (veri kaynağı) ama gizlenir. */
+.game-detail[data-dx][data-dx-hero]>.detail-media{display:none!important}
