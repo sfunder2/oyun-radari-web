@@ -337,3 +337,26 @@ Yeni modüller: `ui-kit-20261128` (jetonlar, toast/modal/sheet, ikonlar; bkz. `d
 | Geri sayım rakamları | Değer değişince kısa çevirme animasyonu. |
 | Küçülen üst çubuk | Kaydırınca yüksekliği azalır, bulanıklaşır. |
 | 404 ve OG görseli | Markalı `404.html` (radar çizimi, TR/EN); paylaşım görseli `icons/og-image.png` (1200x630) ve OG/Twitter etiketleri. |
+
+## Modern katman (28 Kasım 2026)
+
+`assets/modern-20261128.js` ve `.css` (paket koduna dokunmaz). Ortak bileşenleri yeniden yazmaz: toast için `window.radarUI.toast`, sayfa geçişi için `genel-20261128`, tembel görsel için `touch-20261128` kullanılır. Ctrl/Cmd+K oyun araması, doğal dille arama, canlı öneri listesi ve sürpriz slot zaten vardı, tekrarlanmadı. Ayrıntı: `docs/design-system.md`.
+
+| Özellik | Davranış |
+|---|---|
+| Bento ana sayfa | ≥1000 px'te açılış vitrini 12 sütun: büyük "Günün fırsatı" (8) + türler (4), altında iki şerit (6+6). Dar kapsayıcıda türler 2 sütuna iner (container query). |
+| Ölçülü cam | Yalnız yüzen yüzeyler (menü paneli, palet, yardım penceresi, yedek bildirim). Şeffaflık azaltma, yüksek kontrast ve backdrop-filter desteği yoksa düz zemin. |
+| Kapak parıltısı / degrade | Üzerine gelince kartın kendi vurgu rengi (`--cd-accent`) kenar ve gölgeye yansır; favori satırı `:has()` ile hafif degrade; başlık altı degrade çizgi. |
+| Değişken yazı tipi | Manrope 200–800 aralığı yüklenir; gezinme ve sekme ağırlığı yumuşak geçer. |
+| Kaydırma animasyonları | Bölümler görünüme girerken yükselir, üstte kaydırma ilerleme çizgisi (`animation-timeline`; desteklemeyen tarayıcıda yok, içerik yine görünür). |
+| Eylem paleti | Ctrl/Cmd+Shift+K: git (Oyunlar, Fırsatlar, İstek listem, Senin için), tema, dil, Klasik/Sade, sürpriz oyun, kayıtlı görünümler. `<dialog>`, oklar + Enter + Esc, bulanık Türkçe eşleşme. Oyun araması hâlâ Ctrl/Cmd+K. |
+| Kısayollar | `g h/d/w/f` gezinme, `t` tema, `s` sürpriz, `?` yardım (Popover API). Yazı alanında ve açık pencerede çalışmaz. |
+| Kayıtlı görünümler | Oyunlar sayfasında süzgeçleri adla kaydet, tek dokunuşla uygula; en çok 12, yalnız bu cihazda (`radar-mx-views-v1`). Etiketler dile göre kaydedildiği için bir görünüm kaydedildiği dilde uygulanır. |
+| Sürükle-bırak istek listesi | Raf kapaklarındaki ⠿ tutamacı: fare/dokunma sürükle ya da Alt+ok. Sıra yalnız bu cihazda (`radar-mx-fav-order-v1`), DOM düğümleri taşınmaz (CSS `order`). |
+| Sayı animasyonu | Twitch toplamı, istek listesi sayaçları ve istatistikler ilk görününce sayarak gelir. |
+| Ön ısıtma | Gezinme düğmesinin üstüne gelince/dokununca ilgili tembel parça (`modulepreload`); boşta Fırsatlar. Veri tasarrufu/2G'de kapalı. İlk büyük görsele `fetchpriority=high`, görsel sunucularına `preconnect`. |
+| Uygulama rozeti | Hedef fiyatına inmiş favori sayısı `navigator.setAppBadge` ile (yüklü PWA). |
+| Gerçek zamanlı fiyat | **Varsayılan kapalı.** `<meta name="radar-realtime" content="on">` + `supabase/schema-v61-realtime-fiyat.sql`. Fiyat düşüşünde bildirim. |
+| AI özeti / kime uygun | Oyun ayrıntısında "Özet oluştur" kartı. `supabase/functions/ai-summary` gerekir (ANTHROPIC_API_KEY); yoksa kart 6 saat gizlenir. |
+
+Kurulum adımları (kullanıcıya düşenler): AI için `supabase secrets set ANTHROPIC_API_KEY=… && supabase functions deploy ai-summary --no-verify-jwt`; gerçek zamanlı için `schema-v61-realtime-fiyat.sql` çalıştırıp `<meta name="radar-realtime" content="on">` eklemek. Planlar: `docs/vite-gecis-plani.md` (kaynak yapısına geçiş, bilerek yapılmadı), `docs/android-twa.md`. Görsel tarama: `node scripts/visual-check.mjs`.

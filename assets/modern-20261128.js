@@ -1,8 +1,8 @@
 // Modern katman (28 Kasım 2026). modern-20261128.css ile birlikte. Paketin React koduna dokunmaz; DOM'u izler.
-// Yeni olanlar: View Transitions ile sayfa geçişi, eylem paleti (Ctrl/Cmd+Shift+K), tek tuş kısayolları ve yardım penceresi,
+// Yeni olanlar: eylem paleti (Ctrl/Cmd+Shift+K), tek tuş kısayolları ve yardım penceresi,
 // kayıtlı filtre görünümleri, sürükle-bırak istek listesi sırası, canlı sayı animasyonu, ağır sayfa parçalarını önceden ısıtma,
 // görsel öncelikleri, uygulama rozeti sayacı, isteğe bağlı gerçek zamanlı fiyat ve AI oyun özeti.
-// Zaten var olanlar tekrar edilmez: Ctrl/Cmd+K oyun araması, doğal dille arama, canlı öneri listesi, sürpriz slot, mobil haptik.
+// Zaten var olanlar tekrar edilmez: Ctrl/Cmd+K oyun araması, View Transitions sayfa geçişi (genel-20261128), tembel görsel (touch-20261128), doğal dille arama, canlı öneri listesi, sürpriz slot, mobil haptik.
 // Her özellik kendi try/catch'inde başlar: biri çalışmazsa diğerleri etkilenmez. Hareketler azaltılmış harekette kapanır; metinler TR/EN.
 
 // ---------------------------------------------------------------------------------------------
@@ -144,7 +144,9 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') {
   const idle = fn => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 2500 }) : setTimeout(fn, 300));
   const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 
+  // Ortak toast (ui-kit-20261128.js, window.radarUI) varsa onu kullanır; yoksa kendi küçük bildirimini gösterir.
   function toast(text) {
+    if (window.radarUI && typeof window.radarUI.toast === 'function') { window.radarUI.toast(text); return; }
     $$('.mx-toast').forEach(n => n.remove());
     const n = document.createElement('div');
     n.className = 'mx-toast';
@@ -164,33 +166,6 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') {
   }
   const clickIf = sel => { const b = $(sel); if (b) { b.click(); return true; } return false; };
   const focusSearch = () => { const i = $('.csearch input, input[type=search]'); if (i) { i.focus(); i.select && i.select(); return true; } return false; };
-
-  // ----- 1. View Transitions: yalnız gezinme düğmelerinde (popup engelleyiciyi tetiklemeyen tıklamalar) -----
-  safe('view-transitions', () => {
-    if (!document.startViewTransition) return;
-    const SEL = '#root>header nav button, #root>header nav a, #root>header a.brand, nav.bottom-nav button, .radar-landing-links button, .breadcrumb button';
-    let bypass = false;
-    const settle = (cap = 700) => new Promise(res => {
-      let t;
-      const done = () => { clearTimeout(t); mo.disconnect(); res(); };
-      const mo = new MutationObserver(() => { clearTimeout(t); t = setTimeout(done, 90); });
-      mo.observe($('#root') || document.body, { childList: true, subtree: true });
-      t = setTimeout(done, 160);
-      setTimeout(done, cap);
-    });
-    document.addEventListener('click', e => {
-      if (bypass || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || reduced()) return;
-      const el = e.target instanceof Element ? e.target.closest(SEL) : null;
-      if (!el || el.disabled || el.getAttribute('aria-current') === 'page' || el.target === '_blank') return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      document.startViewTransition(async () => {
-        bypass = true;
-        try { el.click(); } finally { bypass = false; }
-        await settle();
-      });
-    }, true);
-  });
 
   // ----- 2. Tek tuş kısayolları + yardım penceresi (Popover API) -----
   let helpEl;
@@ -531,16 +506,13 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') {
 
   // ----- 7. Görsel öncelikleri (LCP) ve ağır sayfa parçalarını önceden ısıtma -----
   const hosts = new Set();
+  // Tembel yükleme ve decoding touch/perf modüllerinde zaten var; burada yalnız ilk büyük görsele öncelik ve görsel sunucularına preconnect.
   function tuneImages(scope) {
-    const imgs = $$('img:not([data-mx-img])', scope);
     let first = !$('img[fetchpriority=high]');
-    for (const img of imgs) {
+    for (const img of $$('img:not([data-mx-img])', scope)) {
       img.dataset.mxImg = '1';
-      if (!img.decoding || img.decoding === 'auto') img.decoding = 'async';
       const r = img.getBoundingClientRect();
-      const above = r.top < innerHeight && r.height > 0;
-      if (above && first && r.width > 120) { img.setAttribute('fetchpriority', 'high'); img.loading = 'eager'; first = false; }
-      else if (!above && !img.hasAttribute('loading')) img.loading = 'lazy';
+      if (first && r.top < innerHeight && r.width > 120 && r.height > 120) { img.setAttribute('fetchpriority', 'high'); img.loading = 'eager'; first = false; }
       try { const o = new URL(img.currentSrc || img.src).origin; if (o !== location.origin && hosts.size < 4 && !hosts.has(o)) { hosts.add(o); const l = document.createElement('link'); l.rel = 'preconnect'; l.href = o; l.crossOrigin = ''; document.head.appendChild(l); } } catch { /* data: gibi */ }
     }
   }

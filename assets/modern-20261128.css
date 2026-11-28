@@ -1,7 +1,7 @@
 /* Modern katman (28 Kasım 2026). modern-20261128.js ile birlikte; en son yüklenir ve yalnız ekleme yapar.
    Tasarım jetonlarını (design-system-20261122.css: --ds-*, --lime, --bg, --line, --ink, --muted) KULLANIR, yeniden tanımlamaz.
    Kapsam: bento ana sayfa, ölçülü cam yüzeyler, kapak parıltısı, kaydırmayla çalışan animasyonlar, container query / :has() / oklch,
-   View Transitions geçişleri, komut paleti, kısayol penceresi, kayıtlı görünümler, sürükle-bırak istek listesi, AI özeti.
+   komut paleti, kısayol penceresi, kayıtlı görünümler, sürükle-bırak istek listesi, AI özeti.
    Hareketler prefers-reduced-motion ve html[data-reduce-motion=true] altında kapanır. Cam efekti prefers-reduced-transparency,
    yüksek kontrast ve backdrop-filter desteklenmeyen tarayıcılarda düz yüzeye döner. */
 
@@ -81,19 +81,7 @@ header nav button.active,.dealtabs button.active,.release-tabs button.active{fon
 }
 
 /* ---------- 6. Hızlı yüklenme: ekran dışı bloklar çizilmez ---------- */
-.deal-list-row{content-visibility:auto;contain-intrinsic-size:auto 84px}
 .hs-strip,.new-releases,.twitch-top{content-visibility:auto;contain-intrinsic-size:auto 340px}
-
-/* ---------- 7. View Transitions ---------- */
-@supports (view-transition-name:none){
-  #root>header{view-transition-name:mx-header}
-  .bottom-nav{view-transition-name:mx-dock}
-  ::view-transition-group(mx-header),::view-transition-group(mx-dock){animation-duration:0s}
-  ::view-transition-old(root){animation:mx-vt-out .16s ease both}
-  ::view-transition-new(root){animation:mx-vt-in .26s var(--ds-ease,ease) both}
-  @keyframes mx-vt-out{to{opacity:0;transform:scale(.995)}}
-  @keyframes mx-vt-in{from{opacity:0;transform:translateY(10px)}}
-}
 
 /* ---------- 8. Komut paleti ve kısayol penceresi (<dialog> ve Popover API) ---------- */
 @layer mx{
@@ -164,9 +152,7 @@ header nav button.active,.dealtabs button.active,.release-tabs button.active{fon
   .hs-strip,.new-releases,.twitch-top,.kh-home{animation:none!important}
   body::after{display:none}
   dialog.mx-palette[open],.mx-toast,.mx-ai-skeleton{animation:none}
-  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
 }
 :root[data-reduce-motion=true] .hs-strip,:root[data-reduce-motion=true] .new-releases,:root[data-reduce-motion=true] .twitch-top,:root[data-reduce-motion=true] .kh-home{animation:none!important}
 :root[data-reduce-motion=true] body::after{display:none}
 :root[data-reduce-motion=true] dialog.mx-palette[open],:root[data-reduce-motion=true] .mx-toast,:root[data-reduce-motion=true] .mx-ai-skeleton{animation:none}
-:root[data-reduce-motion=true] ::view-transition-group(*),:root[data-reduce-motion=true] ::view-transition-old(*),:root[data-reduce-motion=true] ::view-transition-new(*){animation:none!important}
