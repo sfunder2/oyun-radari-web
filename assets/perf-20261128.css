@@ -1,0 +1,11 @@
+/* Veri tasarrufu modu (perf-20261128.js): ağır görsel efektleri kapatır; içerik ve düzen aynı kalır. */
+:root[data-lite="1"] *,:root[data-lite="1"] *::before,:root[data-lite="1"] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+:root[data-lite="1"] *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;text-shadow:none!important}
+:root[data-lite="1"] .hs-slide-bg{filter:none!important;transform:none!important}
+:root[data-lite="1"] .hs-showcase,:root[data-lite="1"] .hs-genre{box-shadow:none!important}
+:root[data-lite="1"] .hs-genre:hover,:root[data-lite="1"] .hs-genre:hover img{transform:none!important}
+.perf-lite-chip{position:fixed;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:300;transform:translateX(-50%);display:flex;align-items:center;gap:12px;max-width:calc(100vw - 24px);padding:9px 10px 9px 14px;border:1px solid #ffffff2a;border-radius:999px;background:#0e141cf2;color:#e8eef5;font:600 13px/1.3 inherit,system-ui,sans-serif;box-shadow:0 8px 24px #0008}
+:root[data-ui=sade] .perf-lite-chip{background:#fffffff2;color:#18212b;border-color:#18212b22}
+.perf-lite-chip button{flex:none;min-height:32px;padding:0 12px;border:0;border-radius:999px;background:#b5f482;color:#10200a;font:700 12.5px/1 inherit,system-ui,sans-serif;cursor:pointer}
+.perf-lite-chip button:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.perf-badge{position:fixed;right:8px;top:8px;z-index:400;margin:0;padding:6px 9px;border-radius:10px;background:#000c;color:#9ef0a8;font:11px/1.35 ui-monospace,monospace;pointer-events:none;white-space:pre}

@@ -28,6 +28,8 @@ jobs:
           RADAR_APPLE_LOGIN: ${{ vars.RADAR_APPLE_LOGIN }}
           RADAR_MAGIC_LINK: ${{ vars.RADAR_MAGIC_LINK }}
         run: node scripts/write-config.mjs
+      # Deploy-time only (committed files stay unchanged): merge override CSS, defer non-critical modules, add the app skeleton.
+      - run: node scripts/build-perf.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages-${{ github.run_attempt }}

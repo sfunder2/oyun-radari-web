@@ -10,6 +10,8 @@ const BASE = '/oyun-radari-web/';
 const OFFLINE = BASE + 'offline.html';
 const PRECACHE = [OFFLINE, BASE + 'icons/icon-192.png', BASE + 'icons/icon.svg', BASE + 'manifest.webmanifest'];
 const STATIC_MAX = 160;
+// <name>-<8 hash chars>.js|css with a letter in the hash: content-addressed, so cache-first without revalidation.
+const HASHED = /\/assets\/[A-Za-z0-9_.-]+-(?=[A-Za-z0-9_-]*[A-Za-z_])[A-Za-z0-9_-]{8}\.(?:js|css)$/;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(SHELL).then((c) => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
@@ -56,6 +58,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith((async () => {
       const c = await caches.open(STATIC);
       const hit = await c.match(req);
+      if (hit && HASHED.test(url.pathname)) return hit;
       // Files without a hash in the name (…-20261122.js) can be re-published: refresh in background.
       const net = fetch(req).then((res) => { if (res.ok) { c.put(req, res.clone()).then(() => trim(c)); } return res; }).catch(() => null);
       if (hit) { event.waitUntil(net); return hit; }
