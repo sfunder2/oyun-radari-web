@@ -19,6 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Deploy-time only (committed files stay unchanged): merge override CSS, defer non-critical modules, add the app skeleton.
+      - run: node scripts/build-perf.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages-${{ github.run_attempt }}
