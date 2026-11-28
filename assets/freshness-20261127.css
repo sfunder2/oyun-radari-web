@@ -1,0 +1,8 @@
+.fresh-pill{display:inline-flex;align-items:center;gap:6px;margin-left:8px;padding:3px 10px;border:1px solid var(--line,#2a3442);border-radius:99px;font-size:11px;line-height:1.4;color:var(--muted,#a3afbf);white-space:nowrap}
+.fresh-pill i{width:8px;height:8px;border-radius:50%;background:#9ed95f;flex:none}
+.fresh-pill.fresh-ok i{background:#f59e0b}
+.fresh-pill.fresh-stale i{background:#ef4444}
+.fresh-pill.fresh-fresh i{animation:fresh-pulse 2.4s ease-in-out infinite}
+@keyframes fresh-pulse{50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){.fresh-pill i{animation:none!important}}
+@media(forced-colors:active){.fresh-pill{border-color:CanvasText}.fresh-pill i{background:CanvasText}}

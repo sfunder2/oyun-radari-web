@@ -279,3 +279,16 @@ Menüdeki "Katalog araçları" bölümünden (ya da `?arac=dlc|sezon|gereksinim|
 ## Kart ve liste cilası (22 Kasım 2026)
 
 `assets/cards-20261122.js` ve `.css` (paket koduna dokunmaz, DOM'u izler): kapak 16:9 ve yüklenirken bulanık önizleme; eski fiyat üstü çizili, yeni fiyat büyük; indirim rozeti %20 / %50 / %75 kademeli renk; köşe şeritleri ("Tüm zamanların en düşüğü" radarın kendi kaydından, "Yeni indirim" son ziyaretten beri düşen fiyattan, 72 saat); son ziyarete göre ▼/▲ yüzde etiketi (yalnız bu cihazda, `radar-cd-prices`); kapaktan vurgu rengi; fareyle hızlı özet (puan, tür, en düşük fiyat); platform simgeleri tek sırada (PC, PS, Xbox, Switch); favori parıltısı ve sayaç vurgusu; mağaza noktaları yerine tek tip simgeler; sıkı liste satırı. Hareket azaltılmışsa animasyonlar kapalıdır.
+
+## Altyapı, erişilebilirlik ve gizlilik (27 Kasım 2026)
+
+| Konu | Uygulama |
+|---|---|
+| Erişilebilirlik | access-20261127.js/.css: ana içeriğe atla, adsız simge düğmelerine otomatik etiket (mevcut etiket korunur), kapak görsellerine alt metin, role=button için Enter/Space, sekmelerde ok tuşları, açık modalda odak tuzağı, belirgin çift odak halkası, dokunma hedefi 44px, `prefers-contrast` ve `forced-colors`. |
+| Çok dil + yerelleştirme | `window.radarI18n`: `register(lang, sözlük)`, `t(anahtar, değişkenler)` (dil → en → tr → anahtar), `formatMoney`, `formatDate` (Europe/Istanbul), `formatRelative`. tr/en/de/es yerel kodları hazır; yeni dil yalnız sözlük kaydıdır. `<time datetime>` ve `[data-money][data-currency]` öğeleri seçili dile göre yazılır. |
+| Hata izleme | telemetry-20261127.js: Sentry zarf biçiminde SDK'sız istemci. DSN `RADAR_SENTRY_DSN` değişkeninden (scripts/write-config.mjs → assets/radar-config.js). Yalnız kullanıcı "hata izleme" iznini verdiyse; e-posta/jeton silinir, adreslerden sorgu atılır, dakikada aynı hata bir kez. |
+| Analitik | Çerezsiz, kimliksiz günlük sayaç. `window.radarTrack(ad, {özellik})`, `data-track="ad"`, dış bağlantı alan adı. Arama metni gönderilmez. Uç: `RADAR_ANALYTICS_ENDPOINT` (supabase/functions/collect-event + schema-v60). İzinsiz ya da uç yoksa hiçbir şey gönderilmez. |
+| KVKK | privacy-20261127.js: ilk ziyarette (yalnız izlenecek bir şey yapılandırılmışsa) tercih şeridi, altbilgide "Gizlilik tercihleri"; verilerimi indir (cihaz + hesap JSON), cihaz kayıtlarını sil, hesabı yazıyla onaylayarak kalıcı sil (`delete_my_account`). |
+| Veri tazelik göstergesi | freshness-20261127.js: ps_state batch/market `finishedAt` değerinden "Fiyatlar 5 dk önce güncellendi"; sonuç satırında ve altbilgide; renk + metin. Veri okunamazsa görünmez. |
+| Giriş | signin-20261127.js: Google, Apple (yapılandırma bayrağıyla), parolasız e-posta bağlantısı (`/auth/v1/otp`). Parola girişi aynen kalır; yeni hesaplara profil satırı bir kez açılır. |
+| Admin mobil | admin-mobile-20261127.js/.css: sağlık özeti (alarm, durmuş mağaza, geciken iş, veritabanı), yapışkan kaydırılabilir sekmeler, 44px hedefler. |
