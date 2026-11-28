@@ -1,0 +1,172 @@
+/* Modern katman (28 Kasım 2026). modern-20261128.js ile birlikte; en son yüklenir ve yalnız ekleme yapar.
+   Tasarım jetonlarını (design-system-20261122.css: --ds-*, --lime, --bg, --line, --ink, --muted) KULLANIR, yeniden tanımlamaz.
+   Kapsam: bento ana sayfa, ölçülü cam yüzeyler, kapak parıltısı, kaydırmayla çalışan animasyonlar, container query / :has() / oklch,
+   View Transitions geçişleri, komut paleti, kısayol penceresi, kayıtlı görünümler, sürükle-bırak istek listesi, AI özeti.
+   Hareketler prefers-reduced-motion ve html[data-reduce-motion=true] altında kapanır. Cam efekti prefers-reduced-transparency,
+   yüksek kontrast ve backdrop-filter desteklenmeyen tarayıcılarda düz yüzeye döner. */
+
+/* ---------- 0. Jetonlar (yalnız bu dosyanın ek jetonları) ---------- */
+:root{
+  --mx-glass-blur:14px;
+  --mx-glass-bg:color-mix(in srgb,var(--bg,#090d12) 82%,transparent);
+  --mx-glass-line:color-mix(in oklch,var(--ink,#fff) 14%,transparent);
+  --mx-accent-soft:color-mix(in oklch,var(--lime,#b5f36b) 16%,transparent);
+  --mx-accent-line:color-mix(in oklch,var(--lime,#b5f36b) 55%,transparent);
+  --mx-pop:0 22px 60px -24px #000c;
+}
+:root[data-ui=sade]{--mx-glass-bg:color-mix(in srgb,var(--bg,#f6f3ff) 84%,transparent);--mx-pop:0 22px 60px -26px #2d1f5a66}
+
+/* ---------- 1. Bento ana sayfa ---------- */
+/* Açılış vitrini (home-search) geniş ekranda 12 sütunlu ızgaraya oturur: büyük "Günün fırsatı" + türler, altında iki şerit. */
+@media (min-width:1000px){
+  .hs-home{grid-template-columns:repeat(12,minmax(0,1fr));gap:22px}
+  .hs-home>.hs-deals{grid-column:span 8}
+  .hs-home>.hs-genre-sec{grid-column:span 4;display:flex;flex-direction:column}
+  .hs-home>.hs-genre-sec>.hs-genres{flex:1;align-content:stretch}
+  .hs-home>.hs-strip{grid-column:span 6}
+}
+.hs-genre-sec{container:mx-genres/inline-size}
+@container mx-genres (max-width:620px){
+  .hs-genres{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hs-genre{aspect-ratio:auto;min-height:84px}
+}
+.hs-strip{container:mx-strip/inline-size}
+@container mx-strip (max-width:520px){ .hs-rail{scroll-snap-type:x proximity} .hs-rail>*{scroll-snap-align:start} }
+
+/* ---------- 2. Ölçülü cam: yalnız yüzen yüzeylerde (menü, açılır liste, palet, bildirim) ---------- */
+.menu-panel,.mx-glass,.mx-palette,.mx-help,.mx-toast{
+  background:var(--mx-glass-bg);
+  border:1px solid var(--mx-glass-line);
+  box-shadow:var(--mx-pop);
+}
+@supports (backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px)){
+  .menu-panel,.mx-glass,.mx-palette,.mx-help,.mx-toast{
+    -webkit-backdrop-filter:blur(var(--mx-glass-blur)) saturate(1.25);backdrop-filter:blur(var(--mx-glass-blur)) saturate(1.25)}
+}
+@media (prefers-reduced-transparency:reduce){
+  .menu-panel,.mx-glass,.mx-palette,.mx-help,.mx-toast{background:var(--bg,#090d12);-webkit-backdrop-filter:none;backdrop-filter:none}
+}
+:root[data-contrast=high] .menu-panel,:root[data-contrast=high] .mx-glass,:root[data-contrast=high] .mx-palette,:root[data-contrast=high] .mx-help,:root[data-contrast=high] .mx-toast{
+  background:var(--bg,#090d12);-webkit-backdrop-filter:none;backdrop-filter:none;border-color:var(--ink,#fff)}
+
+/* ---------- 3. Kapak parıltısı ve degrade vurgu (cards modülünün --cd-accent değişkenini kullanır) ---------- */
+.cataloggrid>*,.deal-list-row,.hs-genre,.kh-rail-card,.release-rail>*{transition:box-shadow .3s ease,border-color .3s ease,transform .3s ease}
+@media (hover:hover){
+  .cataloggrid>*:hover,.kh-rail-card:hover{
+    border-color:color-mix(in oklch,var(--cd-accent,var(--lime)) 60%,var(--line,#2a3644));
+    box-shadow:0 22px 44px -26px var(--cd-accent,var(--lime)),0 0 0 1px color-mix(in oklch,var(--cd-accent,var(--lime)) 30%,transparent)}
+  .deal-list-row:hover{box-shadow:inset 3px 0 0 var(--cd-accent,var(--lime)),0 14px 30px -22px var(--cd-accent,var(--lime))}
+}
+/* Favoridekiler: :has() ile satırın kendisi hafifçe renklenir (JS gerekmez). */
+.deal-list-row:has(.favbtn[aria-pressed=true]),.cataloggrid>*:has(.favbtn[aria-pressed=true]){
+  background-image:linear-gradient(100deg in oklch,var(--mx-accent-soft),transparent 38%)}
+/* Degrade başlık çizgisi */
+.hs-head h2,.kh-home-head h2{font-weight:760;font-optical-sizing:auto}
+.hs-head h2::after{content:"";display:block;width:36px;height:3px;margin-top:6px;border-radius:3px;
+  background:linear-gradient(90deg in oklch,var(--lime),color-mix(in oklch,var(--lime) 30%,#7c5cff));opacity:.85}
+
+/* ---------- 4. Değişken yazı tipi (Manrope 200–800): ağırlık yumuşak geçer ---------- */
+header nav button,.bottom-nav button,.dealtabs button,.release-tabs button{transition:font-weight .22s ease,color .2s ease,background .2s ease}
+header nav button.active,.dealtabs button.active,.release-tabs button.active{font-weight:780}
+.brand{font-weight:800}
+
+/* ---------- 5. Kaydırmayla çalışan animasyonlar (destekleyen tarayıcılarda; JS yok) ---------- */
+@supports (animation-timeline:view()){
+  @keyframes mx-rise{from{opacity:0;transform:translateY(26px) scale(.985)}to{opacity:1;transform:none}}
+  @keyframes mx-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+  .hs-strip,.new-releases,.twitch-top,.kh-home{animation:mx-rise linear both;animation-timeline:view();animation-range:entry 0% entry 38%}
+  body::after{content:"";position:fixed;inset:0 0 auto 0;height:2px;z-index:95;pointer-events:none;transform-origin:0 50%;
+    background:linear-gradient(90deg in oklch,var(--lime),color-mix(in oklch,var(--lime) 35%,#7c5cff));
+    animation:mx-progress linear both;animation-timeline:scroll(root block)}
+}
+
+/* ---------- 6. Hızlı yüklenme: ekran dışı bloklar çizilmez ---------- */
+.deal-list-row{content-visibility:auto;contain-intrinsic-size:auto 84px}
+.hs-strip,.new-releases,.twitch-top{content-visibility:auto;contain-intrinsic-size:auto 340px}
+
+/* ---------- 7. View Transitions ---------- */
+@supports (view-transition-name:none){
+  #root>header{view-transition-name:mx-header}
+  .bottom-nav{view-transition-name:mx-dock}
+  ::view-transition-group(mx-header),::view-transition-group(mx-dock){animation-duration:0s}
+  ::view-transition-old(root){animation:mx-vt-out .16s ease both}
+  ::view-transition-new(root){animation:mx-vt-in .26s var(--ds-ease,ease) both}
+  @keyframes mx-vt-out{to{opacity:0;transform:scale(.995)}}
+  @keyframes mx-vt-in{from{opacity:0;transform:translateY(10px)}}
+}
+
+/* ---------- 8. Komut paleti ve kısayol penceresi (<dialog> ve Popover API) ---------- */
+@layer mx{
+  dialog.mx-palette{width:min(640px,calc(100vw - 24px));max-height:min(70vh,560px);margin:12vh auto 0;padding:0;border-radius:var(--ds-r-lg,20px);color:var(--ink);overflow:hidden}
+  dialog.mx-palette::backdrop{background:#02050a99;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  dialog.mx-palette[open]{display:flex;flex-direction:column;animation:mx-pop-in .18s var(--ds-ease,ease)}
+  @keyframes mx-pop-in{from{opacity:0;transform:translateY(-8px) scale(.98)}}
+  .mx-pal-input{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .mx-pal-input svg{flex:none;color:var(--muted)}
+  .mx-pal-input input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:inherit;font:inherit;font-size:16px}
+  .mx-pal-input kbd,.mx-help kbd{font:600 11px/1 inherit;padding:4px 6px;border:1px solid var(--line);border-radius:6px;color:var(--muted);background:var(--mx-accent-soft)}
+  .mx-pal-list{margin:0;padding:6px;list-style:none;overflow:auto;overscroll-behavior:contain}
+  .mx-pal-group{padding:8px 10px 4px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+  .mx-pal-item{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;border:0;border-radius:12px;background:transparent;color:inherit;font:inherit;font-size:14px;text-align:left;cursor:pointer;min-height:44px}
+  .mx-pal-item[aria-selected=true],.mx-pal-item:hover{background:var(--mx-accent-soft);box-shadow:inset 0 0 0 1px var(--mx-accent-line)}
+  .mx-pal-item small{margin-left:auto;color:var(--muted);font-size:12px}
+  .mx-pal-ico{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:var(--mx-accent-soft);color:var(--lime);font-size:14px}
+  .mx-pal-empty{padding:22px;text-align:center;color:var(--muted);font-size:14px}
+
+  .mx-help{position:fixed;inset:auto;top:50%;left:50%;translate:-50% -50%;width:min(560px,calc(100vw - 24px));max-height:80vh;overflow:auto;margin:0;padding:20px 22px;border-radius:var(--ds-r-lg,20px);color:var(--ink)}
+  .mx-help::backdrop{background:#02050a80}
+  .mx-help h2{margin:0 0 12px;font-size:18px}
+  .mx-help dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0;font-size:14px}
+  .mx-help dt{display:flex;gap:4px;white-space:nowrap}
+  .mx-help dd{margin:0;color:var(--muted)}
+  .mx-help-close{position:absolute;top:10px;right:10px;min-width:44px;min-height:44px;border:0;border-radius:12px;background:transparent;color:inherit;font-size:20px;cursor:pointer}
+
+  .mx-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));translate:-50% 0;z-index:200;max-width:min(420px,calc(100vw - 24px));padding:12px 16px;border-radius:14px;font-size:14px;color:var(--ink);animation:mx-pop-in .2s var(--ds-ease,ease)}
+  @media (max-width:700px){ .mx-toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))} }
+}
+
+/* Katman dışı: sayfanın genel odak kuralı katmanlı kuralları ezer */
+.mx-pal-input input,.mx-pal-input input:focus,.mx-pal-input input:focus-visible{outline:0!important;border:0!important;box-shadow:none!important;background:transparent!important;padding:0!important}
+.mx-pal-input:focus-within{box-shadow:inset 0 -2px 0 var(--lime)}
+
+/* ---------- 9. Kayıtlı görünümler ---------- */
+.mx-views{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px}
+.mx-views-label{font-size:12px;font-weight:700;color:var(--muted);margin-right:2px}
+.mx-chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:13px;cursor:pointer;transition:border-color .2s,background .2s}
+.mx-chip:hover,.mx-chip:focus-visible{border-color:var(--mx-accent-line);background:var(--mx-accent-soft)}
+.mx-chip.mx-chip-add{border-style:dashed;color:var(--lime)}
+.mx-chip .mx-x{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;font-size:12px;opacity:.6}
+.mx-chip .mx-x:hover{opacity:1;background:var(--mx-accent-soft)}
+.mx-views form{display:inline-flex;gap:6px}
+.mx-views input{min-height:36px;padding:6px 12px;border:1px solid var(--mx-accent-line);border-radius:999px;background:transparent;color:var(--ink);font:inherit;font-size:13px;width:170px}
+
+/* ---------- 10. Sürükle-bırak istek listesi ---------- */
+.mx-drag-item{cursor:grab;touch-action:pan-y}
+.mx-drag-item.mx-dragging{opacity:.45;cursor:grabbing;outline:2px dashed var(--mx-accent-line);outline-offset:2px}
+.mx-drag-item.mx-over{box-shadow:0 0 0 2px var(--lime)}
+.mx-drag-note{margin:6px 14px 10px;font-size:12px;color:var(--muted)}
+
+/* ---------- 11. AI özeti ve "kime uygun" ---------- */
+.mx-ai{margin:14px 0;padding:16px 18px;border:1px solid var(--mx-accent-line);border-radius:var(--ds-r-md,14px);background:linear-gradient(120deg in oklch,var(--mx-accent-soft),transparent 70%)}
+.mx-ai h3{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:15px}
+.mx-ai p{margin:6px 0;font-size:14px;line-height:1.55}
+.mx-ai ul{margin:6px 0;padding-left:18px;font-size:14px;line-height:1.55}
+.mx-ai small{display:block;margin-top:8px;color:var(--muted);font-size:11px}
+.mx-ai button{min-height:44px}
+.mx-ai-skeleton{height:12px;margin:8px 0;border-radius:6px;background:linear-gradient(90deg,var(--mx-accent-soft),transparent,var(--mx-accent-soft));background-size:200% 100%;animation:mx-shimmer 1.2s linear infinite}
+@keyframes mx-shimmer{to{background-position:-200% 0}}
+
+/* ---------- 12. Küçük etkileşim ayrıntıları ---------- */
+.favbtn:active,.mx-chip:active{transform:scale(.92)}
+
+/* ---------- 13. Azaltılmış hareket ---------- */
+@media (prefers-reduced-motion:reduce){
+  .hs-strip,.new-releases,.twitch-top,.kh-home{animation:none!important}
+  body::after{display:none}
+  dialog.mx-palette[open],.mx-toast,.mx-ai-skeleton{animation:none}
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
+}
+:root[data-reduce-motion=true] .hs-strip,:root[data-reduce-motion=true] .new-releases,:root[data-reduce-motion=true] .twitch-top,:root[data-reduce-motion=true] .kh-home{animation:none!important}
+:root[data-reduce-motion=true] body::after{display:none}
+:root[data-reduce-motion=true] dialog.mx-palette[open],:root[data-reduce-motion=true] .mx-toast,:root[data-reduce-motion=true] .mx-ai-skeleton{animation:none}
+:root[data-reduce-motion=true] ::view-transition-group(*),:root[data-reduce-motion=true] ::view-transition-old(*),:root[data-reduce-motion=true] ::view-transition-new(*){animation:none!important}
