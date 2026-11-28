@@ -21,7 +21,7 @@ main.radar-landing:has(.hs-home){place-items:start center;align-content:start;pa
 .hs-deals{--c:var(--hs-deal)}
 .hs-genre-sec{--c:var(--lime)}
 .hs-skel{display:grid;place-items:center;min-height:90px;color:var(--muted);font-size:13px}
-.hs-skel-big{min-height:clamp(260px,34vw,380px);border-radius:22px;background:color-mix(in srgb,var(--ink) 5%,transparent)}
+.hs-skel-big{min-height:clamp(270px,34vw,380px);border-radius:22px;background:color-mix(in srgb,var(--ink) 5%,transparent)}
 .hs-skel span{animation:hs-pulse 1.4s ease-in-out infinite}
 @keyframes hs-pulse{50%{opacity:.45}}
 

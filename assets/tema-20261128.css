@@ -1,0 +1,31 @@
+/* Renk ve tema katmanı (tema-20261128.js ile birlikte). Hepsi --ui-* jetonlarından ve mevcut --lime'dan türer. */
+
+/* ---------- 1. Katmanlı yüzeyler: zemin < kart < yükseltilmiş < kaplama ---------- */
+:root:not([data-theme=oled]):not([data-contrast=high]) :is(.gamecard,.catalogcard,.tile,.panel,.pricecompare,.comparerow){background-color:var(--ui-surface-1)}
+@media(hover:hover){:root:not([data-theme=oled]) :is(.gamecard,.catalogcard,.comparerow):hover{background-color:var(--ui-surface-2)}}
+:root:not([data-theme=oled]) :is(.modal,.menu-panel,.csearch-panel,.ds-pop){background-color:var(--ui-surface-2)}
+:root:not([data-theme=oled]) :is(.modal .panel,.modal .tile,.modal .detail-disclosure){background-color:var(--ui-surface-3)}
+.overlay,.menu-overlay{background-color:var(--ui-overlay)}
+
+/* ---------- 2. Vurgu seçici ---------- */
+.tm-pop{min-width:250px}
+.tm-swatches{display:flex;gap:var(--ui-2);flex-wrap:wrap}
+.ds-pop .tm-sw{width:40px;min-width:40px;height:40px;padding:0;border-radius:50%;border:2px solid transparent;background:var(--sw);display:grid;place-items:center;cursor:pointer;
+  box-shadow:inset 0 0 0 2px var(--panel)}
+.ds-pop .tm-sw[aria-pressed=true]{border-color:var(--ink)}
+.ds-pop .tm-sw[aria-pressed=true]::after{content:"";width:10px;height:10px;border-radius:50%;background:#fff;mix-blend-mode:difference}
+.ds-pop .tm-sw:hover{transform:scale(1.08)}
+.ds-pop .tm-sw{transition:transform var(--ui-dur-2) var(--ui-ease)}
+:root[data-accent] .brand span:not(.brandmark){-webkit-text-fill-color:currentColor!important;background:none!important;color:var(--lime)!important}
+
+/* ---------- 3. Mağaza işaretleri: ayrıntıda da kartlardaki tek tip küçük simge ---------- */
+:is(.pc-store,.modal .storeprices,.modal .pricecompare,.modal .cr-price,.modal .directstore) i.dot{display:inline-grid;place-items:center;flex:none;width:18px;height:18px;margin-right:6px;border-radius:5px;color:#fff;
+  font:800 10px/1 system-ui,sans-serif;font-style:normal;vertical-align:-4px;box-shadow:none}
+:is(.pc-store,.modal .storeprices,.modal .pricecompare,.modal .cr-price) i.dot::after{content:"?"}
+.pc-store i.dot.playstation::after{content:"P"}.pc-store i.dot.xbox::after{content:"X"}.pc-store i.dot.steam::after{content:"S"}.pc-store i.dot.switch::after{content:"N"}
+.pc-store i.dot.epic::after{content:"E"}.pc-store i.dot.gog::after{content:"G"}.pc-store i.dot.fanatical::after{content:"F"}.pc-store i.dot.humble::after{content:"H"}
+.pc-store i.dot.gmg::after{content:"M"}.pc-store i.dot.gamesplanet::after{content:"P"}.pc-store i.dot.gamebillet::after{content:"B"}.pc-store i.dot.indiegala::after{content:"I"}.pc-store i.dot.wingamestore::after{content:"W"}
+
+/* ---------- 4. Ayrıntıda kapak/oyun rengi ---------- */
+.modal.game-detail{--cd-accent:var(--lime)}
+.modal.game-detail{background-image:radial-gradient(70% 280px at 50% 0,color-mix(in srgb,var(--cd-accent) 18%,transparent),transparent 75%);background-repeat:no-repeat}

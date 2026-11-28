@@ -1,0 +1,24 @@
+.rp-banner{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:300;max-width:720px;margin:0 auto;padding:14px 16px;border:1px solid var(--line,#2a3442);border-radius:14px;background:var(--bg,#090d12);color:var(--ink,#eef2f6);box-shadow:0 10px 40px #0007}
+.rp-banner p{margin:0 0 10px;font-size:13px;line-height:1.5}
+.rp-actions{display:flex;flex-wrap:wrap;gap:8px}
+.rp-actions button,.rp-footer-link,.rp-delete button{min-height:44px;padding:8px 14px;border:1px solid var(--line,#2a3442);border-radius:10px;background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.rp-actions .rp-primary{background:var(--lime,#9ed95f);border-color:transparent;color:#10170a;font-weight:700}
+.rp-danger,.rp-danger-ghost{border-color:#d0463f!important}
+.rp-danger{background:#d0463f!important;color:#fff!important}
+.rp-danger[disabled]{opacity:.45;cursor:not-allowed}
+.rp-footer-link{border-color:transparent;background:transparent;font-size:11px;text-decoration:underline}
+.rp-overlay{position:fixed;inset:0;z-index:400;display:grid;place-items:center;padding:12px;background:#000a;overflow:auto}
+.rp-box{width:min(560px,100%);max-height:calc(100dvh - 24px);overflow:auto;padding:20px;border:1px solid var(--line,#2a3442);border-radius:16px;background:var(--bg,#090d12);color:var(--ink,#eef2f6)}
+.rp-box h2{margin:0 0 10px;font-size:20px}.rp-box h3{margin:0 0 4px;font-size:14px}
+.rp-box section{margin:0 0 14px;font-size:13px;line-height:1.5}
+.rp-box section p{margin:0}
+.rp-row{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
+.rp-row input{width:22px;height:22px;margin-top:2px;flex:none;accent-color:var(--lime,#9ed95f)}
+.rp-row small{display:block;color:var(--muted,#9aa6b2)}
+.rp-data{padding-top:12px;border-top:1px solid var(--line,#2a3442)}
+.rp-delete{display:grid;gap:8px;margin-top:10px}
+.rp-delete input{min-height:44px;padding:8px 12px;border:1px solid var(--line,#2a3442);border-radius:10px;background:transparent;color:inherit;font:inherit}
+.rp-status{margin:10px 0 0;color:var(--muted,#9aa6b2)}
+.rp-live{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+body.rp-open{overflow:hidden}
+@media(max-width:700px){.rp-banner{bottom:calc(76px + env(safe-area-inset-bottom,0px))}}

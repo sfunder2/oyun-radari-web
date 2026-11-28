@@ -1,1 +1,15 @@
-{"name":"oyun-radari-web","private":true,"type":"module","description":"PlayStation Store TR verisi toplayıcıları (GitHub Actions)","dependencies":{"@neondatabase/serverless":"1.0.2","jpeg-js":"0.4.4"}}
+{
+ "name": "oyun-radari-web",
+ "private": true,
+ "type": "module",
+ "description": "PlayStation Store TR verisi toplayıcıları (GitHub Actions)",
+ "dependencies": {
+  "@neondatabase/serverless": "1.0.2",
+  "jpeg-js": "0.4.4"
+ },
+ "scripts": {
+  "test:mobile": "node --test tests/mobile/mobile.e2e.mjs",
+  "perf:measure": "node scripts/perf-measure.mjs --optimized",
+  "perf:build": "node scripts/build-perf.mjs"
+ }
+}
