@@ -19,6 +19,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      - name: Write runtime config
+        env:
+          RADAR_SENTRY_DSN: ${{ vars.RADAR_SENTRY_DSN }}
+          RADAR_SENTRY_ENV: ${{ vars.RADAR_SENTRY_ENV }}
+          RADAR_ANALYTICS_ENDPOINT: ${{ vars.RADAR_ANALYTICS_ENDPOINT }}
+          RADAR_GOOGLE_LOGIN: ${{ vars.RADAR_GOOGLE_LOGIN }}
+          RADAR_APPLE_LOGIN: ${{ vars.RADAR_APPLE_LOGIN }}
+          RADAR_MAGIC_LINK: ${{ vars.RADAR_MAGIC_LINK }}
+        run: node scripts/write-config.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages-${{ github.run_attempt }}
