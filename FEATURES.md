@@ -229,6 +229,27 @@ Sunucu tarafı (`scripts/digest.mjs`, çalıştırıcı `scripts/digest-run.mjs`
 | Saat başı maliyet | Oyun ayrıntısında ve kartlarda: en ucuz resmî fiyat ÷ ortalama bitirme süresi (normal, yoksa hızlı). Süre verisi yoksa hesaplanmaz. |
 | Fiyatına değer mi? | Ayrıntıda evet/hayır oyu; yüzde en az 5 oyla görünür. Oy veren, ortak listeyle aynı tarayıcı anahtarıyla tanınır, sunucuda yalnız özeti saklanır. **`supabase/schema-v50-fiyata-deger-mi.sql` uygulanmadan oylama gizli kalır**, diğer özellikler çalışır. Geri alma: `...-geri-al.sql`. |
 
+## Alım rehberi (27 Kasım 2026)
+
+`assets/alim-20261127.js` (+ `.css`) ve saf hesaplar `assets/alim-core-20261127.js` (testler: `tests/alim.test.mjs`). Üst menüde ve Menü'de "Alım rehberi" düğmesi (adres: `?alim=alarms|import|library|calendar|spend|subs|cph|shared|feed`), oyun ayrıntısında "Alım rehberi" bölümü. Paketin React koduna dokunmaz; `kisisel-20261121.js` ve `tasarim-20261117.js` dışa aktarımlarını kullanır. Kişisel kayıtlar yalnız bu cihazda (`radar-alim-*`). Klasik/Sade, TR/EN, masaüstü/mobil.
+
+| Özellik | Davranış | Eksik / sınır |
+|---|---|---|
+| Fiyat alarmı | Dört tür: hedef fiyat, indirim yüzdesi, eklendiği fiyattan % ucuzlama, tüm zamanların en düşüğü (≥14 gün kayıt). Aynı alarm 24 saatte bir bildirilir; site açıkken 5 dakikada bir kontrol, tarayıcı izniyle bildirim. Fırsat merkezindeki favori hedef fiyatı aynen çalışır. | Site kapalıyken bildirim yok (o iş Fırsat merkezi özetinde). |
+| Steam/Epic/GOG içe aktarma | Steam: `steam-account?action=wishlist` (anahtarsız `IWishlistService`, herkese açık liste); appid'ler `store_offers`'tan adla eşleşir. Diğer mağazalar: yapıştırılan metin ya da CSV/JSON/TXT dosyası. Eşleşmeyen atlanır, yaklaşık eşleşme işaretlenir. | Epic ve GOG'un herkese açık istek listesi hizmeti yok. **`steam-account` fonksiyonu yeniden yayımlanmalı.** İstek listesine eklemeden sonra sayfa yenilenir (paket bellek durumunu yalnız açılışta okur). |
+| Kütüphane ve "zaten sahipsin" | Elle ekleme, içe aktarma ve Steam kütüphane eşitleme (mevcut `steam-account?action=library`). Sürüm adları (Deluxe, GOTY…) yok sayılır. Ayrıntıda uyarı bandı, kart ve listelerde rozet, akış ve saat başı listesinden sahip olunanlar elenir. | Yalnız bu cihazda; PlayStation/Xbox kütüphanesi için herkese açık kaynak yok. |
+| Ek içerik dahil toplam | Ayrıntıda `game_family.dlcs` + katalog fiyatı; seçilen ek paketlerle toplam, varsa tam sürüm paketiyle fark. | Fiyatı katalogda olmayan DLC toplama girmez; paket içeriği bilinmediğinden kıyas göstergedir. |
+| Bölgeler arası en ucuz | Mevcut `regional-prices` yanıtından TL karşılığı en ucuz ülke; TR'den ≥%10 ve ≥20 TL ucuzsa vurgulanır. Eski kur ve hatalı satırlar atılır. | Kart komisyonu, ülke kısıtı ve hesap bölgesi şartı dahil değil (panel yazar). |
+| Almalı mıyım? | 0–100 skor: kayıtlı dibe uzaklık (35), puan (25), indirim (15), saat başı maliyet (12), topluluk oyu (8), yakın büyük indirim (5). Bilinen sinyaller yeniden ağırlıklanır; en az iki sinyal ve biri dip/puan/indirim değilse skor yok. | Tahmin ya da tavsiye değildir. Fırsat merkezindeki favori başına "Al/bekle" ile çelişmez, ayrıntıda tüm oyunlara genişletir. |
+| İndirim takvimi hatırlatıcısı | Yaklaşık sezon tarihleri (`SALE_SEASONS`); 1/3/7 gün önce uyarı (site açıkken) ve alarmlı `.ics` indirme (telefon takvimi site kapalıyken de çalar). | Tarihler yaklaşıktır. |
+| Mağaza güven rozetleri | Resmî mağaza / yetkili satıcı (Fanatical, Humble, GMG, WinGameStore, Gamesplanet…) / pazaryeri — dikkat (G2A, Kinguin, Eneba, GAMIVO) / tanınmayan. Ayrıntıda teklif başına. | Editör değerlendirmesidir, garanti değildir. Katalogdaki anahtar mağazaları yetkili satıcıdır. |
+| Kişisel akış | Oyuncu tarzı, istek listesi türleri, "Beğendim / İlgilenmem" geri bildirimi; sahip olunanlar ve gizlenenler elenir, neden satırı yazılır. | |
+| Ortak liste | Mevcut `?hediye=` bağlantısına Web Share ve "arkadaşın bağlantısını yapıştır → ortak oyunlar" eklendi. Hediye önerisi Kişisel merkezde. | Sunucu yok: "rezerve et" yapılamaz. |
+| Aylık harcama | Cüzdan koçunun alım kayıtlarından (`radar-lifestyle-v1.purchases`) ay raporu: harcama, indirimle tasarruf, ortalama, önceki aya göre değişim, 6 ay grafiği, özet kopyalama, CSV. | Alım eklemek Cüzdan koçunda. |
+| Abonelik karşılaştırma | Game Pass/PS Plus: aylık ücreti ve haftalık oyun saatini sen yazarsın, abonelikteki oyunları sen işaretlersin; istek listesi + bitirme süresiyle abonelik/satın alma toplamı ve başabaş ay. | Mağaza kaynaklarında abonelik kataloğu verisi yok (PlayStation toplayıcısı abonelik fiyatlarını bilerek dışlar); ücret ve katalog resmî sayfadan elle. |
+| Saat başı fiyat | Mevcut ayrıntı/kart çipine ek: indirimdeki ≥70 puanlı oyunlar saati en ucuzdan sıralı, sahip olunanlar hariç. | Süresi bilinmeyen oyun listelenmez. |
+| Fiyat doğrulama oyları | Ayrıntıda mağaza başına "Doğru / Yanlış" oyu; üç ve üstü yanlış oy çoğunluktaysa uyarı. **`supabase/schema-v53-fiyat-dogrulama.sql` uygulanmadan gizli kalır.** Geri alma: `...-geri-al.sql`. | Topluluk yorumları ve oylaması sitede zaten var (hesaba bağlı); burada ayrıca yazı eklenmedi. |
+
 ## Dağıtım ve doğrulama
 
 - Kaynak: `sfunder2/oyun-radari`, yayın ve toplayıcılar: `sfunder2/oyun-radari-web`.
