@@ -41,3 +41,8 @@ html.is-standalone body{overscroll-behavior-y:none}
 .rx-share{display:inline-flex;align-items:center;justify-content:center;gap:6px}
 
 @media (prefers-reduced-motion:reduce){.dx-lb-stage img{transition:none!important}}
+
+/* "Bilgi" pill must not cover the search box on phones. */
+@media (max-width:700px){
+ html.mx-on main:has(.simple-home)>.simple-site-info:not([open]){position:static;margin:0 0 6px;display:flex;justify-content:flex-end}
+}
