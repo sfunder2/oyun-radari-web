@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090d12">
+<meta name="robots" content="noindex">
+<title>Oyun Radarı — Sayfa bulunamadı</title>
+<link rel="icon" href="/oyun-radari-web/icons/icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#090d12;--ink:#eef3f8;--muted:#a3afbf;--lime:#c4f85b;--line:#2b3947}
+@media(prefers-color-scheme:light){:root{--bg:#f8f6ff;--ink:#081018;--muted:#3a4657;--lime:#5b2fb8;--line:#cec8e5}}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Manrope,system-ui,-apple-system,"Segoe UI",sans-serif}
+main{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:32px 16px;box-sizing:border-box;text-align:center}
+.radar{width:160px;height:160px;color:var(--lime);overflow:visible}
+.radar .r{fill:none;stroke:currentColor;stroke-width:2;opacity:.45}
+.radar .s{fill:currentColor;opacity:.18;transform-origin:80px 80px}
+.radar .p{fill:currentColor}
+.radar .q{fill:none;stroke:var(--muted);stroke-width:3;stroke-linecap:round}
+@media(prefers-reduced-motion:no-preference){.radar .s{animation:sweep 3.6s linear infinite}.radar .p{animation:ping 2.4s ease-in-out infinite}@keyframes sweep{to{transform:rotate(360deg)}}@keyframes ping{0%,100%{opacity:.3}50%{opacity:1}}}
+.code{margin:8px 0 0;font:800 clamp(56px,16vw,96px)/1 "Space Grotesk",Manrope,system-ui,sans-serif;letter-spacing:-.04em;color:var(--lime);font-variant-numeric:tabular-nums}
+h1{margin:0;font-size:22px}
+p{margin:0;max-width:360px;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px}
+a{display:inline-flex;align-items:center;min-height:44px;padding:0 22px;border-radius:12px;border:1px solid var(--line);color:var(--ink);font-weight:700;text-decoration:none}
+a.main{background:var(--lime);border-color:var(--lime);color:#090d12}
+:root{color-scheme:dark light}
+@media(prefers-color-scheme:light){a.main{color:#fff}}
+a:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+</style>
+</head>
+<body>
+<main>
+<svg class="radar" viewBox="0 0 160 160" aria-hidden="true"><circle class="r" cx="80" cy="80" r="30"/><circle class="r" cx="80" cy="80" r="55"/><circle class="r" cx="80" cy="80" r="78"/><path class="s" d="M80 80 L80 2 A78 78 0 0 1 135 25 Z"/><circle class="p" cx="80" cy="80" r="6"/><path class="q" d="M104 104l14 14"/></svg>
+<div class="code">404</div>
+<h1 id="t">Bu sayfa radarda yok</h1>
+<p id="b">Aradığın sayfa taşınmış ya da hiç var olmamış olabilir. Oyunlara ya da fırsatlara dönebilirsin.</p>
+<div class="row"><a class="main" id="h" href="/oyun-radari-web/">Ana sayfaya dön</a><a id="d" href="/oyun-radari-web/?section=deals">Fırsatlar</a></div>
+</main>
+<script>
+try{if(localStorage.getItem('radar-lang')==='en'){document.documentElement.lang='en';t.textContent='This page is off the radar';b.textContent='The page you are looking for may have moved or never existed. You can head back to games or deals.';h.textContent='Back to home';d.textContent='Deals';document.title='Oyun Radarı — Page not found'}}catch(e){}
+</script>
+</body>
+</html>
