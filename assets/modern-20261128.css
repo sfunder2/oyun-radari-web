@@ -138,7 +138,7 @@ header nav button.active,.dealtabs button.active,.release-tabs button.active{fon
 .mx-ai{margin:14px 0;padding:16px 18px;border:1px solid var(--mx-accent-line);border-radius:var(--ds-r-md,14px);background:linear-gradient(120deg in oklch,var(--mx-accent-soft),transparent 70%)}
 .mx-ai h3{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:15px}
 .mx-ai p{margin:6px 0;font-size:14px;line-height:1.55}
-.mx-ai ul{margin:6px 0;padding-left:18px;font-size:14px;line-height:1.55}
+.mx-ai ul{margin:6px 0;padding-left:18px;list-style:disc;font-size:14px;line-height:1.55}
 .mx-ai small{display:block;margin-top:8px;color:var(--muted);font-size:11px}
 .mx-ai button{min-height:44px}
 .mx-ai-skeleton{height:12px;margin:8px 0;border-radius:6px;background:linear-gradient(90deg,var(--mx-accent-soft),transparent,var(--mx-accent-soft));background-size:200% 100%;animation:mx-shimmer 1.2s linear infinite}

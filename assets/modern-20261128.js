@@ -142,7 +142,8 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') {
   const safe = (name, fn) => { try { fn(); } catch (e) { console.warn('[modern] ' + name + ':', e && e.message); } };
   const typing = t => !!t && (/^(input|textarea|select)$/i.test(t.tagName) || t.isContentEditable);
   const idle = fn => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 2500 }) : setTimeout(fn, 300));
-  const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+  // Zamanlayıcı bir kez kurulur ve sıfırlanmaz: başka modüller DOM'u sürekli değiştirse bile tarama en geç `ms` sonra çalışır.
+  const throttle = (fn, ms) => { let t = 0; return () => { if (t) return; t = setTimeout(() => { t = 0; fn(); }, ms); }; };
 
   // Ortak toast (ui-kit-20261128.js, window.radarUI) varsa onu kullanır; yoksa kendi küçük bildirimini gösterir.
   function toast(text) {
@@ -618,7 +619,7 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') {
     box.setAttribute('translate', 'no');
     box.innerHTML = `<h3>✦ ${L('AI özeti: kime uygun?', 'AI summary: who is it for?')}</h3><div class="mx-ai-body"><button type="button" class="mx-chip mx-chip-add">${L('Özet oluştur', 'Generate summary')}</button></div>`;
     const anchor = $('.dt-tabs', modal);
-    (anchor && anchor.parentElement ? anchor.parentElement : modal).insertBefore(box, anchor || modal.firstChild);
+    if (anchor) anchor.after(box); else modal.insertBefore(box, modal.firstChild);
     const body = $('.mx-ai-body', box);
     const render = r => {
       body.replaceChildren();
@@ -655,7 +656,7 @@ if (typeof document !== 'undefined' && typeof window !== 'undefined') {
   }
 
   // ----- Gözlemci: yalnız yeni eklenen düğümlere bakar -----
-  const scan = debounce(() => {
+  const scan = throttle(() => {
     safe('views-ui', () => { if (scopeEl() && !$('.mx-views', scopeEl())) renderViews(); });
     safe('shelf', () => $$('ul.wishshelf:not([data-mx-order])').forEach(decorateShelf));
     safe('counts', () => io && $$(COUNT_SEL).forEach(el => { if (!counted.has(el) && !el.dataset.mxObs) { el.dataset.mxObs = '1'; io.observe(el); } }));
