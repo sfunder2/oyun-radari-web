@@ -57,3 +57,13 @@ svg[class*=lucide]{stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 /* anlam renkleri: yeşil/kırmızı yerine mavi/turuncu, ok yönü zaten ayırır */
 :root[data-cvd]{--ui-good:#56b4e9;--ui-bad:#e69f00;--ds-good:#56b4e9;--ds-bad:#e69f00}
 :root[data-cvd][data-ui=sade]{--ui-good:#0072b2;--ui-bad:#b35900;--ds-good:#0072b2;--ds-bad:#b35900}
+
+/* ---------- İskelet: liste görünümünde gerçek satır düzeni (kapak | başlık + alt satır | fiyat) ---------- */
+.simple-home .mo-skel-grid{grid-template-columns:1fr;gap:0;margin-top:var(--ui-2)}
+.simple-home .mo-sk-card{display:grid;grid-template-columns:64px minmax(0,1fr) 72px;grid-template-areas:"art l1 price" "art l2 price";align-items:center;column-gap:var(--ui-4);row-gap:var(--ui-2);
+  padding:var(--ui-3) var(--ui-3);border-radius:0;border-width:0 0 1px;background:transparent}
+.simple-home .mo-sk-art{grid-area:art;width:64px;aspect-ratio:3/4;border-radius:var(--ui-r-sm)}
+.simple-home .mo-sk-l{margin:0}
+.simple-home .mo-sk-l:nth-of-type(1){grid-area:l1}
+.simple-home .mo-sk-l:nth-of-type(2){grid-area:l2}
+.simple-home .mo-sk-price{grid-area:price;width:100%;margin:0}
