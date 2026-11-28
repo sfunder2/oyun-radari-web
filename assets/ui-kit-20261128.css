@@ -1,0 +1,96 @@
+/* Ortak arayüz takımı (ui-kit-20261128.js ile birlikte): tasarım jetonları + toast / modal / sheet + ikon seti.
+   Başka modüller yalnız bu jetonları (--ui-*) kullanmalı; renkler mevcut --bg/--panel/--ink/--lime değişkenlerinden türer,
+   böylece Klasik, Gerçek siyah ve Sade temalarında, her vurgu renginde kendiliğinden doğru görünür. */
+
+/* ---------- 1. Jetonlar ---------- */
+:root{
+  /* 4/8 ritmi */
+  --ui-1:4px;--ui-2:8px;--ui-3:12px;--ui-4:16px;--ui-5:24px;--ui-6:32px;--ui-7:48px;--ui-8:64px;
+  /* katmanlı yüzeyler: zemin < panel < yükseltilmiş < kaplama (koyuda açılır, sadede beyaza yaklaşır) */
+  --ui-surface-0:var(--bg);
+  --ui-surface-1:var(--panel,#10161e);
+  --ui-surface-2:color-mix(in srgb,var(--ui-surface-1) 92%,var(--ink,#fff));
+  --ui-surface-3:color-mix(in srgb,var(--ui-surface-1) 84%,var(--ink,#fff));
+  --ui-overlay:color-mix(in srgb,var(--bg) 72%,#000);
+  --ui-border:var(--line,#1e2935);--ui-border-strong:var(--line2,#2b3947);
+  /* ortak hareket */
+  --ui-dur-1:120ms;--ui-dur-2:200ms;--ui-dur-3:320ms;--ui-dur-4:520ms;
+  --ui-ease:cubic-bezier(.2,.8,.2,1);--ui-ease-in:cubic-bezier(.4,0,1,1);--ui-ease-spring:cubic-bezier(.34,1.56,.64,1);
+  /* yazı: başlık/sayı yazı tipi + gövde yazı tipi */
+  --ui-font-body:var(--font,"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif);
+  --ui-font-display:"Space Grotesk","Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --ui-fs-xs:clamp(11px,.7rem + .05vw,12px);--ui-fs-sm:clamp(12px,.76rem + .1vw,13.5px);--ui-fs-md:clamp(14px,.86rem + .15vw,16px);
+  --ui-fs-lg:clamp(17px,1rem + .35vw,20px);--ui-fs-xl:clamp(21px,1.15rem + .9vw,30px);--ui-fs-2xl:clamp(26px,1.3rem + 1.8vw,44px);
+  /* katman sırası */
+  --ui-z-header:80;--ui-z-sheet:300;--ui-z-modal:320;--ui-z-toast:360;
+  /* alt gezinme / güvenli alan payı: mobil modül bunu --ui-dock-h ile büyütebilir */
+  --ui-dock-h:0px;
+  --ui-safe-b:env(safe-area-inset-bottom,0px);
+  --ui-r-sm:var(--ds-r-sm,10px);--ui-r-md:var(--ds-r-md,14px);--ui-r-lg:var(--ds-r-lg,20px);
+  --ui-shadow-2:var(--ds-shadow-2,0 10px 26px -14px #000000a6);--ui-shadow-3:var(--ds-shadow-3,0 28px 64px -26px #000000bf);
+  --ui-good:var(--ds-good,#5ee08a);--ui-warn:var(--ds-warn,#ffc94d);--ui-bad:var(--ds-bad,#ff8a8a);--ui-info:#5ec2ff;
+}
+@media(max-width:700px){:root{--ui-dock-h:72px}}
+:root[data-ui=sade]{--ui-surface-2:color-mix(in srgb,var(--ui-surface-1) 94%,var(--ink,#000));--ui-surface-3:color-mix(in srgb,var(--ui-surface-1) 88%,var(--ink,#000));--ui-info:#0b66b8}
+html[data-reduce-motion=true]{--ui-dur-1:.01ms;--ui-dur-2:.01ms;--ui-dur-3:.01ms;--ui-dur-4:.01ms}
+@media(prefers-reduced-motion:reduce){:root{--ui-dur-1:.01ms;--ui-dur-2:.01ms;--ui-dur-3:.01ms;--ui-dur-4:.01ms}}
+
+/* ---------- 2. İkon ---------- */
+.ui-ico{display:inline-block;width:1.25em;height:1.25em;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.25em}
+.ui-ico.fill{fill:currentColor;stroke:none}
+
+/* ---------- 3. Düğmeler (kit içi) ---------- */
+.ui-btn{background-image:none;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;gap:var(--ui-2);min-height:44px;padding:0 var(--ui-4);border:1px solid var(--ui-border-strong);border-radius:var(--ui-r-sm);
+  background:var(--ui-surface-2);color:var(--ink);font:700 var(--ui-fs-sm)/1 var(--ui-font-body);cursor:pointer;transition:border-color var(--ui-dur-2),background-color var(--ui-dur-2),transform var(--ui-dur-1)}
+.ui-btn:hover{border-color:var(--lime)}
+.ui-btn:active{transform:scale(.98)}
+.ui-btn:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.ui-btn.primary{background:var(--lime)!important;background-image:none!important;box-shadow:none!important;border-color:var(--lime);color:var(--ds-on-accent,#0b1118)}
+.ui-btn.danger{border-color:color-mix(in srgb,var(--ui-bad) 60%,transparent);color:var(--ui-bad)}
+.ui-btn.ghost{background:transparent}
+
+/* ---------- 4. Toast ---------- */
+.ui-toasts{position:fixed;left:50%;bottom:calc(var(--ui-4) + var(--ui-dock-h) + var(--ui-safe-b));transform:translateX(-50%);z-index:var(--ui-z-toast);
+  display:grid;gap:var(--ui-2);width:min(440px,calc(100vw - 32px));pointer-events:none}
+.ui-toast{--c:var(--lime);pointer-events:auto;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--ui-3);padding:var(--ui-3) var(--ui-4);
+  border:1px solid color-mix(in srgb,var(--c) 45%,var(--ui-border));border-left:4px solid var(--c);border-radius:var(--ui-r-md);background:var(--ui-surface-3);color:var(--ink);
+  box-shadow:var(--ui-shadow-3);font:600 var(--ui-fs-sm)/1.4 var(--ui-font-body);animation:ui-toast-in var(--ui-dur-3) var(--ui-ease-spring)}
+.ui-toast.good{--c:var(--ui-good)}.ui-toast.warn{--c:var(--ui-warn)}.ui-toast.bad{--c:var(--ui-bad)}.ui-toast.info{--c:var(--ui-info)}
+.ui-toast .ui-ico{color:var(--c);width:20px;height:20px}
+.ui-toast b{display:block;font-weight:800}
+.ui-toast-act{border:0;background:none;color:var(--c);font:800 var(--ui-fs-sm) var(--ui-font-body);cursor:pointer;min-height:36px;padding:0 var(--ui-2)}
+.ui-toast-x{border:0;background:none;color:var(--muted);cursor:pointer;min-width:36px;min-height:36px;border-radius:50%}
+.ui-toast-x:hover{color:var(--ink)}
+.ui-toast.out{animation:ui-toast-out var(--ui-dur-2) var(--ui-ease-in) forwards}
+@keyframes ui-toast-in{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes ui-toast-out{to{opacity:0;transform:translateY(8px) scale(.97)}}
+
+/* ---------- 5. Modal ve sheet ---------- */
+.ui-scrim{position:fixed;inset:0;z-index:var(--ui-z-modal);display:grid;place-items:center;padding:var(--ui-4);background:var(--ui-overlay);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:ui-fade var(--ui-dur-2) var(--ui-ease)}
+.ui-scrim.sheet{z-index:var(--ui-z-sheet);place-items:end center;padding:0}
+.ui-dialog{width:min(520px,100%);max-height:min(86dvh,720px);display:flex;flex-direction:column;border:1px solid var(--ui-border-strong);border-radius:var(--ui-r-lg);
+  background:var(--ui-surface-2);color:var(--ink);box-shadow:var(--ui-shadow-3);animation:ui-pop var(--ui-dur-3) var(--ui-ease)}
+.ui-dialog:focus{outline:none}
+.ui-head{display:flex;align-items:center;gap:var(--ui-3);padding:var(--ui-4) var(--ui-5) var(--ui-2)}
+.ui-head h2{flex:1;margin:0;font:800 var(--ui-fs-lg)/1.2 var(--ui-font-display);letter-spacing:-.01em}
+.ui-dialog .ui-x{border:0;background:none;color:var(--muted);min-width:44px;min-height:44px;border-radius:50%;cursor:pointer}
+.ui-dialog .ui-x:hover{color:var(--ink);background:var(--ui-surface-3)}
+.ui-dialog .ui-body{padding:var(--ui-2) var(--ui-5) var(--ui-4);overflow:auto;overscroll-behavior:contain;font-size:var(--ui-fs-md);line-height:1.55;color:var(--ink)}
+.ui-dialog .ui-body p{margin:0 0 var(--ui-3);color:var(--muted)}
+.ui-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:var(--ui-2);padding:var(--ui-3) var(--ui-5) var(--ui-4);border-top:1px solid var(--ui-border)}
+.ui-scrim.sheet .ui-dialog{width:min(640px,100%);border-radius:var(--ui-r-lg) var(--ui-r-lg) 0 0;max-height:88dvh;padding-bottom:var(--ui-safe-b);animation:ui-sheet var(--ui-dur-3) var(--ui-ease)}
+.ui-grab{align-self:center;width:44px;height:5px;margin:var(--ui-2) 0 0;border-radius:3px;background:var(--ui-border-strong);cursor:grab;touch-action:none;flex:none}
+.ui-grab::before{content:"";display:block;margin:-18px -12px;padding:18px 12px}
+.ui-scrim.out{animation:ui-fade-out var(--ui-dur-2) var(--ui-ease-in) forwards}
+.ui-scrim.out .ui-dialog{animation:ui-pop-out var(--ui-dur-2) var(--ui-ease-in) forwards}
+@keyframes ui-fade{from{opacity:0}}@keyframes ui-fade-out{to{opacity:0}}
+@keyframes ui-pop{from{opacity:0;transform:translateY(12px) scale(.97)}}@keyframes ui-pop-out{to{opacity:0;transform:translateY(10px) scale(.98)}}
+@keyframes ui-sheet{from{transform:translateY(100%)}}
+body.ui-locked{overflow:hidden}
+@media(min-width:701px){.ui-scrim.sheet{place-items:center;padding:var(--ui-4)}.ui-scrim.sheet .ui-dialog{border-radius:var(--ui-r-lg)}.ui-grab{display:none}}
+
+/* ---------- 6. Başlık ve sayı yazı tipi (iki yazı tipi hiyerarşisi) ---------- */
+:where(h1,h2,h3,.brand,.page-title,.catalogtitle){font-family:var(--ui-font-display)}
+:where(.catalogprice,.deal-best-price,.price-now,.discountbadge,.deal-discount,.ui-num){font-family:var(--ui-font-display);font-variant-numeric:tabular-nums lining-nums}
+:where(td,th,time,.deal-score,.scorechips,.resultmeta,.metric){font-variant-numeric:tabular-nums}
