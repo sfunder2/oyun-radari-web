@@ -313,3 +313,27 @@ Menüdeki "Katalog araçları" bölümünden (ya da `?arac=dlc|sezon|gereksinim|
 | Veri tazelik göstergesi | freshness-20261127.js: ps_state batch/market `finishedAt` değerinden "Fiyatlar 5 dk önce güncellendi"; sonuç satırında ve altbilgide; renk + metin. Veri okunamazsa görünmez. |
 | Giriş | signin-20261127.js: Google, Apple (yapılandırma bayrağıyla), parolasız e-posta bağlantısı (`/auth/v1/otp`). Parola girişi aynen kalır; yeni hesaplara profil satırı bir kez açılır. |
 | Admin mobil | admin-mobile-20261127.js/.css: sağlık özeti (alarm, durmuş mağaza, geciken iş, veritabanı), yapışkan kaydırılabilir sekmeler, 44px hedefler. |
+
+## Görsel iyileştirmeler (28 Kasım 2026)
+
+Yeni modüller: `ui-kit-20261128` (jetonlar, toast/modal/sheet, ikonlar; bkz. `docs/ui-kit.md`), `tema-20261128`, `kart-yazi-20261128`, `genel-20261128`. Hepsi DOM üzerinden eklenir, React düğümleri silinmez; Klasik/Sade, TR/EN ve azaltılmış hareket korunur. Önceki turlardaki özellikler (kapak oranı, bulanık önizleme, tüm zamanların en düşüğü, ısı haritası balonu, güven aralığı, çizgi çizme, favori konfetisi vb.) tekrarlanmadı.
+
+| Özellik | Davranış |
+|---|---|
+| Tasarım jetonları | `--ui-*`: 4/8 boşluk, 4 yüzey katmanı, süre/easing, yazı ölçeği (clamp), z-index. Koyu yüzeyler katmanlıdır (zemin < kart < yükseltilmiş < kaplama). |
+| Vurgu rengi seçici | Alt çubuktaki palet düğmesi: 6 vurgu rengi; hepsi koyu ve açık zeminde WCAG AA metin kontrastını geçer (testle doğrulanır). Seçim cihazda. |
+| Otomatik gün/gece | İsteğe bağlı: sistem koyuysa Klasik, açıksa Sade. |
+| Renk körü dostu grafikler | İsteğe bağlı: ısı haritası ve halka için Okabe-Ito dizisi, desen, mavi/turuncu anlam renkleri. |
+| Ortak toast / modal / sheet | `window.radarUI.toast/modal/sheet/confirm`: odak tuzağı, Esc, odağı geri verme, sheet'te sürükleyerek kapatma. |
+| Tek SVG ikon seti | `radarUI.icon(ad)`: 35 ikon, ortak çizgi ağırlığı. |
+| İki yazı tipi | Başlık ve sayılar Space Grotesk, gövde Manrope; rakamlar tabular. Fiyatta para simgesi küçük. |
+| Akıllı kırpma | Uzun başlıklar 2 satırda biter, kırpılanların tamamı ipucunda. |
+| Sparkline | Bu cihazda en az 3 farklı fiyatla görülen oyunların satırında minik fiyat çizgisi (uydurma veri yok). |
+| Renkli çipler | Tür/etiket çipleri addan türeyen sabit tonla, AA kontrastlı. |
+| Hover/odak | Kartlarda yükselme, satırlarda vurgu çizgisi, klavye odağında belirgin halka. |
+| Ayrıntıda kapak tonu | Ayrıntı üst bölümünde oyundan türeyen yumuşak ışık; mağaza satırlarında kartlardaki tek tip simge. |
+| Yığılmış harcama çubuğu | Bütçe halkasının altında, halkanın dilimleriyle aynı veri. |
+| Sayfa geçişleri | View Transitions API (destekleyen tarayıcıda), azaltılmış harekette kapalı. |
+| Geri sayım rakamları | Değer değişince kısa çevirme animasyonu. |
+| Küçülen üst çubuk | Kaydırınca yüksekliği azalır, bulanıklaşır. |
+| 404 ve OG görseli | Markalı `404.html` (radar çizimi, TR/EN); paylaşım görseli `icons/og-image.png` (1200x630) ve OG/Twitter etiketleri. |

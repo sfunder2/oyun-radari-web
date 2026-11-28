@@ -41,6 +41,7 @@ function applyAccent() {
   root.dataset.accent = key;
 }
 
+function applyCvd() { prefs.cvd ? root.setAttribute('data-cvd', '1') : root.removeAttribute('data-cvd'); }
 const systemDark = () => matchMedia('(prefers-color-scheme: dark)').matches;
 function applyAuto() {
   if (!prefs.auto) return;
@@ -72,6 +73,9 @@ function paint() {
   const auto = el('button', { type: 'button', 'aria-pressed': String(!!prefs.auto) }, `<span>${T('Otomatik gün/gece', 'Auto day/night')}</span><i>${prefs.auto ? T('Açık', 'On') : T('Kapalı', 'Off')}</i>`);
   auto.addEventListener('click', () => { prefs.auto = !prefs.auto; write(prefs); applyAuto(); paint(); });
   pop.append(auto);
+  const cvd = el('button', { type: 'button', 'aria-pressed': String(!!prefs.cvd) }, `<span>${T('Renk körü dostu grafikler', 'Colour-blind friendly charts')}</span><i>${prefs.cvd ? T('Açık', 'On') : T('Kapalı', 'Off')}</i>`);
+  cvd.addEventListener('click', () => { prefs.cvd = !prefs.cvd; write(prefs); applyCvd(); paint(); });
+  pop.append(cvd);
   slot.append(pop);
 }
 function ensure() {
@@ -101,6 +105,7 @@ function tintDetail() {
 if (root) {
   prefs = read();
   applyAccent();
+  applyCvd();
   applyAuto();
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyAuto);
   addEventListener('radar:ui', () => { applyAccent(); paint(); });

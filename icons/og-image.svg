@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630"><defs><radialGradient id="g" cx="78%" cy="30%" r="70%"><stop offset="0" stop-color="#c4f85b" stop-opacity=".22"/><stop offset="1" stop-color="#090d12" stop-opacity="0"/></radialGradient><linearGradient id="t" x1="0" x2="1"><stop offset="0" stop-color="#c4f85b"/><stop offset="1" stop-color="#4fd1c5"/></linearGradient></defs>
+<rect width="1200" height="630" fill="#090d12"/><rect width="1200" height="630" fill="url(#g)"/>
+<g fill="none" stroke="#c4f85b" stroke-width="3" opacity=".35"><circle cx="900" cy="315" r="90"/><circle cx="900" cy="315" r="180"/><circle cx="900" cy="315" r="270"/></g>
+<path d="M900 315 L900 135 A180 180 0 0 1 1056 225 Z" fill="#c4f85b" fill-opacity=".16"/><circle cx="900" cy="315" r="18" fill="#c4f85b"/><circle cx="1010" cy="200" r="9" fill="#5ee08a"/><circle cx="780" cy="420" r="9" fill="#5ec2ff"/><circle cx="990" cy="440" r="9" fill="#ffc94d"/>
+<g font-family="Manrope,Segoe UI,Helvetica,Arial,sans-serif" font-weight="800"><circle cx="110" cy="150" r="30" fill="none" stroke="url(#t)" stroke-width="8"/><circle cx="110" cy="150" r="10" fill="#c4f85b"/>
+<text x="160" y="172" font-size="64" fill="#eef3f8">oyun<tspan fill="url(#t)">radarı</tspan></text>
+<text x="80" y="340" font-size="68" fill="#eef3f8">Oyun fiyatlarını</text><text x="80" y="420" font-size="68" fill="#c4f85b">radarında tut.</text>
+<text x="80" y="500" font-size="30" font-weight="600" fill="#96a2b3">PlayStation, Xbox, Steam ve Switch fiyatları tek yerde</text></g></svg>
