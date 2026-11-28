@@ -12,6 +12,7 @@ html.is-standalone body{overscroll-behavior-y:none}
 @media (pointer:coarse){
  /* 44px targets and 16px fields at every width, not only <=700px (iPad portrait, landscape phones). */
  button,summary,select,[role=button],[role=tab],.linkbtn,header .brand,.account-button{min-height:44px}
+ select{min-height:44px!important;height:auto!important}
  button,.account-button{min-width:44px}
  header .brand{display:inline-flex;align-items:center}
  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]),select,textarea{font-size:max(16px,1em)!important;min-height:44px}
