@@ -1,0 +1,10 @@
+.social-auth{display:grid;gap:10px;margin:14px 0}
+.social-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;padding:10px 14px;border:1px solid var(--line,#2a3442);border-radius:12px;background:transparent;color:var(--ink,#eef2f6);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.social-btn:hover{border-color:var(--lime,#d6ff6a)}
+.social-btn[disabled]{opacity:.55;cursor:progress}
+.social-btn.google::before{content:"G";display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#fff;color:#4285f4;font-weight:800;font-size:14px}
+.social-btn.apple{background:#000;color:#fff;border-color:#000}
+.social-btn.apple::before{content:"\F8FF";font-size:18px}
+:root[data-ui=sade] .social-btn.apple{background:#111;border-color:#111}
+.social-msg{margin:0;font-size:13px}.social-msg:empty{display:none}
+.social-sep{margin:0;text-align:center;color:var(--muted,#9aa6b2);font-size:12px}

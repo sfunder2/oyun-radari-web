@@ -1,0 +1,15 @@
+.admin-health{display:grid;gap:6px;margin:10px 0;padding:12px 14px;border:1px solid var(--line,#2a3442);border-left-width:5px;border-radius:12px;font-size:13px}
+.admin-health p{margin:0}
+.admin-health.h-ok{border-left-color:#9ed95f}.admin-health.h-warn{border-left-color:#f59e0b}.admin-health.h-danger{border-left-color:#ef4444}.admin-health.h-none{border-left-color:var(--line,#2a3442)}
+.admin-health-actions{display:flex;flex-wrap:wrap;gap:8px}
+.admin-health-actions button{min-height:44px;padding:8px 14px;border:1px solid var(--line,#2a3442);border-radius:10px;background:transparent;color:inherit;font:inherit;font-size:13px}
+@media(max-width:700px){
+.admin-workbench .admin-tool-tabs{position:sticky;top:54px;z-index:20;display:flex;gap:6px;overflow-x:auto;padding:8px 0;background:var(--bg,#090d12);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.admin-workbench .admin-tool-tabs::-webkit-scrollbar{display:none}
+.admin-workbench .admin-tool-tabs button{flex:none;min-height:44px;padding:8px 14px;white-space:nowrap}
+.admin-workbench .admin-alert-list article{display:grid;gap:8px}
+.admin-workbench .admin-alert-list article button{min-height:44px;width:100%}
+.admin-workbench .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.admin-workbench .admin-filters{display:grid;gap:8px}
+.admin-workbench .admin-filters input,.admin-workbench .admin-filters select,.admin-workbench .admin-filters button{min-height:44px;width:100%}
+}

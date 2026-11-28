@@ -48,6 +48,9 @@ export function mergeAchievements(player,schema){
  return{total:list.length,unlocked:list.filter(a=>a.done).length,list};
 }
 
+// Herkese açık Steam istek listesi (anahtarsız IWishlistService). Gizli profilde boş döner; appid ve ekleme zamanı gelir, adlar mağaza kataloğundan eşleştirilir.
+export function parseWishlist(j){const items=j?.response?.items;if(!Array.isArray(items))return null;return items.map(i=>({appid:Number(i.appid),added:i.date_added?new Date(i.date_added*1000).toISOString():null,priority:Number(i.priority)||0})).filter(i=>i.appid>0).slice(0,2000);}
+export async function fetchWishlist(steamid,key,f=fetch){const r=await f(API+'/IWishlistService/GetWishlist/v1/?'+new URLSearchParams({key,steamid}),{signal:AbortSignal.timeout(12000)});if(r.status===400||r.status===403)return{visible:false,items:[]};if(!r.ok)throw Error('Steam HTTP '+r.status);const items=parseWishlist(await r.json());return{visible:!!items,items:items||[]};}
 export async function fetchLibrary(steamid,key,f=fetch){
  const [p,o]=await Promise.all([api('/ISteamUser/GetPlayerSummaries/v0002/',{steamids:steamid},key,f),api('/IPlayerService/GetOwnedGames/v0001/',{steamid,include_appinfo:'1',include_played_free_games:'1'},key,f)]);
  const profile=parseProfile(p),games=parseOwned(o);

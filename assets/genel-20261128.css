@@ -1,0 +1,69 @@
+/* Genel cila (genel-20261128.js ile birlikte). Renk/boşluk/süre --ui-* jetonlarından gelir. */
+
+/* ---------- Ortak ikon çizgisi: paketin lucide ikonları ve kit ikonları aynı çizgi ağırlığında ---------- */
+svg[class*=lucide]{stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- Üst çubuk: kaydırınca küçülür ve bulanıklaşır ---------- */
+#root>header .topbar{transition:min-height var(--ui-dur-3) var(--ui-ease),padding var(--ui-dur-3) var(--ui-ease)}
+#root>header.radar-scrolled .topbar{min-height:46px;padding-block:var(--ui-1)}
+#root>header.radar-scrolled .brand{font-size:19px;transition:font-size var(--ui-dur-3) var(--ui-ease)}
+#root>header.radar-scrolled{backdrop-filter:blur(18px) saturate(1.4)!important;-webkit-backdrop-filter:blur(18px) saturate(1.4)}
+#root>header{view-transition-name:site-header}
+
+/* ---------- Sayfa geçişi (View Transitions) ---------- */
+@media(prefers-reduced-motion:no-preference){
+  ::view-transition-old(root){animation:gz-out var(--ui-dur-2) var(--ui-ease-in) both}
+  ::view-transition-new(root){animation:gz-in var(--ui-dur-3) var(--ui-ease) both}
+  ::view-transition-group(site-header){animation-duration:0s}
+}
+@keyframes gz-out{to{opacity:0;transform:translateY(-6px)}}
+@keyframes gz-in{from{opacity:0;transform:translateY(10px)}}
+
+/* ---------- Geri sayım rakamı ---------- */
+.rc-tiles b{display:inline-block;font-variant-numeric:tabular-nums}
+.rc-tiles b.gz-tick{animation:gz-flip var(--ui-dur-3) var(--ui-ease-spring)}
+@keyframes gz-flip{0%{transform:translateY(-45%) scaleY(.5);opacity:0}100%{transform:none;opacity:1}}
+
+/* ---------- Yığılmış harcama çubuğu ---------- */
+.gz-stack{grid-column:1/-1;display:flex;gap:2px;width:100%;height:14px;margin-top:var(--ui-3);border-radius:var(--ui-r-sm);overflow:hidden;background:color-mix(in srgb,var(--ink) 8%,transparent)}
+.gz-seg{flex:0 0 var(--w);min-width:0;background:var(--c,color-mix(in srgb,var(--ink) 14%,transparent));transform-origin:left;border-radius:2px}
+.gz-seg.remain{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--ink) 14%,transparent) 0 4px,transparent 4px 8px)}
+@media(prefers-reduced-motion:no-preference){html:not([data-reduce-motion=true]) .gz-seg{animation:gz-grow var(--ui-dur-4) var(--ui-ease) both;animation-delay:calc(var(--i,0)*70ms)}}
+@keyframes gz-grow{from{transform:scaleX(0)}}
+.vz-wallet{flex-wrap:wrap}
+
+/* ---------- Renk körü dostu mod (html[data-cvd]) ---------- */
+:root[data-cvd]{--cvd-0:#1b2a4a;--cvd-1:#2f5d8a;--cvd-2:#3f9ab5;--cvd-3:#8fd3b6;--cvd-4:#f4f0a8}
+:root[data-cvd][data-ui=sade]{--cvd-0:#e6edf7;--cvd-1:#a9c5e4;--cvd-2:#5e9fc9;--cvd-3:#1f7a8c;--cvd-4:#0b3f5c}
+:root[data-cvd] .vz-cell{background:var(--cvd-0)}
+:root[data-cvd] .vz-cell.l1{background:var(--cvd-1)}
+:root[data-cvd] .vz-cell.l2{background:var(--cvd-2)}
+:root[data-cvd] .vz-cell.l3{background:var(--cvd-3)}
+:root[data-cvd] .vz-cell.l4{background:var(--cvd-4)}
+/* desen: renge ek olarak çizgi yoğunluğu */
+:root[data-cvd] .vz-cell.l2{background-image:repeating-linear-gradient(45deg,#ffffff30 0 2px,transparent 2px 6px)}
+:root[data-cvd] .vz-cell.l3{background-image:repeating-linear-gradient(45deg,#00000033 0 3px,transparent 3px 6px)}
+:root[data-cvd] .vz-cell.l4{background-image:repeating-linear-gradient(45deg,#00000040 0 4px,transparent 4px 6px)}
+:root[data-cvd] .vz-seg:nth-child(8n+1){stroke:#e69f00}:root[data-cvd] .vz-seg:nth-child(8n+2){stroke:#56b4e9}:root[data-cvd] .vz-seg:nth-child(8n+3){stroke:#009e73}
+:root[data-cvd] .vz-seg:nth-child(8n+4){stroke:#f0e442}:root[data-cvd] .vz-seg:nth-child(8n+5){stroke:#0072b2}:root[data-cvd] .vz-seg:nth-child(8n+6){stroke:#d55e00}
+:root[data-cvd] .vz-seg:nth-child(8n+7){stroke:#cc79a7}:root[data-cvd] .vz-seg:nth-child(8n){stroke:#fff}
+:root[data-cvd] .gz-seg:nth-child(8n+1){--c:#e69f00!important}:root[data-cvd] .gz-seg:nth-child(8n+2){--c:#56b4e9!important}:root[data-cvd] .gz-seg:nth-child(8n+3){--c:#009e73!important}
+:root[data-cvd] .gz-seg:nth-child(8n+4){--c:#f0e442!important}:root[data-cvd] .gz-seg:nth-child(8n+5){--c:#0072b2!important}:root[data-cvd] .gz-seg:nth-child(8n+6){--c:#d55e00!important}
+:root[data-cvd] .gz-seg:nth-child(8n+7){--c:#cc79a7!important}:root[data-cvd] .gz-seg:nth-child(8n){--c:#fff}
+:root[data-cvd] .vz-legend li:nth-child(8n+1) i{background:#e69f00!important}:root[data-cvd] .vz-legend li:nth-child(8n+2) i{background:#56b4e9!important}
+:root[data-cvd] .vz-legend li:nth-child(8n+3) i{background:#009e73!important}:root[data-cvd] .vz-legend li:nth-child(8n+4) i{background:#f0e442!important}
+:root[data-cvd] .vz-legend li:nth-child(8n+5) i{background:#0072b2!important}:root[data-cvd] .vz-legend li:nth-child(8n+6) i{background:#d55e00!important}
+:root[data-cvd] .vz-legend li:nth-child(8n+7) i{background:#cc79a7!important}
+/* anlam renkleri: yeşil/kırmızı yerine mavi/turuncu, ok yönü zaten ayırır */
+:root[data-cvd]{--ui-good:#56b4e9;--ui-bad:#e69f00;--ds-good:#56b4e9;--ds-bad:#e69f00}
+:root[data-cvd][data-ui=sade]{--ui-good:#0072b2;--ui-bad:#b35900;--ds-good:#0072b2;--ds-bad:#b35900}
+
+/* ---------- İskelet: liste görünümünde gerçek satır düzeni (kapak | başlık + alt satır | fiyat) ---------- */
+.simple-home .mo-skel-grid{grid-template-columns:1fr;gap:0;margin-top:var(--ui-2)}
+.simple-home .mo-sk-card{display:grid;grid-template-columns:64px minmax(0,1fr) 72px;grid-template-areas:"art l1 price" "art l2 price";align-items:center;column-gap:var(--ui-4);row-gap:var(--ui-2);
+  padding:var(--ui-3) var(--ui-3);border-radius:0;border-width:0 0 1px;background:transparent}
+.simple-home .mo-sk-art{grid-area:art;width:64px;aspect-ratio:3/4;border-radius:var(--ui-r-sm)}
+.simple-home .mo-sk-l{margin:0}
+.simple-home .mo-sk-l:nth-of-type(1){grid-area:l1}
+.simple-home .mo-sk-l:nth-of-type(2){grid-area:l2}
+.simple-home .mo-sk-price{grid-area:price;width:100%;margin:0}

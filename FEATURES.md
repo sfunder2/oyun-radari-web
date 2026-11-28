@@ -229,6 +229,27 @@ Sunucu tarafı (`scripts/digest.mjs`, çalıştırıcı `scripts/digest-run.mjs`
 | Saat başı maliyet | Oyun ayrıntısında ve kartlarda: en ucuz resmî fiyat ÷ ortalama bitirme süresi (normal, yoksa hızlı). Süre verisi yoksa hesaplanmaz. |
 | Fiyatına değer mi? | Ayrıntıda evet/hayır oyu; yüzde en az 5 oyla görünür. Oy veren, ortak listeyle aynı tarayıcı anahtarıyla tanınır, sunucuda yalnız özeti saklanır. **`supabase/schema-v50-fiyata-deger-mi.sql` uygulanmadan oylama gizli kalır**, diğer özellikler çalışır. Geri alma: `...-geri-al.sql`. |
 
+## Alım rehberi (27 Kasım 2026)
+
+`assets/alim-20261127.js` (+ `.css`) ve saf hesaplar `assets/alim-core-20261127.js` (testler: `tests/alim.test.mjs`). Üst menüde ve Menü'de "Alım rehberi" düğmesi (adres: `?alim=alarms|import|library|calendar|spend|subs|cph|shared|feed`), oyun ayrıntısında "Alım rehberi" bölümü. Paketin React koduna dokunmaz; `kisisel-20261121.js` ve `tasarim-20261117.js` dışa aktarımlarını kullanır. Kişisel kayıtlar yalnız bu cihazda (`radar-alim-*`). Klasik/Sade, TR/EN, masaüstü/mobil.
+
+| Özellik | Davranış | Eksik / sınır |
+|---|---|---|
+| Fiyat alarmı | Dört tür: hedef fiyat, indirim yüzdesi, eklendiği fiyattan % ucuzlama, tüm zamanların en düşüğü (≥14 gün kayıt). Aynı alarm 24 saatte bir bildirilir; site açıkken 5 dakikada bir kontrol, tarayıcı izniyle bildirim. Fırsat merkezindeki favori hedef fiyatı aynen çalışır. | Site kapalıyken bildirim yok (o iş Fırsat merkezi özetinde). |
+| Steam/Epic/GOG içe aktarma | Steam: `steam-account?action=wishlist` (anahtarsız `IWishlistService`, herkese açık liste); appid'ler `store_offers`'tan adla eşleşir. Diğer mağazalar: yapıştırılan metin ya da CSV/JSON/TXT dosyası. Eşleşmeyen atlanır, yaklaşık eşleşme işaretlenir. | Epic ve GOG'un herkese açık istek listesi hizmeti yok. **`steam-account` fonksiyonu yeniden yayımlanmalı.** İstek listesine eklemeden sonra sayfa yenilenir (paket bellek durumunu yalnız açılışta okur). |
+| Kütüphane ve "zaten sahipsin" | Elle ekleme, içe aktarma ve Steam kütüphane eşitleme (mevcut `steam-account?action=library`). Sürüm adları (Deluxe, GOTY…) yok sayılır. Ayrıntıda uyarı bandı, kart ve listelerde rozet, akış ve saat başı listesinden sahip olunanlar elenir. | Yalnız bu cihazda; PlayStation/Xbox kütüphanesi için herkese açık kaynak yok. |
+| Ek içerik dahil toplam | Ayrıntıda `game_family.dlcs` + katalog fiyatı; seçilen ek paketlerle toplam, varsa tam sürüm paketiyle fark. | Fiyatı katalogda olmayan DLC toplama girmez; paket içeriği bilinmediğinden kıyas göstergedir. |
+| Bölgeler arası en ucuz | Mevcut `regional-prices` yanıtından TL karşılığı en ucuz ülke; TR'den ≥%10 ve ≥20 TL ucuzsa vurgulanır. Eski kur ve hatalı satırlar atılır. | Kart komisyonu, ülke kısıtı ve hesap bölgesi şartı dahil değil (panel yazar). |
+| Almalı mıyım? | 0–100 skor: kayıtlı dibe uzaklık (35), puan (25), indirim (15), saat başı maliyet (12), topluluk oyu (8), yakın büyük indirim (5). Bilinen sinyaller yeniden ağırlıklanır; en az iki sinyal ve biri dip/puan/indirim değilse skor yok. | Tahmin ya da tavsiye değildir. Fırsat merkezindeki favori başına "Al/bekle" ile çelişmez, ayrıntıda tüm oyunlara genişletir. |
+| İndirim takvimi hatırlatıcısı | Yaklaşık sezon tarihleri (`SALE_SEASONS`); 1/3/7 gün önce uyarı (site açıkken) ve alarmlı `.ics` indirme (telefon takvimi site kapalıyken de çalar). | Tarihler yaklaşıktır. |
+| Mağaza güven rozetleri | Resmî mağaza / yetkili satıcı (Fanatical, Humble, GMG, WinGameStore, Gamesplanet…) / pazaryeri — dikkat (G2A, Kinguin, Eneba, GAMIVO) / tanınmayan. Ayrıntıda teklif başına. | Editör değerlendirmesidir, garanti değildir. Katalogdaki anahtar mağazaları yetkili satıcıdır. |
+| Kişisel akış | Oyuncu tarzı, istek listesi türleri, "Beğendim / İlgilenmem" geri bildirimi; sahip olunanlar ve gizlenenler elenir, neden satırı yazılır. | |
+| Ortak liste | Mevcut `?hediye=` bağlantısına Web Share ve "arkadaşın bağlantısını yapıştır → ortak oyunlar" eklendi. Hediye önerisi Kişisel merkezde. | Sunucu yok: "rezerve et" yapılamaz. |
+| Aylık harcama | Cüzdan koçunun alım kayıtlarından (`radar-lifestyle-v1.purchases`) ay raporu: harcama, indirimle tasarruf, ortalama, önceki aya göre değişim, 6 ay grafiği, özet kopyalama, CSV. | Alım eklemek Cüzdan koçunda. |
+| Abonelik karşılaştırma | Game Pass/PS Plus: aylık ücreti ve haftalık oyun saatini sen yazarsın, abonelikteki oyunları sen işaretlersin; istek listesi + bitirme süresiyle abonelik/satın alma toplamı ve başabaş ay. | Mağaza kaynaklarında abonelik kataloğu verisi yok (PlayStation toplayıcısı abonelik fiyatlarını bilerek dışlar); ücret ve katalog resmî sayfadan elle. |
+| Saat başı fiyat | Mevcut ayrıntı/kart çipine ek: indirimdeki ≥70 puanlı oyunlar saati en ucuzdan sıralı, sahip olunanlar hariç. | Süresi bilinmeyen oyun listelenmez. |
+| Fiyat doğrulama oyları | Ayrıntıda mağaza başına "Doğru / Yanlış" oyu; üç ve üstü yanlış oy çoğunluktaysa uyarı. **`supabase/schema-v53-fiyat-dogrulama.sql` uygulanmadan gizli kalır.** Geri alma: `...-geri-al.sql`. | Topluluk yorumları ve oylaması sitede zaten var (hesaba bağlı); burada ayrıca yazı eklenmedi. |
+
 ## Dağıtım ve doğrulama
 
 - Kaynak: `sfunder2/oyun-radari`, yayın ve toplayıcılar: `sfunder2/oyun-radari-web`.
@@ -279,3 +300,63 @@ Menüdeki "Katalog araçları" bölümünden (ya da `?arac=dlc|sezon|gereksinim|
 ## Kart ve liste cilası (22 Kasım 2026)
 
 `assets/cards-20261122.js` ve `.css` (paket koduna dokunmaz, DOM'u izler): kapak 16:9 ve yüklenirken bulanık önizleme; eski fiyat üstü çizili, yeni fiyat büyük; indirim rozeti %20 / %50 / %75 kademeli renk; köşe şeritleri ("Tüm zamanların en düşüğü" radarın kendi kaydından, "Yeni indirim" son ziyaretten beri düşen fiyattan, 72 saat); son ziyarete göre ▼/▲ yüzde etiketi (yalnız bu cihazda, `radar-cd-prices`); kapaktan vurgu rengi; fareyle hızlı özet (puan, tür, en düşük fiyat); platform simgeleri tek sırada (PC, PS, Xbox, Switch); favori parıltısı ve sayaç vurgusu; mağaza noktaları yerine tek tip simgeler; sıkı liste satırı. Hareket azaltılmışsa animasyonlar kapalıdır.
+
+## Altyapı, erişilebilirlik ve gizlilik (27 Kasım 2026)
+
+| Konu | Uygulama |
+|---|---|
+| Erişilebilirlik | access-20261127.js/.css: ana içeriğe atla, adsız simge düğmelerine otomatik etiket (mevcut etiket korunur), kapak görsellerine alt metin, role=button için Enter/Space, sekmelerde ok tuşları, açık modalda odak tuzağı, belirgin çift odak halkası, dokunma hedefi 44px, `prefers-contrast` ve `forced-colors`. |
+| Çok dil + yerelleştirme | `window.radarI18n`: `register(lang, sözlük)`, `t(anahtar, değişkenler)` (dil → en → tr → anahtar), `formatMoney`, `formatDate` (Europe/Istanbul), `formatRelative`. tr/en/de/es yerel kodları hazır; yeni dil yalnız sözlük kaydıdır. `<time datetime>` ve `[data-money][data-currency]` öğeleri seçili dile göre yazılır. |
+| Hata izleme | telemetry-20261127.js: Sentry zarf biçiminde SDK'sız istemci. DSN `RADAR_SENTRY_DSN` değişkeninden (scripts/write-config.mjs → assets/radar-config.js). Yalnız kullanıcı "hata izleme" iznini verdiyse; e-posta/jeton silinir, adreslerden sorgu atılır, dakikada aynı hata bir kez. |
+| Analitik | Çerezsiz, kimliksiz günlük sayaç. `window.radarTrack(ad, {özellik})`, `data-track="ad"`, dış bağlantı alan adı. Arama metni gönderilmez. Uç: `RADAR_ANALYTICS_ENDPOINT` (supabase/functions/collect-event + schema-v60). İzinsiz ya da uç yoksa hiçbir şey gönderilmez. |
+| KVKK | privacy-20261127.js: ilk ziyarette (yalnız izlenecek bir şey yapılandırılmışsa) tercih şeridi, altbilgide "Gizlilik tercihleri"; verilerimi indir (cihaz + hesap JSON), cihaz kayıtlarını sil, hesabı yazıyla onaylayarak kalıcı sil (`delete_my_account`). |
+| Veri tazelik göstergesi | freshness-20261127.js: ps_state batch/market `finishedAt` değerinden "Fiyatlar 5 dk önce güncellendi"; sonuç satırında ve altbilgide; renk + metin. Veri okunamazsa görünmez. |
+| Giriş | signin-20261127.js: Google, Apple (yapılandırma bayrağıyla), parolasız e-posta bağlantısı (`/auth/v1/otp`). Parola girişi aynen kalır; yeni hesaplara profil satırı bir kez açılır. |
+| Admin mobil | admin-mobile-20261127.js/.css: sağlık özeti (alarm, durmuş mağaza, geciken iş, veritabanı), yapışkan kaydırılabilir sekmeler, 44px hedefler. |
+
+## Görsel iyileştirmeler (28 Kasım 2026)
+
+Yeni modüller: `ui-kit-20261128` (jetonlar, toast/modal/sheet, ikonlar; bkz. `docs/ui-kit.md`), `tema-20261128`, `kart-yazi-20261128`, `genel-20261128`. Hepsi DOM üzerinden eklenir, React düğümleri silinmez; Klasik/Sade, TR/EN ve azaltılmış hareket korunur. Önceki turlardaki özellikler (kapak oranı, bulanık önizleme, tüm zamanların en düşüğü, ısı haritası balonu, güven aralığı, çizgi çizme, favori konfetisi vb.) tekrarlanmadı.
+
+| Özellik | Davranış |
+|---|---|
+| Tasarım jetonları | `--ui-*`: 4/8 boşluk, 4 yüzey katmanı, süre/easing, yazı ölçeği (clamp), z-index. Koyu yüzeyler katmanlıdır (zemin < kart < yükseltilmiş < kaplama). |
+| Vurgu rengi seçici | Alt çubuktaki palet düğmesi: 6 vurgu rengi; hepsi koyu ve açık zeminde WCAG AA metin kontrastını geçer (testle doğrulanır). Seçim cihazda. |
+| Otomatik gün/gece | İsteğe bağlı: sistem koyuysa Klasik, açıksa Sade. |
+| Renk körü dostu grafikler | İsteğe bağlı: ısı haritası ve halka için Okabe-Ito dizisi, desen, mavi/turuncu anlam renkleri. |
+| Ortak toast / modal / sheet | `window.radarUI.toast/modal/sheet/confirm`: odak tuzağı, Esc, odağı geri verme, sheet'te sürükleyerek kapatma. |
+| Tek SVG ikon seti | `radarUI.icon(ad)`: 35 ikon, ortak çizgi ağırlığı. |
+| İki yazı tipi | Başlık ve sayılar Space Grotesk, gövde Manrope; rakamlar tabular. Fiyatta para simgesi küçük. |
+| Akıllı kırpma | Uzun başlıklar 2 satırda biter, kırpılanların tamamı ipucunda. |
+| Sparkline | Bu cihazda en az 3 farklı fiyatla görülen oyunların satırında minik fiyat çizgisi (uydurma veri yok). |
+| Renkli çipler | Tür/etiket çipleri addan türeyen sabit tonla, AA kontrastlı. |
+| Hover/odak | Kartlarda yükselme, satırlarda vurgu çizgisi, klavye odağında belirgin halka. |
+| Ayrıntıda kapak tonu | Ayrıntı üst bölümünde oyundan türeyen yumuşak ışık; mağaza satırlarında kartlardaki tek tip simge. |
+| Yığılmış harcama çubuğu | Bütçe halkasının altında, halkanın dilimleriyle aynı veri. |
+| Sayfa geçişleri | View Transitions API (destekleyen tarayıcıda), azaltılmış harekette kapalı. |
+| Geri sayım rakamları | Değer değişince kısa çevirme animasyonu. |
+| Küçülen üst çubuk | Kaydırınca yüksekliği azalır, bulanıklaşır. |
+| 404 ve OG görseli | Markalı `404.html` (radar çizimi, TR/EN); paylaşım görseli `icons/og-image.png` (1200x630) ve OG/Twitter etiketleri. |
+
+## Modern katman (28 Kasım 2026)
+
+`assets/modern-20261128.js` ve `.css` (paket koduna dokunmaz). Ortak bileşenleri yeniden yazmaz: toast için `window.radarUI.toast`, sayfa geçişi için `genel-20261128`, tembel görsel için `touch-20261128` kullanılır. Ctrl/Cmd+K oyun araması, doğal dille arama, canlı öneri listesi ve sürpriz slot zaten vardı, tekrarlanmadı. Ayrıntı: `docs/design-system.md`.
+
+| Özellik | Davranış |
+|---|---|
+| Bento ana sayfa | ≥1000 px'te açılış vitrini 12 sütun: büyük "Günün fırsatı" (8) + türler (4), altında iki şerit (6+6). Dar kapsayıcıda türler 2 sütuna iner (container query). |
+| Ölçülü cam | Yalnız yüzen yüzeyler (menü paneli, palet, yardım penceresi, yedek bildirim). Şeffaflık azaltma, yüksek kontrast ve backdrop-filter desteği yoksa düz zemin. |
+| Kapak parıltısı / degrade | Üzerine gelince kartın kendi vurgu rengi (`--cd-accent`) kenar ve gölgeye yansır; favori satırı `:has()` ile hafif degrade; başlık altı degrade çizgi. |
+| Değişken yazı tipi | Manrope 200–800 aralığı yüklenir; gezinme ve sekme ağırlığı yumuşak geçer. |
+| Kaydırma animasyonları | Bölümler görünüme girerken yükselir, üstte kaydırma ilerleme çizgisi (`animation-timeline`; desteklemeyen tarayıcıda yok, içerik yine görünür). |
+| Eylem paleti | Ctrl/Cmd+Shift+K: git (Oyunlar, Fırsatlar, İstek listem, Senin için), tema, dil, Klasik/Sade, sürpriz oyun, kayıtlı görünümler. `<dialog>`, oklar + Enter + Esc, bulanık Türkçe eşleşme. Oyun araması hâlâ Ctrl/Cmd+K. |
+| Kısayollar | `g h/d/w/f` gezinme, `t` tema, `s` sürpriz, `?` yardım (Popover API). Yazı alanında ve açık pencerede çalışmaz. |
+| Kayıtlı görünümler | Oyunlar sayfasında süzgeçleri adla kaydet, tek dokunuşla uygula; en çok 12, yalnız bu cihazda (`radar-mx-views-v1`). Etiketler dile göre kaydedildiği için bir görünüm kaydedildiği dilde uygulanır. |
+| Sürükle-bırak istek listesi | Raf kapaklarındaki ⠿ tutamacı: fare/dokunma sürükle ya da Alt+ok. Sıra yalnız bu cihazda (`radar-mx-fav-order-v1`), DOM düğümleri taşınmaz (CSS `order`). |
+| Sayı animasyonu | Twitch toplamı, istek listesi sayaçları ve istatistikler ilk görününce sayarak gelir. |
+| Ön ısıtma | Gezinme düğmesinin üstüne gelince/dokununca ilgili tembel parça (`modulepreload`); boşta Fırsatlar. Veri tasarrufu/2G'de kapalı. İlk büyük görsele `fetchpriority=high`, görsel sunucularına `preconnect`. |
+| Uygulama rozeti | Hedef fiyatına inmiş favori sayısı `navigator.setAppBadge` ile (yüklü PWA). |
+| Gerçek zamanlı fiyat | **Varsayılan kapalı.** `<meta name="radar-realtime" content="on">` + `supabase/schema-v61-realtime-fiyat.sql`. Fiyat düşüşünde bildirim. |
+| AI özeti / kime uygun | Oyun ayrıntısında "Özet oluştur" kartı. `supabase/functions/ai-summary` gerekir (ANTHROPIC_API_KEY); yoksa kart 6 saat gizlenir. |
+
+Kurulum adımları (kullanıcıya düşenler): AI için `supabase secrets set ANTHROPIC_API_KEY=… && supabase functions deploy ai-summary --no-verify-jwt`; gerçek zamanlı için `schema-v61-realtime-fiyat.sql` çalıştırıp `<meta name="radar-realtime" content="on">` eklemek. Planlar: `docs/vite-gecis-plani.md` (kaynak yapısına geçiş, bilerek yapılmadı), `docs/android-twa.md`. Görsel tarama: `node scripts/visual-check.mjs`.
