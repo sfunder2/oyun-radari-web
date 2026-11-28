@@ -1,0 +1,43 @@
+/* Touch + PWA polish for every touch device (phones and tablets), Klasik and Sade. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+a,button,summary,select,label,[role=button],[role=tab],input[type=checkbox],input[type=radio]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+body{overscroll-behavior-x:none}
+.dx-lb,.mx-sheet-root,.menu-overlay{overscroll-behavior:contain}
+html.is-standalone body{overscroll-behavior-y:none}
+
+/* Long lists: skip layout/paint of off-screen cards (cheap virtualisation). */
+.cataloggrid>*,.ux-grid>*,.deal-list-row{content-visibility:auto;contain-intrinsic-size:auto 320px}
+.deal-list-row{contain-intrinsic-size:auto 84px}
+
+@media (pointer:coarse){
+ /* 44px targets and 16px fields at every width, not only <=700px (iPad portrait, landscape phones). */
+ button,summary,select,[role=button],[role=tab],.linkbtn,header .brand,.account-button{min-height:44px}
+ select{min-height:44px!important;height:auto!important}
+ button,.account-button{min-width:44px}
+ header .brand{display:inline-flex;align-items:center}
+ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]),select,textarea{font-size:max(16px,1em)!important;min-height:44px}
+ input[type=checkbox],input[type=radio]{width:22px;height:22px}
+ .vv-modeswitch button{min-height:44px;min-width:44px}
+ /* a hover-only reveal needs a touch twin: keep card actions visible */
+ .catalogcardactions,.cardactions,.card-actions{opacity:1!important;visibility:visible!important;transform:none!important}
+ .tip-bubble-host{cursor:help}
+}
+
+/* Landing page: floating bell + theme switch must not sit on top of the hero buttons. */
+@media (max-width:700px){
+ .radar-landing{padding-bottom:calc(120px + env(safe-area-inset-bottom,0px))}
+}
+
+/* Touch tooltip bubble (tap a term / chart point, tap elsewhere to dismiss). */
+.tip-bubble{position:fixed;z-index:400;max-width:min(280px,calc(100vw - 24px));padding:9px 12px;border-radius:10px;background:#101820;color:#eef2f6;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 30px #0007;font-size:13px;line-height:1.4;pointer-events:none}
+:root[data-ui=sade] .tip-bubble{background:#2b2540;color:#fff}
+
+/* Pinch-zoom gallery. */
+.dx-lb-stage{touch-action:none;overflow:hidden}
+.dx-lb-stage img{transform-origin:0 0;will-change:transform;max-width:100%;max-height:100%}
+.dx-lb.is-zoomed .dx-lb-nav{opacity:.0;pointer-events:none}
+
+/* Share button in the game dialog. */
+.rx-share{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+
+@media (prefers-reduced-motion:reduce){.dx-lb-stage img{transition:none!important}}
